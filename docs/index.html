@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PinTours Design System — Token Reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- variables.css is imported by main.js so Vite resolves the path correctly -->
+  <style>
+    /* ─── Reset ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ─── Base ──────────────────────────────────────────────────── */
+    html { scroll-padding-top: 115px; }
+
+    body {
+      font-family: 'Poppins', var(--pt-typography-font_family-primary, 'Poppins'), sans-serif;
+      background: var(--pt-semantic-surface-page, #f6f9f9);
+      color: var(--pt-semantic-typography-headings, #222628);
+      min-height: 100vh;
+      padding-bottom: 80px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ─── Header ────────────────────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: var(--pt-semantic-surface-page, #f6f9f9);
+      border-bottom: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    header h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+
+    /* ─── Dark mode toggle ──────────────────────────────────────── */
+    .toggle {
+      padding: 7px 18px;
+      border: 1px solid var(--pt-semantic-border-default, #222628);
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      font: 13px/1 'Poppins', sans-serif;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .toggle:hover { background: var(--pt-semantic-surface-card_primary, #fff); }
+
+    /* ─── Top nav ───────────────────────────────────────────────── */
+    .top-nav {
+      position: sticky;
+      top: 53px;
+      z-index: 190;
+      background: var(--pt-semantic-surface-page, #f6f9f9);
+      border-bottom: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      padding: 10px 32px;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+    }
+    .top-nav a {
+      text-decoration: none;
+      color: inherit;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.55;
+      white-space: nowrap;
+      transition: opacity 0.15s, background 0.15s;
+    }
+    .top-nav a:hover {
+      opacity: 1;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+    }
+
+    /* ─── Main layout ───────────────────────────────────────────── */
+    main { max-width: 1120px; margin: 0 auto; padding: 48px 32px; }
+
+    section { margin-bottom: 72px; }
+
+    section > h2 {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      opacity: 0.38;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+    }
+
+    /* ─── Color palettes ────────────────────────────────────────── */
+    .palette-group { margin-bottom: 28px; }
+    .palette-label { font-size: 12px; font-weight: 600; opacity: 0.6; margin-bottom: 10px; }
+    .palette { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    /* ─── Swatch ────────────────────────────────────────────────── */
+    .swatch-wrap {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .swatch {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .swatch:hover { transform: scale(1.08); }
+    .shade-label { font-size: 10px; opacity: 0.42; font-family: monospace; }
+
+    /* ─── Tooltip ───────────────────────────────────────────────── */
+    .swatch-wrap:hover > .swatch-tooltip { display: block; }
+    .swatch-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--pt-semantic-typography-headings, #222628);
+      color: var(--pt-semantic-surface-page, #f6f9f9);
+      padding: 5px 9px;
+      border-radius: 6px;
+      font-size: 10px;
+      white-space: nowrap;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .swatch-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: var(--pt-semantic-typography-headings, #222628);
+    }
+
+    /* ─── Snippet toggle button ─────────────────────────────────── */
+    .snippet-toggle {
+      font-size: 10px;
+      padding: 2px 5px;
+      background: transparent;
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 4px;
+      cursor: pointer;
+      color: inherit;
+      opacity: 0.6;
+      font-family: monospace;
+      line-height: 1.4;
+    }
+    .snippet-toggle:hover,
+    .snippet-toggle.active {
+      opacity: 1;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+    }
+
+    /* ─── Snippet panel (floating, for swatches) ────────────────── */
+    .snippet-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      width: 290px;
+      z-index: 50;
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--pt-shadow-lg, 0px 12px 32px 0px #dce6e9, 0px 8px 16px 0px #b9cdd2);
+    }
+    .snippet-panel.open { display: block; }
+
+    /* Inline variant — for semantic tiles and shadow section */
+    .snippet-panel.inline {
+      position: static;
+      width: 100%;
+      box-shadow: none;
+      margin-top: 8px;
+    }
+
+    /* ─── Snippet tabs ───────────────────────────────────────────── */
+    .snippet-tabs {
+      display: flex;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border-bottom: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px 4px;
+      background: transparent;
+      border: none;
+      font: 11px/1 'Poppins', sans-serif;
+      cursor: pointer;
+      color: inherit;
+      opacity: 0.45;
+      transition: opacity 0.1s;
+    }
+    .tab-btn.active {
+      opacity: 1;
+      font-weight: 600;
+      border-bottom: 2px solid var(--pt-semantic-surface-action, #5d9c4d);
+      margin-bottom: -1px;
+    }
+
+    /* ─── Snippet code block ─────────────────────────────────────── */
+    .snippet-code-wrap {
+      position: relative;
+      padding: 12px 14px;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+    }
+    .snippet-text {
+      display: block;
+      font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace;
+      font-size: 11.5px;
+      line-height: 1.5;
+      color: var(--pt-semantic-typography-headings, #222628);
+      white-space: pre-wrap;
+      word-break: break-word;
+      padding-right: 60px;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 4px 10px;
+      background: var(--pt-semantic-surface-action, #5d9c4d);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font: 11px/1 'Poppins', sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { opacity: 0.85; }
+
+    /* ─── Semantic groups ────────────────────────────────────────── */
+    .sem-group { margin-bottom: 36px; }
+    .sem-group h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+    .semantic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    /* ─── Semantic tile ──────────────────────────────────────────── */
+    .sem-tile {
+      border-radius: 10px;
+      padding: 14px;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      position: relative;
+      transition: border-color 0.15s;
+    }
+    .sem-tile:hover { border-color: var(--pt-semantic-border-default, #222628); }
+    .sem-badge {
+      position: absolute;
+      top: 12px; right: 12px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      opacity: 0.3;
+    }
+    .sem-swatch {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    .sem-name { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+    .sem-value {
+      font-size: 11px;
+      opacity: 0.5;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      margin-bottom: 8px;
+    }
+    .sem-snippet-btn {
+      display: inline-block;
+      padding: 3px 8px;
+      background: transparent;
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 4px;
+      font: 11px/1.4 monospace;
+      cursor: pointer;
+      color: inherit;
+      opacity: 0.6;
+    }
+    .sem-snippet-btn:hover { opacity: 1; background: var(--pt-semantic-surface-page, #f6f9f9); }
+
+    /* Inline snippet panel inside semantic tiles */
+    .sem-tile .snippet-panel {
+      position: static;
+      width: 100%;
+      box-shadow: none;
+      margin-top: 8px;
+    }
+
+    /* ─── Typography ─────────────────────────────────────────────── */
+    .type-controls { display: flex; gap: 8px; margin-bottom: 24px; }
+    .type-tab-btn {
+      padding: 6px 18px;
+      border: 1px solid var(--pt-semantic-border-default, #222628);
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      font: 12px/1 'Poppins', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .type-tab-btn.active {
+      background: var(--pt-semantic-typography-headings, #222628);
+      color: var(--pt-semantic-surface-page, #f6f9f9);
+    }
+    .type-group { display: none; }
+    .type-group.active { display: block; }
+
+    /* Each row is wrapped so the snippet panel can sit below it, full-width */
+    .type-row-wrap {
+      border-bottom: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+    }
+    .type-row-wrap:last-child { border-bottom: none; }
+
+    .type-row {
+      padding: 14px 0;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .type-meta { min-width: 160px; flex-shrink: 0; }
+    .type-label { font-size: 11px; opacity: 0.42; }
+    .type-details { font-size: 10px; font-family: monospace; opacity: 0.55; margin-top: 2px; }
+    .type-sample {
+      flex: 1;
+      font-family: 'Poppins', var(--pt-typography-font_family-primary), sans-serif;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Inline snippet panel inside type rows */
+    .type-row-wrap .snippet-panel {
+      position: static;
+      width: 100%;
+      box-shadow: none;
+      margin-bottom: 12px;
+    }
+
+    /* ─── Typography weight sub-filter ──────────────────────────── */
+    .type-weight-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: -12px;
+      margin-bottom: 24px;
+    }
+    .type-weight-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.35;
+      margin-right: 6px;
+    }
+    .type-weight-btn {
+      padding: 4px 14px;
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      font: 11px/1.5 'Poppins', sans-serif;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.15s, background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .type-weight-btn:hover {
+      opacity: 1;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+    }
+    .type-weight-btn.active {
+      opacity: 1;
+      border-color: var(--pt-semantic-surface-action, #5d9c4d);
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      color: var(--pt-semantic-typography-action, #5d9c4d);
+      font-weight: 600;
+    }
+
+    /* ─── Spacing scale ──────────────────────────────────────────── */
+    .scale-row { display: flex; align-items: center; gap: 12px; margin-bottom: 5px; }
+    .scale-bar {
+      background: var(--pt-semantic-surface-action, #5d9c4d);
+      border-radius: 3px;
+      height: 14px;
+      min-width: 2px;
+    }
+    .scale-info { font-size: 12px; opacity: 0.55; min-width: 140px; font-family: monospace; }
+
+    /* ─── Shadow section ─────────────────────────────────────────── */
+    .shadow-card {
+      display: inline-flex;
+      align-items: center;
+      gap: 24px;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border-radius: 16px;
+      padding: 28px 36px;
+      margin-bottom: 24px;
+      box-shadow: var(--pt-shadow-lg, 0px 12px 32px 0px #dce6e9, 0px 8px 16px 0px #b9cdd2);
+    }
+    .shadow-card-dot {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: var(--pt-semantic-surface-action, #5d9c4d);
+    }
+    .shadow-card-label { font-size: 13px; }
+    .shadow-card-token { font-size: 14px; font-weight: 600; font-family: monospace; margin-top: 2px; }
+    .shadow-snippet-wrap { max-width: 480px; }
+    .shadow-snippet-wrap .snippet-panel {
+      position: static;
+      width: 100%;
+      box-shadow: none;
+    }
+
+    /* ─── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 680px) {
+      main { padding: 32px 16px; }
+      header, .top-nav { padding: 12px 16px; }
+      .top-nav { top: 49px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PinTours Design System — Token Reference</h1>
+    <button class="toggle" id="themeToggle">Dark</button>
+  </header>
+
+  <nav class="top-nav">
+    <a href="#colors">Colors</a>
+    <a href="#semantic">Semantic</a>
+    <a href="#type">Typography</a>
+    <a href="#scale">Spacing</a>
+    <a href="#shadows">Shadows</a>
+  </nav>
+
+  <main>
+    <!-- ── Color Palettes ── -->
+    <section id="colors">
+      <h2>Color Primitives</h2>
+      <!-- populated by main.js -->
+    </section>
+
+    <!-- ── Semantic Tokens ── -->
+    <section id="semantic">
+      <h2>Semantic Tokens</h2>
+      <!-- populated by main.js -->
+    </section>
+
+    <!-- ── Typography Scale ── -->
+    <section id="type">
+      <h2>Typography Scale</h2>
+      <div class="type-controls">
+        <button class="type-tab-btn active" data-group="large">Large</button>
+        <button class="type-tab-btn" data-group="small">Small</button>
+      </div>
+      <div class="type-weight-controls">
+        <span class="type-weight-label">Weight</span>
+        <button class="type-weight-btn active" data-weight="regular">Regular</button>
+        <button class="type-weight-btn" data-weight="emphasis">Emphasis</button>
+        <button class="type-weight-btn" data-weight="thin">Light</button>
+      </div>
+      <div id="typeScale"></div>
+    </section>
+
+    <!-- ── Spacing Scale ── -->
+    <section id="scale">
+      <h2>Spacing Scale</h2>
+      <div id="spacingScale"></div>
+    </section>
+
+    <!-- ── Shadows ── -->
+    <section id="shadows">
+      <h2>Shadows</h2>
+      <!-- populated by main.js -->
+    </section>
+  </main>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
