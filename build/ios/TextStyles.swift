@@ -241,19 +241,19 @@ public extension PT {
             public static let bodySmRegular = PTTextStyle(
                 font: UIFont(name: "Poppins-Medium", size: 14)
                     ?? .systemFont(ofSize: 14, weight: .medium),
-                lineHeight: 20,
+                lineHeight: 24,
                 paragraphSpacing: 14
             )
             public static let bodySmEmphasis = PTTextStyle(
                 font: UIFont(name: "Poppins-Bold", size: 14)
                     ?? .systemFont(ofSize: 14, weight: .bold),
-                lineHeight: 20,
+                lineHeight: 24,
                 paragraphSpacing: 14
             )
             public static let bodySmThin = PTTextStyle(
                 font: UIFont(name: "Poppins-Light", size: 14)
                     ?? .systemFont(ofSize: 14, weight: .light),
-                lineHeight: 20,
+                lineHeight: 24,
                 paragraphSpacing: 14
             )
 
@@ -490,19 +490,19 @@ public extension PT {
             public static let bodySmRegular = PTTextStyle(
                 font: UIFont(name: "Poppins-Medium", size: 14)
                     ?? .systemFont(ofSize: 14, weight: .medium),
-                lineHeight: 20,
+                lineHeight: 24,
                 paragraphSpacing: 14
             )
             public static let bodySmEmphasis = PTTextStyle(
                 font: UIFont(name: "Poppins-Bold", size: 14)
                     ?? .systemFont(ofSize: 14, weight: .bold),
-                lineHeight: 20,
+                lineHeight: 24,
                 paragraphSpacing: 14
             )
             public static let bodySmThin = PTTextStyle(
                 font: UIFont(name: "Poppins-Light", size: 14)
                     ?? .systemFont(ofSize: 14, weight: .light),
-                lineHeight: 20,
+                lineHeight: 24,
                 paragraphSpacing: 14
             )
 

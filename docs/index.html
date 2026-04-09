@@ -12,14 +12,13 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     /* ─── Base ──────────────────────────────────────────────────── */
-    html { scroll-padding-top: 115px; }
+    html { scroll-padding-top: 68px; }
 
     body {
       font-family: 'Poppins', var(--pt-typography-font_family-primary, 'Poppins'), sans-serif;
       background: var(--pt-semantic-surface-page, #f6f9f9);
       color: var(--pt-semantic-typography-headings, #222628);
       min-height: 100vh;
-      padding-bottom: 80px;
       transition: background 0.2s, color 0.2s;
     }
 
@@ -52,36 +51,84 @@
     }
     .toggle:hover { background: var(--pt-semantic-surface-card_primary, #fff); }
 
-    /* ─── Top nav ───────────────────────────────────────────────── */
-    .top-nav {
-      position: sticky;
-      top: 53px;
-      z-index: 190;
-      background: var(--pt-semantic-surface-page, #f6f9f9);
-      border-bottom: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
-      padding: 10px 32px;
+    /* ─── Layout ────────────────────────────────────────────────── */
+    .layout {
       display: flex;
-      gap: 4px;
-      overflow-x: auto;
-    }
-    .top-nav a {
-      text-decoration: none;
-      color: inherit;
-      padding: 5px 14px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 500;
-      opacity: 0.55;
-      white-space: nowrap;
-      transition: opacity 0.15s, background 0.15s;
-    }
-    .top-nav a:hover {
-      opacity: 1;
-      background: var(--pt-semantic-surface-card_primary, #fff);
+      min-height: calc(100vh - 53px);
     }
 
-    /* ─── Main layout ───────────────────────────────────────────── */
-    main { max-width: 1120px; margin: 0 auto; padding: 48px 32px; }
+    /* ─── Sidebar ───────────────────────────────────────────────── */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 53px;
+      height: calc(100vh - 53px);
+      overflow-y: auto;
+      border-right: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      padding: 28px 0;
+      transition: background 0.2s;
+    }
+
+    .nav-section { margin-bottom: 4px; }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 8px 24px;
+      background: transparent;
+      border: none;
+      color: inherit;
+      font: 600 13px/1.4 'Poppins', sans-serif;
+      cursor: pointer;
+      text-align: left;
+    }
+    .nav-section-header:hover { opacity: 0.7; }
+
+    .nav-toggle-icon {
+      font-size: 18px;
+      font-weight: 300;
+      opacity: 0.45;
+      line-height: 1;
+    }
+
+    .nav-section-items.collapsed { display: none; }
+
+    .nav-link {
+      display: block;
+      padding: 7px 24px 7px 32px;
+      text-decoration: none;
+      color: inherit;
+      font-size: 13px;
+      opacity: 0.5;
+      transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+      border-left: 2px solid transparent;
+    }
+    .nav-link:hover { opacity: 1; }
+    .nav-link.active {
+      opacity: 1;
+      font-weight: 600;
+      border-left-color: var(--pt-semantic-surface-action, #5d9c4d);
+      color: var(--pt-semantic-typography-action, #5d9c4d);
+    }
+
+    .nav-coming-soon {
+      padding: 7px 24px 7px 32px;
+      font-size: 12px;
+      opacity: 0.35;
+      font-style: italic;
+    }
+
+    /* ─── Main content ──────────────────────────────────────────── */
+    main {
+      flex: 1;
+      min-width: 0;
+      padding: 48px 40px 80px;
+      max-width: 960px;
+    }
 
     section { margin-bottom: 72px; }
 
@@ -429,11 +476,363 @@
       box-shadow: none;
     }
 
+    /* ─── Component section ─────────────────────────────────────── */
+    .comp-description {
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.65;
+      margin-bottom: 32px;
+      max-width: 560px;
+    }
+
+    /* ─── Button playground — controls ──────────────────────────── */
+    .btn-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .btn-ctrl-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .btn-ctrl-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.35;
+      min-width: 52px;
+      margin-right: 4px;
+    }
+    .btn-ctrl {
+      padding: 4px 14px;
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      font: 11px/1.5 'Poppins', sans-serif;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.15s, background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .btn-ctrl:hover { opacity: 1; background: var(--pt-semantic-surface-card_primary, #fff); }
+    .btn-ctrl.active {
+      opacity: 1;
+      border-color: var(--pt-semantic-surface-action, #5d9c4d);
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      color: var(--pt-semantic-typography-action, #5d9c4d);
+      font-weight: 600;
+    }
+
+    /* ─── Button playground — rows ───────────────────────────────── */
+    .btn-row-wrap { border-bottom: 1px solid var(--pt-semantic-border-divider, #a8c0c7); }
+    .btn-row-wrap:last-child { border-bottom: none; }
+    .btn-row {
+      padding: 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .btn-row-meta { min-width: 100px; flex-shrink: 0; }
+    .btn-row-label { font-size: 12px; font-weight: 600; opacity: 0.5; }
+    .btn-row-preview {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      min-height: 52px;
+    }
+    .btn-row-wrap .snippet-panel {
+      position: static;
+      width: 100%;
+      box-shadow: none;
+      margin-bottom: 12px;
+    }
+
+    /* ─── PT Button component ────────────────────────────────────── */
+    .pt-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--pt-scale-2, 8px);
+      border: 1px solid transparent;
+      font-family: var(--pt-typography-font_family-primary, 'Poppins'), sans-serif;
+      font-weight: var(--pt-typography-font_weight-regular, 500);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+      text-decoration: none;
+    }
+
+    /* Sizes */
+    .pt-btn-sm {
+      padding: var(--pt-scale-2, 8px) var(--pt-scale-4, 16px);
+      font-size: var(--pt-typography-body-sm-font_size, 14px);
+      line-height: var(--pt-typography-body-sm-line_height, 24px);
+      border-radius: var(--pt-scale-1half, 6px);
+    }
+    .pt-btn-md {
+      padding: var(--pt-scale-3, 12px) var(--pt-scale-5, 20px);
+      font-size: var(--pt-typography-body-default-font_size, 16px);
+      line-height: var(--pt-typography-body-default-line_height, 24px);
+      border-radius: var(--pt-scale-2, 8px);
+    }
+    .pt-btn-lg {
+      padding: var(--pt-scale-3, 12px) var(--pt-scale-6, 24px);
+      font-size: var(--pt-typography-body-lg-font_size, 20px);
+      line-height: var(--pt-typography-body-lg-line_height, 28px);
+      border-radius: var(--pt-scale-2, 8px);
+    }
+
+    /* Primary */
+    .pt-btn-primary {
+      background: var(--pt-semantic-surface-action, #5d9c4d);
+      border-color: var(--pt-semantic-border-action, #5d9c4d);
+      color: var(--pt-semantic-typography-on_action, #fff);
+    }
+    .pt-btn-primary:hover:not(:disabled) {
+      background: var(--pt-semantic-surface-action_hover, #4a7d3e);
+      border-color: var(--pt-semantic-border-action_hover, #4a7d3e);
+      border-bottom-width: 4px;
+      box-shadow: 0 0 var(--pt-scale-1half, 6px) 0 var(--pt-semantic-shadow, #dce6e9),
+                  0 var(--pt-scale-1, 4px) 0 0 var(--pt-semantic-shadow-normal, #b9cdd2);
+    }
+
+    /* Secondary */
+    .pt-btn-secondary {
+      background: var(--pt-semantic-surface-page, #f6f9f9);
+      border-color: var(--pt-semantic-border-action, #5d9c4d);
+      color: var(--pt-semantic-typography-action, #5d9c4d);
+    }
+    .pt-btn-secondary:hover:not(:disabled) {
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border-color: var(--pt-semantic-border-action_hover, #4a7d3e);
+      color: var(--pt-semantic-typography-action_hover, #4a7d3e);
+    }
+
+    /* Tertiary */
+    .pt-btn-tertiary {
+      background: transparent;
+      border-color: transparent;
+      color: var(--pt-semantic-typography-action, #5d9c4d);
+    }
+    .pt-btn-tertiary:hover:not(:disabled) {
+      color: var(--pt-semantic-typography-action_hover, #4a7d3e);
+      text-decoration: underline;
+    }
+
+    /* Negative */
+    .pt-btn-negative {
+      background: var(--pt-semantic-surface-negative, #d64545);
+      border-color: var(--pt-semantic-border-negative, #d64545);
+      color: var(--pt-semantic-typography-on_action, #fff);
+    }
+    .pt-btn-negative:hover:not(:disabled) {
+      background: var(--pt-semantic-surface-negative_hover, #ab3737);
+      border-color: var(--pt-semantic-border-negative_hover, #ab3737);
+      border-bottom-width: 4px;
+      box-shadow: 0 0 var(--pt-scale-1half, 6px) 0 var(--pt-semantic-shadow, #dce6e9),
+                  0 var(--pt-scale-1, 4px) 0 0 var(--pt-semantic-shadow-normal, #b9cdd2);
+    }
+
+    /* Gradient */
+    .pt-btn-gradient {
+      background: linear-gradient(to right, var(--pt-color-green-400, #7db071), var(--pt-color-teal-500, #009bc8));
+      border-color: var(--pt-color-green-400, #7db071);
+      color: var(--pt-semantic-typography-on_action, #fff);
+    }
+
+    /* Hover — static display class (mirrors :hover for playground) */
+    .pt-btn-primary.pt-btn-is-hover {
+      background: var(--pt-semantic-surface-action_hover, #4a7d3e);
+      border-color: var(--pt-semantic-border-action_hover, #4a7d3e);
+      border-bottom-width: 4px;
+      box-shadow: 0 0 var(--pt-scale-1half, 6px) 0 var(--pt-semantic-shadow, #dce6e9),
+                  0 var(--pt-scale-1, 4px) 0 0 var(--pt-semantic-shadow-normal, #b9cdd2);
+    }
+    .pt-btn-secondary.pt-btn-is-hover {
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border-color: var(--pt-semantic-border-action_hover, #4a7d3e);
+      color: var(--pt-semantic-typography-action_hover, #4a7d3e);
+    }
+    .pt-btn-tertiary.pt-btn-is-hover {
+      color: var(--pt-semantic-typography-action_hover, #4a7d3e);
+      text-decoration: underline;
+    }
+
+    /* Negative — Secondary and Tertiary overrides */
+    .pt-btn-secondary.pt-btn-negative {
+      background: var(--pt-semantic-surface-page, #f6f9f9);
+      border-color: var(--pt-semantic-border-negative, #d64545);
+      color: var(--pt-semantic-typography-error, #802929);
+    }
+    .pt-btn-secondary.pt-btn-negative:hover:not(:disabled),
+    .pt-btn-secondary.pt-btn-negative.pt-btn-is-hover {
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border-color: var(--pt-semantic-border-negative_hover, #ab3737);
+    }
+    .pt-btn-tertiary.pt-btn-negative {
+      background: transparent;
+      border-color: transparent;
+      color: var(--pt-semantic-typography-error, #802929);
+    }
+    .pt-btn-tertiary.pt-btn-negative:hover:not(:disabled),
+    .pt-btn-tertiary.pt-btn-negative.pt-btn-is-hover {
+      text-decoration: underline;
+    }
+
+    /* AI Default — gradient applies to all types */
+    .pt-btn-ai,
+    .pt-btn-secondary.pt-btn-ai,
+    .pt-btn-tertiary.pt-btn-ai {
+      background: linear-gradient(to right, var(--pt-color-green-400, #7db071), var(--pt-color-teal-500, #009bc8));
+      border-color: var(--pt-color-green-400, #7db071);
+      color: var(--pt-semantic-typography-on_action, #fff);
+      text-decoration: none;
+    }
+
+    /* Disabled (all filled types) */
+    .pt-btn-primary:disabled,
+    .pt-btn-secondary:disabled,
+    .pt-btn-negative:disabled,
+    .pt-btn-gradient:disabled {
+      background: var(--pt-semantic-surface-disabled, #a8c0c7);
+      border-color: var(--pt-semantic-border-disabled, #a8c0c7);
+      color: var(--pt-semantic-typography-on_action, #fff);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .pt-btn-tertiary:disabled {
+      color: var(--pt-semantic-typography-disabled, #eef2f4);
+      cursor: not-allowed;
+    }
+
     /* ─── Responsive ─────────────────────────────────────────────── */
     @media (max-width: 680px) {
-      main { padding: 32px 16px; }
-      header, .top-nav { padding: 12px 16px; }
-      .top-nav { top: 49px; }
+      main { padding: 32px 16px 80px; }
+      header { padding: 12px 16px; }
+      .sidebar { display: none; }
+    }
+    /* ─── Icons page ─────────────────────────────────────────────── */
+    .icon-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .icon-search {
+      flex: 1;
+      min-width: 200px;
+      max-width: 360px;
+      padding: 8px 12px;
+      border: 1px solid var(--pt-semantic-border-default);
+      border-radius: 8px;
+      background: var(--pt-semantic-surface-card_primary);
+      color: var(--pt-semantic-typography-body);
+      font-size: 14px;
+      outline: none;
+    }
+    .icon-search:focus {
+      border-color: var(--pt-semantic-border-action);
+    }
+    .icon-size-switcher {
+      display: flex;
+      gap: 4px;
+    }
+    .icon-size-btn {
+      padding: 6px 10px;
+      border: 1px solid var(--pt-semantic-border-default);
+      border-radius: 6px;
+      background: var(--pt-semantic-surface-card_primary);
+      color: var(--pt-semantic-typography-body);
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .icon-size-btn.active {
+      border-color: var(--pt-semantic-surface-action);
+      color: var(--pt-semantic-typography-action);
+      font-weight: 600;
+    }
+    .icon-count {
+      font-size: 12px;
+      color: var(--pt-semantic-typography-body_secondary);
+      margin-left: auto;
+    }
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+    .icon-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 4px 10px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .icon-tile:hover {
+      background: var(--pt-semantic-surface-card_primary);
+      border-color: var(--pt-semantic-border-divider);
+    }
+    .icon-tile.selected {
+      background: var(--pt-semantic-surface-card_primary);
+      border-color: var(--pt-semantic-border-action);
+    }
+    .icon-tile svg {
+      color: var(--pt-semantic-typography-body);
+      flex-shrink: 0;
+    }
+    .icon-tile-name {
+      font-size: 10px;
+      color: var(--pt-semantic-typography-body_secondary);
+      text-align: center;
+      word-break: break-all;
+      line-height: 1.3;
+    }
+    .icon-snippet-wrap {
+      margin-bottom: 32px;
+    }
+    .icon-snippet-wrap .snippet-panel {
+      display: block;
+    }
+    .icon-none-msg {
+      color: var(--pt-semantic-typography-body_secondary);
+      font-size: 14px;
+      padding: 32px 0;
+    }
+    .icon-categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .icon-cat-btn {
+      padding: 4px 12px;
+      border: 1px solid var(--pt-semantic-border-divider);
+      border-radius: 100px;
+      background: var(--pt-semantic-surface-card_primary);
+      color: var(--pt-semantic-typography-body_secondary);
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .icon-cat-btn:hover {
+      border-color: var(--pt-semantic-border-action);
+      color: var(--pt-semantic-typography-action);
+    }
+    .icon-cat-btn.active {
+      background: var(--pt-semantic-surface-action);
+      border-color: var(--pt-semantic-surface-action);
+      color: var(--pt-semantic-typography-on_action);
+      font-weight: 600;
     }
   </style>
 </head>
@@ -443,13 +842,36 @@
     <button class="toggle" id="themeToggle">Dark</button>
   </header>
 
-  <nav class="top-nav">
-    <a href="#colors">Colors</a>
-    <a href="#semantic">Semantic</a>
-    <a href="#type">Typography</a>
-    <a href="#scale">Spacing</a>
-    <a href="#shadows">Shadows</a>
-  </nav>
+  <div class="layout">
+
+  <aside class="sidebar">
+    <nav>
+      <div class="nav-section">
+        <button class="nav-section-header" id="foundations-toggle">
+          Foundations
+          <span class="nav-toggle-icon" id="foundations-icon">−</span>
+        </button>
+        <div class="nav-section-items" id="foundations-items">
+          <a href="#colors"   class="nav-link" data-section="colors">Colors</a>
+          <a href="#semantic" class="nav-link" data-section="semantic">Semantic</a>
+          <a href="#type"     class="nav-link" data-section="type">Typography</a>
+          <a href="#scale"    class="nav-link" data-section="scale">Spacing</a>
+          <a href="#shadows"  class="nav-link" data-section="shadows">Shadows</a>
+          <a href="#icons"    class="nav-link" data-section="icons">Icons</a>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <button class="nav-section-header" id="components-toggle">
+          Components
+          <span class="nav-toggle-icon" id="components-icon">−</span>
+        </button>
+        <div class="nav-section-items" id="components-items">
+          <a href="#components-button" class="nav-link" data-section="components-button">Button</a>
+        </div>
+      </div>
+    </nav>
+  </aside>
 
   <main>
     <!-- ── Color Palettes ── -->
@@ -475,7 +897,7 @@
         <span class="type-weight-label">Weight</span>
         <button class="type-weight-btn active" data-weight="regular">Regular</button>
         <button class="type-weight-btn" data-weight="emphasis">Emphasis</button>
-        <button class="type-weight-btn" data-weight="thin">Light</button>
+        <button class="type-weight-btn" data-weight="thin">Thin</button>
       </div>
       <div id="typeScale"></div>
     </section>
@@ -491,7 +913,23 @@
       <h2>Shadows</h2>
       <!-- populated by main.js -->
     </section>
+
+    <!-- ── Icons ── -->
+    <section id="icons">
+      <h2>Icons</h2>
+      <p class="comp-description">PinTours uses <a href="https://tabler.io/icons" target="_blank" rel="noopener">Tabler Icons</a> — 5,000+ outline icons, MIT licensed. Use <code>currentColor</code> so icons inherit semantic color tokens from their parent.</p>
+      <div id="iconGallery"></div>
+    </section>
+
+    <!-- ── Button Component ── -->
+    <section id="components-button">
+      <h2>Button</h2>
+      <p class="comp-description">Allow users to trigger actions, submit forms, or navigate. Three types, three sizes, five states.</p>
+      <div id="btnPlayground"></div>
+    </section>
   </main>
+
+  </div><!-- /.layout -->
 
   <script type="module" src="./main.js"></script>
 </body>

@@ -279,3 +279,108 @@ textView.setTextAppearance(R.style.PT_TextStyle_Large_H1_Regular)
 | 3 | Android responsive guidance | ⚠️ Android snippet shows a single style name. No guidance yet on using `values-sw600dp/` configuration qualifiers to auto-switch between Large and Small styles. |
 
 ---
+
+## Entry 3 · 2026-04-09 · PST
+
+### Work Completed Since Entry 2
+
+---
+
+### Button Component — Interactive Playground ✅
+
+**Goal:** Add a Button component page to the docs site with an interactive playground mirroring the Typography section pattern.
+
+**What was done:**
+- Added `<section id="components-button">` to `docs/index.html` with a `#btnPlayground` shell populated by JS
+- Built `buildBtnPlayground()` in `docs/main.js`:
+  - **Controls:** Size (Small / Default / Large), State (Default / Hover / Negative / Disabled / AI Default), Icon (None / Leading / Trailing)
+  - **Three live preview rows:** Primary, Secondary, Tertiary — all update simultaneously on any control change
+  - **Per-row snippet panel** (`▸ {}`) with Web / iOS / Android tabs using the updater registry pattern (`btnSnippetUpdaters[]`)
+- Added full button CSS to `docs/index.html`:
+  - Base `.pt-btn` styles; size variants `.pt-btn-sm/md/lg`
+  - Type variants: Primary (filled action), Secondary (outlined), Tertiary (text-only)
+  - State overrides: Hover, Negative (type-specific — Secondary gets red border+text, Tertiary gets red text only), Disabled, AI Default
+  - **AI Default state:** `linear-gradient(to right, var(--pt-color-green-400), var(--pt-color-teal-500))` applied to all three button types via a single CSS rule
+- Icon size scales with button size: 16px (sm) / 20px (md) / 24px (lg)
+
+**Token snippet approach (developer-first):**
+- Initial snippets output component class names — identified as unbuildable since those classes only exist in docs, not in any distributed stylesheet
+- Rewrote all three snippet generators to output actual token usage:
+  - **Web:** CSS property declarations with semantic tokens (`background`, `color`, `border`, `padding`, `font-size`, `border-radius`)
+  - **iOS:** `UIButton` setup using `PT.Semantic.*` and `PT.Scale.*` tokens
+  - **Android:** Jetpack Compose `Button()` with `MaterialTheme.ptColors` and `PTDimens`
+- Every type × state × size × icon combination generates the correct token set
+
+---
+
+### Navigation — Sidebar Redesign ✅
+
+**What was done:**
+- Removed sticky top-nav, replaced with a fixed left sidebar (240px)
+- Foundations section (expandable): Colors · Semantic · Typography · Spacing · Shadows · Icons
+- Components section (expandable): Button
+- IntersectionObserver tracks active section and highlights the corresponding sidebar link
+- `scroll-padding-top` updated to 68px (header height only)
+
+---
+
+### Icon Tokens ✅
+
+**Source:** Figma `Icons_Weights` variable collection
+
+**Added to `tokens/tokens.json`:**
+
+| Token group | Keys | Values |
+|---|---|---|
+| `icon.size` | 12, 16, 20, 24, 32 | 12–32px |
+| `icon.stroke_weight` | 12, 16, 20, 24, 32 | 1, 1.5, 1.75, 2, 2.5 |
+
+**CSS output (after `npm run build`):**
+- `--pt-icon-size-{n}` and `--pt-icon-stroke_weight-{n}` in `build/web/variables.css`
+- Equivalent tokens in Swift and Android outputs
+
+**Token count:** 280 → 290
+
+---
+
+### Icons Page ✅
+
+**Goal:** Full searchable icon gallery using Tabler Icons (MIT licensed, 5,039 outline icons).
+
+**What was done:**
+- Installed `@tabler/icons` npm package
+- Imported `tabler-nodes-outline.json` (SVG path data) and `icons.json` (category metadata) — single JSON bundle, no per-file HTTP requests
+- Built `buildIconGallery()` in `docs/main.js`:
+  - **Search bar** — filters by icon name and tags in real time
+  - **Size switcher** — 12 / 16 / 20 / **24** (default) / 32; icons re-render at correct size with stroke weight from tokens
+  - **41 category chips** — pill buttons (All + 40 categories: Arrows, Brand, Communication, Map, etc.); category + search filters combine
+  - **Icon count** label updates live
+  - **Click to select** — snippet panel appears below grid with Web / iOS / Android tabs
+- Snippet output references `--pt-icon-size-{n}` and `--pt-icon-stroke_weight-{n}` tokens; iOS and Android snippets document the asset import pattern (SVG → asset catalog / vector drawable)
+
+**Button playground icon integration:**
+- Removed hardcoded arrow SVG from button playground
+- Button icons now rendered via `buildIconSvg('arrow-right', px)` — same function as the icon gallery
+- `BTN_ICON_NAME = 'arrow-right'` is a single constant to change the default button icon
+
+---
+
+### Token Count
+
+| Version | Token count |
+|---|---|
+| Entry 2 | 280 |
+| After icon size + stroke tokens | 290 |
+
+---
+
+### Open Items
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Font weight discrepancies (Thin: tokens=300, Figma=400; Regular: tokens=500, Figma=600) | ⚠️ Identified during Figma cross-check. Not yet resolved — user only approved fixing body.sm line-height. |
+| 2 | iOS/Android icon delivery method | ⚠️ Not yet decided. Snippets document the pattern but the actual asset pipeline is TBD. |
+| 3 | Button component stylesheet not distributed | ⚠️ Button CSS exists only in docs. No `build/web/components.css` or native component files yet. |
+| 4 | Snippet panel clipping on small viewports | ⚠️ Low priority carry-over from Entry 2. |
+
+---

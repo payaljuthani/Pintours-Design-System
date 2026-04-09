@@ -246,21 +246,157 @@ label.attributedText = NSAttributedString(
 .heading { font-size: 60px; font-weight: 700; }
 ```
 
-### iOS color usage
+### iOS (UIKit) — layout and color usage
+
+Use `PT` tokens everywhere in UIKit layout code. Never use hardcoded hex values, `.systemBackground`, or raw pixel constants.
 
 ```swift
-// Correct — uses dynamic colors that switch automatically in dark mode
-label.textColor = PT.Semantic.Typography.headings
+// ✅ Correct — floating card with PT tokens
+private func setupFloatingCard() {
+    floatingCardContainer = UIView()
+    floatingCardContainer.translatesAutoresizingMaskIntoConstraints = false
+    floatingCardContainer.backgroundColor     = PT.Semantic.Surface.cardPrimary
+    floatingCardContainer.layer.cornerRadius  = PT.Scale.s4          // 16px
+    floatingCardContainer.layer.shadowColor   = PT.Semantic.Shadow.shadow.cgColor
+    floatingCardContainer.layer.shadowOffset  = CGSize(width: 0, height: PT.Scale.s1)  // 4px
+    floatingCardContainer.layer.shadowOpacity = 0.15
+    floatingCardContainer.layer.shadowRadius  = PT.Scale.s3          // 12px
+    view.addSubview(floatingCardContainer)
+
+    NSLayoutConstraint.activate([
+        floatingCardContainer.leadingAnchor.constraint(
+            equalTo: view.leadingAnchor, constant: PT.Scale.s5),     // 20px
+        floatingCardContainer.trailingAnchor.constraint(
+            equalTo: view.trailingAnchor, constant: -PT.Scale.s5),
+        floatingCardContainer.bottomAnchor.constraint(
+            equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -PT.Scale.s5),
+    ])
+}
+
+// ✅ Correct — text and icon colors
+label.textColor       = PT.Semantic.Typography.headings
+captionLabel.textColor = PT.Semantic.Typography.bodyCaption
 button.backgroundColor = PT.Semantic.Surface.action
-view.layer.cornerRadius = PT.Scale.s3  // 12px
+button.tintColor       = PT.Semantic.Icon.onAction
+divider.backgroundColor = PT.Semantic.Border.divider
 ```
 
-### Android color usage
+```swift
+// ❌ Wrong — hardcoded values
+view.backgroundColor     = .systemBackground      // use PT.Semantic.Surface.page
+layer.cornerRadius       = 16                     // use PT.Scale.s4
+layer.shadowColor        = UIColor.black.cgColor  // use PT.Semantic.Shadow.shadow.cgColor
+label.textColor          = UIColor(hex: "#222628") // use PT.Semantic.Typography.headings
+```
+
+### Android (Jetpack Compose) — PTTheme and token usage
+
+Import `PTTheme.kt` from `build/android/compose/`. Wrap every screen in `PTTheme` and access colors through `MaterialTheme.ptColors`.
+
+```kotlin
+// ✅ Correct — app root wraps in PTTheme
+setContent {
+    PTTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color    = MaterialTheme.colorScheme.background  // resolves to surfacePage
+        ) {
+            // screen content
+        }
+    }
+}
+
+// ✅ Correct — composable using PT tokens for color, spacing, and text
+@Composable
+private fun FloatingCard(
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val colors = MaterialTheme.ptColors
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color  = colors.surfaceCardPrimary,
+                shape  = RoundedCornerShape(PTDimens.s4)  // 16.dp
+            )
+            .shadow(elevation = PTDimens.s2)              // 8.dp
+    ) {
+        Column(modifier = Modifier.padding(PTDimens.s4)) {
+            Text(
+                text  = "Heading",
+                style = PTTextStyles.smallH1Regular,
+                color = colors.typographyHeadings,
+            )
+            Text(
+                text  = "Body copy",
+                style = PTTextStyles.smallBodyDefaultRegular,
+                color = colors.typographyBody,
+            )
+        }
+        IconButton(
+            onClick   = onDismiss,
+            modifier  = Modifier.align(Alignment.TopStart).padding(PTDimens.s4)
+        ) {
+            Icon(
+                imageVector        = Icons.Default.Close,
+                contentDescription = "Close",
+                tint               = colors.iconHeadings,
+            )
+        }
+    }
+}
+```
+
+```kotlin
+// ❌ Wrong — hardcoded values
+Box(modifier = Modifier.background(Color.White))     // use colors.surfaceCardPrimary
+RoundedCornerShape(16.dp)                            // use PTDimens.s4
+Text(color = Color(0xFF222628))                      // use colors.typographyHeadings
+```
+
+### Android (XML) — color and dimen token usage
+
+Always reference token resources — never hardcode `dp` values or hex colors inline.
 
 ```xml
-<TextView android:textColor="@color/pt_semantic_typography_headings" />
-<View android:background="@color/pt_semantic_surface_action" />
-<Space android:layout_height="@dimen/pt_scale_4" />
+<!-- ✅ Correct — CardView using token resources -->
+<androidx.cardview.widget.CardView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="@dimen/pt_scale_4"
+    app:cardElevation="@dimen/pt_scale_2"
+    app:cardBackgroundColor="@color/pt_semantic_surface_card_primary">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/pt_scale_4">
+
+        <TextView
+            android:id="@+id/tvNavDistance"
+            android:layout_width="wrap_content"
+            android:textColor="@color/pt_semantic_typography_headings"
+            android:textAppearance="@style/PT.TextStyle.Small.H2.Emphasis" />
+
+        <TextView
+            android:id="@+id/tvNavInstruction"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:textColor="@color/pt_semantic_typography_body"
+            android:textAppearance="@style/PT.TextStyle.Small.BodyDefault.Regular" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
+```
+
+```xml
+<!-- ❌ Wrong — hardcoded values -->
+<View app:cardCornerRadius="16dp"           />  <!-- use @dimen/pt_scale_4 -->
+<View android:background="#ffffff"         />  <!-- use @color/pt_semantic_surface_card_primary -->
+<TextView android:textColor="#1C1C1E"      />  <!-- use @color/pt_semantic_typography_headings -->
+<TextView android:textSize="26sp"          />  <!-- use @style/PT.TextStyle.* -->
 ```
 
 ---
@@ -287,14 +423,15 @@ npm run docs:build     # build static docs site → docs/dist/
 ### File structure
 
 ```
-tokens/tokens.json          ← edit here only
-build/web/variables.css     ← import in any web project
-build/web/text-styles.css   ← utility classes for typography
-build/ios/Tokens.swift      ← PT namespace with dynamic colors
-build/ios/TextStyles.swift  ← PTTextStyle structs
-build/android/values/       ← XML resources (light + typography)
-build/android/values-night/ ← XML resources (dark overrides)
-docs/                       ← token reference gallery (Vite)
+tokens/tokens.json              ← edit here only
+build/web/variables.css         ← import in any web project
+build/web/text-styles.css       ← utility classes for typography
+build/ios/Tokens.swift          ← PT namespace with dynamic colors
+build/ios/TextStyles.swift      ← PTTextStyle structs
+build/android/values/           ← XML resources (light + typography)
+build/android/values-night/     ← XML resources (dark overrides)
+build/android/compose/PTTheme.kt ← Jetpack Compose theme, palette, dimens, text styles
+docs/                           ← token reference gallery (Vite)
 ```
 
 ---

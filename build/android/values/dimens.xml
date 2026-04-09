@@ -62,7 +62,7 @@
     <dimen name="pt_typography_body_xs_line_height">16dp</dimen>
     <dimen name="pt_typography_body_xs_paragraph_spacing">12dp</dimen>
     <dimen name="pt_typography_body_sm_font_size">14sp</dimen>
-    <dimen name="pt_typography_body_sm_line_height">20dp</dimen>
+    <dimen name="pt_typography_body_sm_line_height">24dp</dimen>
     <dimen name="pt_typography_body_sm_paragraph_spacing">14dp</dimen>
     <dimen name="pt_typography_body_default_font_size">16sp</dimen>
     <dimen name="pt_typography_body_default_line_height">24dp</dimen>
@@ -102,5 +102,17 @@
     <dimen name="pt_breakpoint_large">768dp</dimen>
     <dimen name="pt_breakpoint_canvas_large">1440dp</dimen>
     <dimen name="pt_breakpoint_canvas_small">440dp</dimen>
+
+    <!-- ICON -->
+    <dimen name="pt_icon_size_12">12dp</dimen>
+    <dimen name="pt_icon_size_16">16dp</dimen>
+    <dimen name="pt_icon_size_20">20dp</dimen>
+    <dimen name="pt_icon_size_24">24dp</dimen>
+    <dimen name="pt_icon_size_32">32dp</dimen>
+    <dimen name="pt_icon_stroke_weight_12">1dp</dimen>
+    <dimen name="pt_icon_stroke_weight_16">1.5dp</dimen>
+    <dimen name="pt_icon_stroke_weight_20">1.75dp</dimen>
+    <dimen name="pt_icon_stroke_weight_24">2dp</dimen>
+    <dimen name="pt_icon_stroke_weight_32">2.5dp</dimen>
 
 </resources>

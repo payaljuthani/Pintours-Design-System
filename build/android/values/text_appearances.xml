@@ -193,17 +193,17 @@
     <style name="PT.TextStyle.Large.BodySm.Regular" parent="PT.TextStyle.Base">
         <item name="android:fontFamily">@font/poppins_medium</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:lineSpacingMultiplier">1.429</item>
+        <item name="android:lineSpacingMultiplier">1.714</item>
     </style>
     <style name="PT.TextStyle.Large.BodySm.Emphasis" parent="PT.TextStyle.Base">
         <item name="android:fontFamily">@font/poppins_bold</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:lineSpacingMultiplier">1.429</item>
+        <item name="android:lineSpacingMultiplier">1.714</item>
     </style>
     <style name="PT.TextStyle.Large.BodySm.Thin" parent="PT.TextStyle.Base">
         <item name="android:fontFamily">@font/poppins_light</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:lineSpacingMultiplier">1.429</item>
+        <item name="android:lineSpacingMultiplier">1.714</item>
     </style>
 
     <style name="PT.TextStyle.Large.BodyDefault.Regular" parent="PT.TextStyle.Base">
@@ -407,17 +407,17 @@
     <style name="PT.TextStyle.Small.BodySm.Regular" parent="PT.TextStyle.Base">
         <item name="android:fontFamily">@font/poppins_medium</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:lineSpacingMultiplier">1.429</item>
+        <item name="android:lineSpacingMultiplier">1.714</item>
     </style>
     <style name="PT.TextStyle.Small.BodySm.Emphasis" parent="PT.TextStyle.Base">
         <item name="android:fontFamily">@font/poppins_bold</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:lineSpacingMultiplier">1.429</item>
+        <item name="android:lineSpacingMultiplier">1.714</item>
     </style>
     <style name="PT.TextStyle.Small.BodySm.Thin" parent="PT.TextStyle.Base">
         <item name="android:fontFamily">@font/poppins_light</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:lineSpacingMultiplier">1.429</item>
+        <item name="android:lineSpacingMultiplier">1.714</item>
     </style>
 
     <style name="PT.TextStyle.Small.BodyDefault.Regular" parent="PT.TextStyle.Base">

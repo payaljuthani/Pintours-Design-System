@@ -8,6 +8,8 @@
 // relative to this file, even though Vite's web root is the docs/ directory.
 import '../build/web/variables.css';
 import '../build/web/text-styles.css';
+import iconNodes from '../node_modules/@tabler/icons/tabler-nodes-outline.json';
+import iconMeta  from '../node_modules/@tabler/icons/icons.json';
 
 const root = document.documentElement;
 
@@ -413,8 +415,8 @@ function typeStyleSwiftSnippet(scaleKey, weightKey, largeSize, largeLh, smallSiz
     // Values differ across breakpoints — show the trait-adaptive pattern so developers
     // get a single copy-paste snippet that handles both size classes correctly.
     return [
-      `// regular: ${lSz}pt · ${weightValue} · lh ${lLh}`,
-      `// compact: ${sSz}pt · ${weightValue} · lh ${sLh}`,
+      `// large:   ${lSz}pt · ${weightValue} · lh ${lLh}`,
+      `// small:   ${sSz}pt · ${weightValue} · lh ${sLh}`,
       `let style: PTTextStyle = traitCollection.horizontalSizeClass == .regular`,
       `    ? ${lToken}`,
       `    : ${sToken}`,
@@ -759,3 +761,624 @@ for (const [tokenKey, label] of [
 
 shadowColorGroup.appendChild(shadowGrid);
 shadowsSection.appendChild(shadowColorGroup);
+
+// ─── Sidebar — section toggle ─────────────────────────────────────────────────
+
+[
+  { toggleId: 'foundations-toggle', itemsId: 'foundations-items', iconId: 'foundations-icon' },
+  { toggleId: 'components-toggle',  itemsId: 'components-items',  iconId: 'components-icon'  },
+].forEach(({ toggleId, itemsId, iconId }) => {
+  const btn   = document.getElementById(toggleId);
+  const items = document.getElementById(itemsId);
+  const icon  = document.getElementById(iconId);
+  if (!btn || !items || !icon) return;
+
+  btn.addEventListener('click', () => {
+    const isCollapsed = items.classList.toggle('collapsed');
+    icon.textContent  = isCollapsed ? '+' : '−';
+  });
+});
+
+// ─── Sidebar — active link on scroll ─────────────────────────────────────────
+
+const navLinks    = document.querySelectorAll('.nav-link[data-section]');
+const sectionIds  = [...navLinks].map(a => a.dataset.section);
+
+function setActiveLink(id) {
+  navLinks.forEach(a => a.classList.toggle('active', a.dataset.section === id));
+}
+
+// Mark first link active on load
+if (sectionIds.length) setActiveLink(sectionIds[0]);
+
+const observer = new IntersectionObserver(
+  entries => {
+    // Find the topmost section currently intersecting
+    const visible = entries
+      .filter(e => e.isIntersecting)
+      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+    if (visible.length) setActiveLink(visible[0].target.id);
+  },
+  { rootMargin: '-10% 0px -80% 0px', threshold: 0 }
+);
+
+sectionIds.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) observer.observe(el);
+});
+
+// ─── Button playground ────────────────────────────────────────────────────────
+
+const ICON_SIZE = { sm: 16, md: 20, lg: 24 };
+const BTN_ICON_NAME = 'arrow-right';
+
+const btnState = { size: 'md', state: 'default', icon: 'none' };
+
+const btnTypes = [
+  { key: 'primary',   label: 'Primary'   },
+  { key: 'secondary', label: 'Secondary' },
+  { key: 'tertiary',  label: 'Tertiary'  },
+];
+
+const btnControls = [
+  { key: 'size',  label: 'Size',  opts: [
+    { val: 'sm', label: 'Small'      },
+    { val: 'md', label: 'Default', active: true },
+    { val: 'lg', label: 'Large'      },
+  ]},
+  { key: 'state', label: 'State', opts: [
+    { val: 'default',  label: 'Default',    active: true },
+    { val: 'hover',    label: 'Hover'       },
+    { val: 'negative', label: 'Negative'    },
+    { val: 'disabled', label: 'Disabled'    },
+    { val: 'ai',       label: 'AI Default'  },
+  ]},
+  { key: 'icon',  label: 'Icon',  opts: [
+    { val: 'none',     label: 'None',     active: true },
+    { val: 'leading',  label: 'Leading'  },
+    { val: 'trailing', label: 'Trailing' },
+  ]},
+];
+
+function getBtnClasses(type, { size, state }) {
+  const cls = ['pt-btn', `pt-btn-${type}`, `pt-btn-${size}`];
+  if (state === 'hover')    cls.push('pt-btn-is-hover');
+  if (state === 'negative') cls.push('pt-btn-negative');
+  if (state === 'ai')       cls.push('pt-btn-ai');
+  return cls;
+}
+
+function buildBtnElement(type, { size, state, icon }) {
+  const btn = document.createElement('button');
+  btn.className = getBtnClasses(type, { size, state }).join(' ');
+  if (state === 'disabled') btn.disabled = true;
+  if (icon === 'leading')  btn.insertAdjacentHTML('beforeend', buildIconSvg(BTN_ICON_NAME, ICON_SIZE[size]));
+  btn.insertAdjacentText('beforeend', 'Button');
+  if (icon === 'trailing') btn.insertAdjacentHTML('beforeend', buildIconSvg(BTN_ICON_NAME, ICON_SIZE[size]));
+  return btn;
+}
+
+// ─── Snippet generators ───────────────────────────────────────────────────────
+
+// Token maps keyed by type × state
+const BTN_BG = {
+  primary:   { default: 'var(--pt-semantic-surface-action)', hover: 'var(--pt-semantic-surface-action_hover)', negative: 'var(--pt-semantic-surface-negative)', disabled: 'var(--pt-semantic-surface-disabled)', ai: 'linear-gradient(to right, var(--pt-color-green-400), var(--pt-color-teal-500))' },
+  secondary: { default: 'var(--pt-semantic-surface-page)', hover: 'var(--pt-semantic-surface-card_primary)', negative: 'var(--pt-semantic-surface-page)', disabled: 'var(--pt-semantic-surface-disabled)', ai: 'linear-gradient(to right, var(--pt-color-green-400), var(--pt-color-teal-500))' },
+  tertiary:  { default: 'transparent', hover: 'transparent', negative: 'transparent', disabled: 'transparent', ai: 'linear-gradient(to right, var(--pt-color-green-400), var(--pt-color-teal-500))' },
+};
+const BTN_COLOR = {
+  primary:   { default: 'var(--pt-semantic-typography-on_action)', hover: 'var(--pt-semantic-typography-on_action)', negative: 'var(--pt-semantic-typography-on_action)', disabled: 'var(--pt-semantic-typography-on_disabled)', ai: 'var(--pt-semantic-typography-on_action)' },
+  secondary: { default: 'var(--pt-semantic-typography-action)', hover: 'var(--pt-semantic-typography-action_hover)', negative: 'var(--pt-semantic-typography-error)', disabled: 'var(--pt-semantic-typography-on_disabled)', ai: 'var(--pt-semantic-typography-on_action)' },
+  tertiary:  { default: 'var(--pt-semantic-typography-action)', hover: 'var(--pt-semantic-typography-action_hover)', negative: 'var(--pt-semantic-typography-error)', disabled: 'var(--pt-semantic-typography-disabled)', ai: 'var(--pt-semantic-typography-on_action)' },
+};
+const BTN_BORDER = {
+  primary:   { default: 'var(--pt-semantic-border-action)', hover: 'var(--pt-semantic-border-action_hover)', negative: 'var(--pt-semantic-border-negative)', disabled: 'var(--pt-semantic-border-disabled)', ai: 'var(--pt-color-green-400)' },
+  secondary: { default: 'var(--pt-semantic-border-action)', hover: 'var(--pt-semantic-border-action_hover)', negative: 'var(--pt-semantic-border-negative)', disabled: 'var(--pt-semantic-border-disabled)', ai: 'var(--pt-color-green-400)' },
+  tertiary:  { default: 'transparent', hover: 'transparent', negative: 'transparent', disabled: 'transparent', ai: 'var(--pt-color-green-400)' },
+};
+const BTN_PADDING = { sm: ['var(--pt-scale-2)', 'var(--pt-scale-4)'], md: ['var(--pt-scale-3)', 'var(--pt-scale-5)'], lg: ['var(--pt-scale-3)', 'var(--pt-scale-6)'] };
+const BTN_FONT    = { sm: 'var(--pt-typography-body-sm-font_size)', md: 'var(--pt-typography-body-default-font_size)', lg: 'var(--pt-typography-body-lg-font_size)' };
+const BTN_RADIUS  = { sm: 'var(--pt-scale-1half)', md: 'var(--pt-scale-2)', lg: 'var(--pt-scale-2)' };
+
+// Swift token maps (no CSS-var syntax)
+const BTN_BG_SWIFT = {
+  primary:   { default: 'PT.Semantic.Surface.action', hover: 'PT.Semantic.Surface.actionHover', negative: 'PT.Semantic.Surface.negative', disabled: 'PT.Semantic.Surface.disabled', ai: '/* gradient — see note */' },
+  secondary: { default: 'PT.Semantic.Surface.page', hover: 'PT.Semantic.Surface.cardPrimary', negative: 'PT.Semantic.Surface.page', disabled: 'PT.Semantic.Surface.disabled', ai: '/* gradient — see note */' },
+  tertiary:  { default: '.clear', hover: '.clear', negative: '.clear', disabled: '.clear', ai: '/* gradient — see note */' },
+};
+const BTN_COLOR_SWIFT = {
+  primary:   { default: 'PT.Semantic.Typography.onAction', hover: 'PT.Semantic.Typography.onAction', negative: 'PT.Semantic.Typography.onAction', disabled: 'PT.Semantic.Typography.onDisabled', ai: 'PT.Semantic.Typography.onAction' },
+  secondary: { default: 'PT.Semantic.Typography.action', hover: 'PT.Semantic.Typography.actionHover', negative: 'PT.Semantic.Typography.error', disabled: 'PT.Semantic.Typography.onDisabled', ai: 'PT.Semantic.Typography.onAction' },
+  tertiary:  { default: 'PT.Semantic.Typography.action', hover: 'PT.Semantic.Typography.actionHover', negative: 'PT.Semantic.Typography.error', disabled: 'PT.Semantic.Typography.disabled', ai: 'PT.Semantic.Typography.onAction' },
+};
+const BTN_BORDER_SWIFT = {
+  primary:   { default: 'PT.Semantic.Border.action', hover: 'PT.Semantic.Border.actionHover', negative: 'PT.Semantic.Border.negative', disabled: 'PT.Semantic.Border.disabled', ai: 'PT.Color.Green.c400' },
+  secondary: { default: 'PT.Semantic.Border.action', hover: 'PT.Semantic.Border.actionHover', negative: 'PT.Semantic.Border.negative', disabled: 'PT.Semantic.Border.disabled', ai: 'PT.Color.Green.c400' },
+  tertiary:  { default: '.clear', hover: '.clear', negative: '.clear', disabled: '.clear', ai: 'PT.Color.Green.c400' },
+};
+const BTN_PADDING_SWIFT = { sm: ['PT.Scale.s2', 'PT.Scale.s4'], md: ['PT.Scale.s3', 'PT.Scale.s5'], lg: ['PT.Scale.s3', 'PT.Scale.s6'] };
+const BTN_RADIUS_SWIFT  = { sm: 'PT.Scale.s1half', md: 'PT.Scale.s2', lg: 'PT.Scale.s2' };
+
+// Android Compose token maps
+const BTN_BG_COMPOSE = {
+  primary:   { default: 'colors.surfaceAction', hover: 'colors.surfaceActionHover', negative: 'colors.surfaceNegative', disabled: 'colors.surfaceDisabled', ai: '/* gradient — see note */' },
+  secondary: { default: 'colors.surfacePage', hover: 'colors.surfaceCardPrimary', negative: 'colors.surfacePage', disabled: 'colors.surfaceDisabled', ai: '/* gradient — see note */' },
+  tertiary:  { default: 'Color.Transparent', hover: 'Color.Transparent', negative: 'Color.Transparent', disabled: 'Color.Transparent', ai: '/* gradient — see note */' },
+};
+const BTN_COLOR_COMPOSE = {
+  primary:   { default: 'colors.typographyOnAction', hover: 'colors.typographyOnAction', negative: 'colors.typographyOnAction', disabled: 'colors.typographyOnDisabled', ai: 'colors.typographyOnAction' },
+  secondary: { default: 'colors.typographyAction', hover: 'colors.typographyActionHover', negative: 'colors.typographyError', disabled: 'colors.typographyOnDisabled', ai: 'colors.typographyOnAction' },
+  tertiary:  { default: 'colors.typographyAction', hover: 'colors.typographyActionHover', negative: 'colors.typographyError', disabled: 'colors.typographyDisabled', ai: 'colors.typographyOnAction' },
+};
+const BTN_BORDER_COMPOSE = {
+  primary:   { default: 'colors.borderAction', hover: 'colors.borderActionHover', negative: 'colors.borderNegative', disabled: 'colors.borderDisabled', ai: 'MaterialTheme.ptColors.colorGreen400' },
+  secondary: { default: 'colors.borderAction', hover: 'colors.borderActionHover', negative: 'colors.borderNegative', disabled: 'colors.borderDisabled', ai: 'MaterialTheme.ptColors.colorGreen400' },
+  tertiary:  { default: 'Color.Transparent', hover: 'Color.Transparent', negative: 'Color.Transparent', disabled: 'Color.Transparent', ai: 'MaterialTheme.ptColors.colorGreen400' },
+};
+const BTN_PADDING_COMPOSE = { sm: ['PTDimens.s2', 'PTDimens.s4'], md: ['PTDimens.s3', 'PTDimens.s5'], lg: ['PTDimens.s3', 'PTDimens.s6'] };
+const BTN_RADIUS_COMPOSE  = { sm: 'PTDimens.s1half', md: 'PTDimens.s2', lg: 'PTDimens.s2' };
+
+function buildBtnWebSnippet(type, { size, state, icon }) {
+  const bg     = BTN_BG[type][state];
+  const color  = BTN_COLOR[type][state];
+  const border = BTN_BORDER[type][state];
+  const [pv, ph] = BTN_PADDING[size];
+  const fs     = BTN_FONT[size];
+  const radius = BTN_RADIUS[size];
+  const dis    = state === 'disabled' ? '\ncursor: not-allowed;' : '';
+  const iconPx   = ICON_SIZE[size] || 20;
+  const iconNote = icon !== 'none' ? `\n/* tabler icon "${BTN_ICON_NAME}" (${iconPx}×${iconPx}px) — see Icons section */\n/* place ${icon === 'leading' ? 'before' : 'after'} label, stroke="currentColor" */` : '';
+  return [
+    `/* ${type[0].toUpperCase() + type.slice(1)} · ${state} · ${size} */`,
+    `background: ${bg};`,
+    `color: ${color};`,
+    `border: 1px solid ${border};`,
+    `padding: ${pv} ${ph};`,
+    `font-size: ${fs};`,
+    `border-radius: ${radius};`,
+    `display: inline-flex; align-items: center; gap: var(--pt-scale-2);`,
+    dis + iconNote,
+  ].filter(Boolean).join('\n');
+}
+
+function buildBtnIOSSnippet(type, { size, state, icon }) {
+  const bg     = BTN_BG_SWIFT[type][state];
+  const color  = BTN_COLOR_SWIFT[type][state];
+  const border = BTN_BORDER_SWIFT[type][state];
+  const [pv, ph] = BTN_PADDING_SWIFT[size];
+  const radius = BTN_RADIUS_SWIFT[size];
+  const dis    = state === 'disabled' ? '\nbutton.isEnabled = false' : '';
+  const iconNote = icon !== 'none' ? `\n// Add SF Symbol or custom SVG ${icon === 'leading' ? 'before' : 'after'} title` : '';
+  const aiNote   = state === 'ai' ? '\n// AI gradient: apply CAGradientLayer with\n// colors: [PT.Color.Green.c400.cgColor, PT.Color.Teal.c500.cgColor]' : '';
+  const borderLine = border === '.clear' ? '' : `\nbutton.layer.borderColor = ${border}.cgColor\nbutton.layer.borderWidth = 1`;
+  return [
+    `// ${type[0].toUpperCase() + type.slice(1)} · ${state} · ${size}`,
+    `button.backgroundColor = ${bg}`,
+    `button.setTitleColor(${color}, for: .normal)`,
+    borderLine,
+    `button.layer.cornerRadius = ${radius}`,
+    `button.contentEdgeInsets = UIEdgeInsets(`,
+    `  top: ${pv}, left: ${ph},`,
+    `  bottom: ${pv}, right: ${ph}`,
+    `)`,
+    dis + iconNote + aiNote,
+  ].filter(Boolean).join('\n');
+}
+
+function buildBtnAndroidSnippet(type, { size, state, icon }) {
+  const colors = 'val colors = MaterialTheme.ptColors';
+  const bg     = BTN_BG_COMPOSE[type][state];
+  const color  = BTN_COLOR_COMPOSE[type][state];
+  const border = BTN_BORDER_COMPOSE[type][state];
+  const [pv, ph] = BTN_PADDING_COMPOSE[size];
+  const radius = BTN_RADIUS_COMPOSE[size];
+  const dis    = state === 'disabled' ? '\n  enabled = false,' : '';
+  const iconNote = icon !== 'none' ? `\n// Add Icon composable ${icon === 'leading' ? 'before' : 'after'} Text` : '';
+  const aiNote   = state === 'ai' ? '\n// AI gradient: use Box with Modifier.background(Brush.horizontalGradient(\n//   listOf(PT.Color.Green.c400, PT.Color.Teal.c500)))' : '';
+  const borderLine = border === 'Color.Transparent' ? '' : `\n  border = BorderStroke(1.dp, ${border}),`;
+  return [
+    `// ${type[0].toUpperCase() + type.slice(1)} · ${state} · ${size}`,
+    colors,
+    `Button(`,
+    `  colors = ButtonDefaults.buttonColors(`,
+    `    containerColor = ${bg},`,
+    `    contentColor = ${color}`,
+    `  ),`,
+    borderLine,
+    `  shape = RoundedCornerShape(${radius}),`,
+    `  contentPadding = PaddingValues(horizontal = ${ph}, vertical = ${pv}),`,
+    dis,
+    `) { Text("Button") }`,
+    iconNote + aiNote,
+  ].filter(Boolean).join('\n');
+}
+
+// ─── Snippet panel (updates with controls) ────────────────────────────────────
+
+const btnSnippetUpdaters = [];
+
+function buildBtnSnippetPanel(type) {
+  const panel = document.createElement('div');
+  panel.className = 'snippet-panel inline';
+  panel.innerHTML = `
+    <div class="snippet-tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn" data-tab="ios">iOS</button>
+      <button class="tab-btn" data-tab="android">Android</button>
+    </div>
+    <div class="snippet-code-wrap">
+      <code class="snippet-text"></code>
+      <button class="copy-btn">Copy</button>
+    </div>
+  `;
+
+  const tabs    = panel.querySelectorAll('.tab-btn');
+  const codeEl  = panel.querySelector('.snippet-text');
+  const copyBtn = panel.querySelector('.copy-btn');
+  let activeTab = 'web';
+
+  const generators = {
+    web:     () => buildBtnWebSnippet(type, btnState),
+    ios:     () => buildBtnIOSSnippet(type, btnState),
+    android: () => buildBtnAndroidSnippet(type, btnState),
+  };
+
+  function refresh() { codeEl.textContent = generators[activeTab](); }
+  refresh();
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      refresh();
+    });
+  });
+
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(generators[activeTab]());
+    copyBtn.textContent = 'Copied!';
+    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+  });
+
+  btnSnippetUpdaters.push(refresh);
+  return panel;
+}
+
+// ─── Build playground ─────────────────────────────────────────────────────────
+
+function updateBtnPreviews() {
+  document.querySelectorAll('.btn-row-wrap').forEach(wrap => {
+    const preview = wrap.querySelector('.btn-row-preview');
+    preview.innerHTML = '';
+    preview.appendChild(buildBtnElement(wrap.dataset.type, btnState));
+  });
+}
+
+function buildBtnPlayground() {
+  const container = document.getElementById('btnPlayground');
+  if (!container) return;
+
+  // Controls
+  const ctrlsEl = document.createElement('div');
+  ctrlsEl.className = 'btn-controls';
+
+  btnControls.forEach(({ key, label, opts }) => {
+    const row = document.createElement('div');
+    row.className = 'btn-ctrl-row';
+    const lbl = document.createElement('span');
+    lbl.className = 'btn-ctrl-label';
+    lbl.textContent = label;
+    row.appendChild(lbl);
+
+    opts.forEach(({ val, label: optLabel, active }) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-ctrl' + (active ? ' active' : '');
+      btn.dataset.ctrl = key;
+      btn.dataset.val  = val;
+      btn.textContent  = optLabel;
+      btn.addEventListener('click', () => {
+        row.querySelectorAll('.btn-ctrl').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        btnState[key] = val;
+        updateBtnPreviews();
+        btnSnippetUpdaters.forEach(fn => fn());
+      });
+      row.appendChild(btn);
+    });
+
+    ctrlsEl.appendChild(row);
+  });
+
+  container.appendChild(ctrlsEl);
+
+  // Preview rows (one per type — mirrors Typography rows)
+  const rowsEl = document.createElement('div');
+  rowsEl.className = 'btn-rows';
+
+  btnTypes.forEach(({ key, label }) => {
+    const rowWrap = document.createElement('div');
+    rowWrap.className = 'btn-row-wrap';
+    rowWrap.dataset.type = key;
+
+    const row = document.createElement('div');
+    row.className = 'btn-row';
+
+    const meta = document.createElement('div');
+    meta.className = 'btn-row-meta';
+    meta.innerHTML = `<div class="btn-row-label">${label}</div>`;
+
+    const preview = document.createElement('div');
+    preview.className = 'btn-row-preview';
+    preview.appendChild(buildBtnElement(key, btnState));
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'snippet-toggle';
+    toggleBtn.textContent = '▸ {}';
+
+    row.append(meta, preview, toggleBtn);
+
+    const panel = buildBtnSnippetPanel(key);
+    panel._toggleBtn = toggleBtn;
+
+    toggleBtn.addEventListener('click', () => {
+      toggleBtn.classList.toggle('active', !panel.classList.contains('open'));
+      togglePanel(panel);
+    });
+
+    rowWrap.append(row, panel);
+    rowsEl.appendChild(rowWrap);
+  });
+
+  container.appendChild(rowsEl);
+}
+
+// ─── Icons gallery ───────────────────────────────────────────────────────────
+
+
+const ICON_SIZES        = [12, 16, 20, 24, 32];
+const ICON_DEFAULT_SIZE = 24;
+
+const ICON_STROKE = { 12: 1, 16: 1.5, 20: 1.75, 24: 2, 32: 2.5 };
+
+// Build SVG string from tabler node data
+function buildIconSvg(name, size) {
+  const nodes  = iconNodes[name];
+  if (!nodes) return '';
+  const stroke = ICON_STROKE[size] || 2;
+  const paths  = nodes.map(([tag, attrs]) => {
+    const attrStr = Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(' ');
+    return `<${tag} ${attrStr}/>`;
+  }).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+}
+
+function buildIconWebSnippet(name, size) {
+  const stroke = ICON_STROKE[size] || 2;
+  return [
+    `<!-- ${name} -->`,
+    `<svg`,
+    `  xmlns="http://www.w3.org/2000/svg"`,
+    `  width="var(--pt-icon-size-${size})"`,
+    `  height="var(--pt-icon-size-${size})"`,
+    `  viewBox="0 0 24 24"`,
+    `  fill="none"`,
+    `  stroke="currentColor"`,
+    `  stroke-width="var(--pt-icon-stroke_weight-${size})"`,
+    `  stroke-linecap="round"`,
+    `  stroke-linejoin="round"`,
+    `>`,
+    `  <!-- paths from tabler SVG file: ${name}.svg -->`,
+    `</svg>`,
+    ``,
+    `/* colour via parent or directly: */`,
+    `color: var(--pt-semantic-icon-action);`,
+  ].join('\n');
+}
+
+function buildIconIOSSnippet(name, size) {
+  const assetName = 'pt-icon-' + name;
+  return [
+    `// Asset name: "${assetName}"`,
+    `// Export from Tabler SVG and add to Xcode asset catalog`,
+    ``,
+    `let icon = UIImage(named: "${assetName}")?`,
+    `    .withRenderingMode(.alwaysTemplate)`,
+    `imageView.image = icon`,
+    `imageView.tintColor = PT.Semantic.Icon.action`,
+    `imageView.frame.size = CGSize(`,
+    `    width: PT.Icon.size${size},`,
+    `    height: PT.Icon.size${size}`,
+    `)`,
+  ].join('\n');
+}
+
+function buildIconAndroidSnippet(name, size) {
+  const drawableName = 'pt_icon_' + name.replace(/-/g, '_');
+  return [
+    `<!-- Drawable name: ${drawableName} -->`,
+    `<!-- Convert Tabler SVG to vector drawable via Android Studio -->`,
+    ``,
+    `<ImageView`,
+    `    android:layout_width="@dimen/pt_icon_size_${size}"`,
+    `    android:layout_height="@dimen/pt_icon_size_${size}"`,
+    `    app:srcCompat="@drawable/${drawableName}"`,
+    `    android:tint="@color/pt_semantic_icon_action" />`,
+  ].join('\n');
+}
+
+function buildIconGallery() {
+  const container = document.getElementById('iconGallery');
+  if (!container) return;
+
+  const allNames   = Object.keys(iconNodes);
+  const allCats    = ['All', ...new Set(allNames.map(n => iconMeta[n]?.category).filter(Boolean))].sort((a, b) => a === 'All' ? -1 : a.localeCompare(b));
+  let   activeSize = ICON_DEFAULT_SIZE;
+  let   query      = '';
+  let   activecat  = 'All';
+  let   selected   = null;
+
+  // ── Controls ──
+  const controls = document.createElement('div');
+  controls.className = 'icon-controls';
+
+  const search = document.createElement('input');
+  search.type        = 'search';
+  search.placeholder = 'Search icons…';
+  search.className   = 'icon-search';
+
+  const sizeSwitcher = document.createElement('div');
+  sizeSwitcher.className = 'icon-size-switcher';
+
+  const countEl = document.createElement('span');
+  countEl.className = 'icon-count';
+
+  ICON_SIZES.forEach(sz => {
+    const btn = document.createElement('button');
+    btn.className   = 'icon-size-btn' + (sz === ICON_DEFAULT_SIZE ? ' active' : '');
+    btn.textContent = sz;
+    btn.addEventListener('click', () => {
+      sizeSwitcher.querySelectorAll('.icon-size-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeSize = sz;
+      renderGrid();
+    });
+    sizeSwitcher.appendChild(btn);
+  });
+
+  search.addEventListener('input', () => {
+    query    = search.value.trim().toLowerCase();
+    selected = null;
+    renderGrid();
+  });
+
+  controls.append(search, sizeSwitcher, countEl);
+  container.appendChild(controls);
+
+  // ── Category chips ──
+  const catRow = document.createElement('div');
+  catRow.className = 'icon-categories';
+
+  allCats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className   = 'icon-cat-btn' + (cat === 'All' ? ' active' : '');
+    btn.textContent = cat;
+    btn.addEventListener('click', () => {
+      catRow.querySelectorAll('.icon-cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activecat = cat;
+      selected  = null;
+      renderGrid();
+    });
+    catRow.appendChild(btn);
+  });
+
+  container.appendChild(catRow);
+
+  // ── Grid ──
+  const grid = document.createElement('div');
+  grid.className = 'icon-grid';
+  container.appendChild(grid);
+
+  // ── Snippet panel ──
+  const snippetWrap = document.createElement('div');
+  snippetWrap.className = 'icon-snippet-wrap';
+  snippetWrap.style.display = 'none';
+
+  const snippetPanel = document.createElement('div');
+  snippetPanel.className = 'snippet-panel inline';
+  snippetPanel.style.display = 'block';
+  snippetPanel.innerHTML = `
+    <div class="snippet-tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn" data-tab="ios">iOS</button>
+      <button class="tab-btn" data-tab="android">Android</button>
+    </div>
+    <div class="snippet-code-wrap">
+      <code class="snippet-text"></code>
+      <button class="copy-btn">Copy</button>
+    </div>
+  `;
+
+  const snippetTabs  = snippetPanel.querySelectorAll('.tab-btn');
+  const snippetCode  = snippetPanel.querySelector('.snippet-text');
+  const snippetCopy  = snippetPanel.querySelector('.copy-btn');
+  let   snippetTab   = 'web';
+
+  const snippetGens = {
+    web:     () => selected ? buildIconWebSnippet(selected, activeSize)     : '',
+    ios:     () => selected ? buildIconIOSSnippet(selected, activeSize)     : '',
+    android: () => selected ? buildIconAndroidSnippet(selected, activeSize) : '',
+  };
+
+  function refreshSnippet() {
+    snippetCode.textContent = snippetGens[snippetTab]();
+  }
+
+  snippetTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      snippetTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      snippetTab = tab.dataset.tab;
+      refreshSnippet();
+    });
+  });
+
+  snippetCopy.addEventListener('click', () => {
+    navigator.clipboard.writeText(snippetGens[snippetTab]());
+    snippetCopy.textContent = 'Copied!';
+    setTimeout(() => { snippetCopy.textContent = 'Copy'; }, 1500);
+  });
+
+  snippetWrap.appendChild(snippetPanel);
+  container.appendChild(snippetWrap);
+
+  // ── Render ──
+  function renderGrid() {
+    grid.innerHTML = '';
+
+    const filtered = allNames.filter(n => {
+      const matchesCat   = activecat === 'All' || iconMeta[n]?.category === activecat;
+      const matchesQuery = !query || n.includes(query) || (iconMeta[n]?.tags || []).some(t => String(t).includes(query));
+      return matchesCat && matchesQuery;
+    });
+
+    countEl.textContent = `${filtered.length.toLocaleString()} icons`;
+
+    if (filtered.length === 0) {
+      const msg = document.createElement('p');
+      msg.className   = 'icon-none-msg';
+      msg.textContent = 'No icons match your search.';
+      grid.appendChild(msg);
+      snippetWrap.style.display = 'none';
+      return;
+    }
+
+    filtered.forEach(name => {
+      const tile = document.createElement('div');
+      tile.className   = 'icon-tile' + (name === selected ? ' selected' : '');
+      tile.innerHTML   = buildIconSvg(name, activeSize) +
+        `<span class="icon-tile-name">${name}</span>`;
+
+      tile.addEventListener('click', () => {
+        grid.querySelectorAll('.icon-tile').forEach(t => t.classList.remove('selected'));
+        tile.classList.add('selected');
+        selected = name;
+        snippetWrap.style.display = 'block';
+        refreshSnippet();
+        snippetWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+
+      grid.appendChild(tile);
+    });
+
+    // Refresh snippet if size changed and something is selected
+    if (selected) refreshSnippet();
+  }
+
+  renderGrid();
+}
+
+buildIconGallery();
+
+buildBtnPlayground();

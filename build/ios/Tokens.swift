@@ -191,7 +191,7 @@ public enum PT {
         public static let bodyXsLineHeight: CGFloat = 16
         public static let bodyXsParagraphSpacing: CGFloat = 12
         public static let bodySmFontSize: CGFloat = 14
-        public static let bodySmLineHeight: CGFloat = 20
+        public static let bodySmLineHeight: CGFloat = 24
         public static let bodySmParagraphSpacing: CGFloat = 14
         public static let bodyDefaultFontSize: CGFloat = 16
         public static let bodyDefaultLineHeight: CGFloat = 24

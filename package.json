@@ -5,12 +5,13 @@
   "description": "PinTours design token pipeline — web, iOS, Android",
   "scripts": {
     "validate": "node scripts/validate.js",
-    "build":    "npm run validate && node build.js",
-    "diff":     "node scripts/diff-check.js",
+    "build": "npm run validate && node build.js",
+    "diff": "node scripts/diff-check.js",
     "docs:dev": "vite docs",
     "docs:build": "vite build docs"
   },
   "dependencies": {
+    "@tabler/icons": "^3.41.1",
     "style-dictionary": "3.9.2"
   },
   "devDependencies": {
