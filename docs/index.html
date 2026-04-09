@@ -683,19 +683,16 @@
       text-decoration: underline;
     }
 
-    /* AI Default — gradient applies to all types */
-    .pt-btn-ai,
-    .pt-btn-secondary.pt-btn-ai,
-    .pt-btn-tertiary.pt-btn-ai {
+    /* AI Default — Primary only */
+    .pt-btn-primary.pt-btn-ai {
       background: linear-gradient(to right, var(--pt-color-green-400, #7db071), var(--pt-color-teal-500, #009bc8));
       border-color: var(--pt-color-green-400, #7db071);
       color: var(--pt-semantic-typography-on_action, #fff);
       text-decoration: none;
     }
 
-    /* Disabled (all filled types) */
+    /* Disabled — Primary (filled) */
     .pt-btn-primary:disabled,
-    .pt-btn-secondary:disabled,
     .pt-btn-negative:disabled,
     .pt-btn-gradient:disabled {
       background: var(--pt-semantic-surface-disabled, #a8c0c7);
@@ -704,8 +701,19 @@
       cursor: not-allowed;
       box-shadow: none;
     }
+    /* Disabled — Secondary (outline preserved, text muted to body_caption) */
+    .pt-btn-secondary:disabled {
+      background: var(--pt-semantic-surface-page, #f2f6f7);
+      border-color: var(--pt-semantic-border-disabled, #a8c0c7);
+      color: var(--pt-semantic-typography-body_caption, #869a9f);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    /* Disabled — Tertiary (no border, text muted to body_caption) */
     .pt-btn-tertiary:disabled {
-      color: var(--pt-semantic-typography-disabled, #eef2f4);
+      background: transparent;
+      border-color: transparent;
+      color: var(--pt-semantic-typography-body_caption, #869a9f);
       cursor: not-allowed;
     }
 

@@ -863,18 +863,18 @@ function buildBtnElement(type, { size, state, icon }) {
 // Token maps keyed by type × state
 const BTN_BG = {
   primary:   { default: 'var(--pt-semantic-surface-action)', hover: 'var(--pt-semantic-surface-action_hover)', negative: 'var(--pt-semantic-surface-negative)', disabled: 'var(--pt-semantic-surface-disabled)', ai: 'linear-gradient(to right, var(--pt-color-green-400), var(--pt-color-teal-500))' },
-  secondary: { default: 'var(--pt-semantic-surface-page)', hover: 'var(--pt-semantic-surface-card_primary)', negative: 'var(--pt-semantic-surface-page)', disabled: 'var(--pt-semantic-surface-disabled)', ai: 'linear-gradient(to right, var(--pt-color-green-400), var(--pt-color-teal-500))' },
-  tertiary:  { default: 'transparent', hover: 'transparent', negative: 'transparent', disabled: 'transparent', ai: 'linear-gradient(to right, var(--pt-color-green-400), var(--pt-color-teal-500))' },
+  secondary: { default: 'var(--pt-semantic-surface-page)', hover: 'var(--pt-semantic-surface-card_primary)', negative: 'var(--pt-semantic-surface-page)', disabled: 'var(--pt-semantic-surface-page)', ai: 'var(--pt-semantic-surface-page)' },
+  tertiary:  { default: 'transparent', hover: 'transparent', negative: 'transparent', disabled: 'transparent', ai: 'transparent' },
 };
 const BTN_COLOR = {
   primary:   { default: 'var(--pt-semantic-typography-on_action)', hover: 'var(--pt-semantic-typography-on_action)', negative: 'var(--pt-semantic-typography-on_action)', disabled: 'var(--pt-semantic-typography-on_disabled)', ai: 'var(--pt-semantic-typography-on_action)' },
-  secondary: { default: 'var(--pt-semantic-typography-action)', hover: 'var(--pt-semantic-typography-action_hover)', negative: 'var(--pt-semantic-typography-error)', disabled: 'var(--pt-semantic-typography-on_disabled)', ai: 'var(--pt-semantic-typography-on_action)' },
-  tertiary:  { default: 'var(--pt-semantic-typography-action)', hover: 'var(--pt-semantic-typography-action_hover)', negative: 'var(--pt-semantic-typography-error)', disabled: 'var(--pt-semantic-typography-disabled)', ai: 'var(--pt-semantic-typography-on_action)' },
+  secondary: { default: 'var(--pt-semantic-typography-action)', hover: 'var(--pt-semantic-typography-action_hover)', negative: 'var(--pt-semantic-typography-error)', disabled: 'var(--pt-semantic-typography-body_caption)', ai: 'var(--pt-semantic-typography-action)' },
+  tertiary:  { default: 'var(--pt-semantic-typography-action)', hover: 'var(--pt-semantic-typography-action_hover)', negative: 'var(--pt-semantic-typography-error)', disabled: 'var(--pt-semantic-typography-body_caption)', ai: 'var(--pt-semantic-typography-action)' },
 };
 const BTN_BORDER = {
   primary:   { default: 'var(--pt-semantic-border-action)', hover: 'var(--pt-semantic-border-action_hover)', negative: 'var(--pt-semantic-border-negative)', disabled: 'var(--pt-semantic-border-disabled)', ai: 'var(--pt-color-green-400)' },
-  secondary: { default: 'var(--pt-semantic-border-action)', hover: 'var(--pt-semantic-border-action_hover)', negative: 'var(--pt-semantic-border-negative)', disabled: 'var(--pt-semantic-border-disabled)', ai: 'var(--pt-color-green-400)' },
-  tertiary:  { default: 'transparent', hover: 'transparent', negative: 'transparent', disabled: 'transparent', ai: 'var(--pt-color-green-400)' },
+  secondary: { default: 'var(--pt-semantic-border-action)', hover: 'var(--pt-semantic-border-action_hover)', negative: 'var(--pt-semantic-border-negative)', disabled: 'var(--pt-semantic-border-disabled)', ai: 'var(--pt-semantic-border-action)' },
+  tertiary:  { default: 'transparent', hover: 'transparent', negative: 'transparent', disabled: 'transparent', ai: 'transparent' },
 };
 const BTN_PADDING = { sm: ['var(--pt-scale-2)', 'var(--pt-scale-4)'], md: ['var(--pt-scale-3)', 'var(--pt-scale-5)'], lg: ['var(--pt-scale-3)', 'var(--pt-scale-6)'] };
 const BTN_FONT    = { sm: 'var(--pt-typography-body-sm-font_size)', md: 'var(--pt-typography-body-default-font_size)', lg: 'var(--pt-typography-body-lg-font_size)' };
@@ -883,18 +883,18 @@ const BTN_RADIUS  = { sm: 'var(--pt-scale-1half)', md: 'var(--pt-scale-2)', lg: 
 // Swift token maps (no CSS-var syntax)
 const BTN_BG_SWIFT = {
   primary:   { default: 'PT.Semantic.Surface.action', hover: 'PT.Semantic.Surface.actionHover', negative: 'PT.Semantic.Surface.negative', disabled: 'PT.Semantic.Surface.disabled', ai: '/* gradient — see note */' },
-  secondary: { default: 'PT.Semantic.Surface.page', hover: 'PT.Semantic.Surface.cardPrimary', negative: 'PT.Semantic.Surface.page', disabled: 'PT.Semantic.Surface.disabled', ai: '/* gradient — see note */' },
-  tertiary:  { default: '.clear', hover: '.clear', negative: '.clear', disabled: '.clear', ai: '/* gradient — see note */' },
+  secondary: { default: 'PT.Semantic.Surface.page', hover: 'PT.Semantic.Surface.cardPrimary', negative: 'PT.Semantic.Surface.page', disabled: 'PT.Semantic.Surface.disabled', ai: 'PT.Semantic.Surface.page' },
+  tertiary:  { default: '.clear', hover: '.clear', negative: '.clear', disabled: '.clear', ai: '.clear' },
 };
 const BTN_COLOR_SWIFT = {
   primary:   { default: 'PT.Semantic.Typography.onAction', hover: 'PT.Semantic.Typography.onAction', negative: 'PT.Semantic.Typography.onAction', disabled: 'PT.Semantic.Typography.onDisabled', ai: 'PT.Semantic.Typography.onAction' },
-  secondary: { default: 'PT.Semantic.Typography.action', hover: 'PT.Semantic.Typography.actionHover', negative: 'PT.Semantic.Typography.error', disabled: 'PT.Semantic.Typography.onDisabled', ai: 'PT.Semantic.Typography.onAction' },
-  tertiary:  { default: 'PT.Semantic.Typography.action', hover: 'PT.Semantic.Typography.actionHover', negative: 'PT.Semantic.Typography.error', disabled: 'PT.Semantic.Typography.disabled', ai: 'PT.Semantic.Typography.onAction' },
+  secondary: { default: 'PT.Semantic.Typography.action', hover: 'PT.Semantic.Typography.actionHover', negative: 'PT.Semantic.Typography.error', disabled: 'PT.Semantic.Typography.onDisabled', ai: 'PT.Semantic.Typography.action' },
+  tertiary:  { default: 'PT.Semantic.Typography.action', hover: 'PT.Semantic.Typography.actionHover', negative: 'PT.Semantic.Typography.error', disabled: 'PT.Semantic.Typography.disabled', ai: 'PT.Semantic.Typography.action' },
 };
 const BTN_BORDER_SWIFT = {
   primary:   { default: 'PT.Semantic.Border.action', hover: 'PT.Semantic.Border.actionHover', negative: 'PT.Semantic.Border.negative', disabled: 'PT.Semantic.Border.disabled', ai: 'PT.Color.Green.c400' },
-  secondary: { default: 'PT.Semantic.Border.action', hover: 'PT.Semantic.Border.actionHover', negative: 'PT.Semantic.Border.negative', disabled: 'PT.Semantic.Border.disabled', ai: 'PT.Color.Green.c400' },
-  tertiary:  { default: '.clear', hover: '.clear', negative: '.clear', disabled: '.clear', ai: 'PT.Color.Green.c400' },
+  secondary: { default: 'PT.Semantic.Border.action', hover: 'PT.Semantic.Border.actionHover', negative: 'PT.Semantic.Border.negative', disabled: 'PT.Semantic.Border.disabled', ai: 'PT.Semantic.Border.action' },
+  tertiary:  { default: '.clear', hover: '.clear', negative: '.clear', disabled: '.clear', ai: '.clear' },
 };
 const BTN_PADDING_SWIFT = { sm: ['PT.Scale.s2', 'PT.Scale.s4'], md: ['PT.Scale.s3', 'PT.Scale.s5'], lg: ['PT.Scale.s3', 'PT.Scale.s6'] };
 const BTN_RADIUS_SWIFT  = { sm: 'PT.Scale.s1half', md: 'PT.Scale.s2', lg: 'PT.Scale.s2' };
@@ -902,18 +902,18 @@ const BTN_RADIUS_SWIFT  = { sm: 'PT.Scale.s1half', md: 'PT.Scale.s2', lg: 'PT.Sc
 // Android Compose token maps
 const BTN_BG_COMPOSE = {
   primary:   { default: 'colors.surfaceAction', hover: 'colors.surfaceActionHover', negative: 'colors.surfaceNegative', disabled: 'colors.surfaceDisabled', ai: '/* gradient — see note */' },
-  secondary: { default: 'colors.surfacePage', hover: 'colors.surfaceCardPrimary', negative: 'colors.surfacePage', disabled: 'colors.surfaceDisabled', ai: '/* gradient — see note */' },
-  tertiary:  { default: 'Color.Transparent', hover: 'Color.Transparent', negative: 'Color.Transparent', disabled: 'Color.Transparent', ai: '/* gradient — see note */' },
+  secondary: { default: 'colors.surfacePage', hover: 'colors.surfaceCardPrimary', negative: 'colors.surfacePage', disabled: 'colors.surfacePage', ai: 'colors.surfacePage' },
+  tertiary:  { default: 'Color.Transparent', hover: 'Color.Transparent', negative: 'Color.Transparent', disabled: 'Color.Transparent', ai: 'Color.Transparent' },
 };
 const BTN_COLOR_COMPOSE = {
   primary:   { default: 'colors.typographyOnAction', hover: 'colors.typographyOnAction', negative: 'colors.typographyOnAction', disabled: 'colors.typographyOnDisabled', ai: 'colors.typographyOnAction' },
-  secondary: { default: 'colors.typographyAction', hover: 'colors.typographyActionHover', negative: 'colors.typographyError', disabled: 'colors.typographyOnDisabled', ai: 'colors.typographyOnAction' },
-  tertiary:  { default: 'colors.typographyAction', hover: 'colors.typographyActionHover', negative: 'colors.typographyError', disabled: 'colors.typographyDisabled', ai: 'colors.typographyOnAction' },
+  secondary: { default: 'colors.typographyAction', hover: 'colors.typographyActionHover', negative: 'colors.typographyError', disabled: 'colors.typographyOnDisabled', ai: 'colors.typographyAction' },
+  tertiary:  { default: 'colors.typographyAction', hover: 'colors.typographyActionHover', negative: 'colors.typographyError', disabled: 'colors.typographyDisabled', ai: 'colors.typographyAction' },
 };
 const BTN_BORDER_COMPOSE = {
   primary:   { default: 'colors.borderAction', hover: 'colors.borderActionHover', negative: 'colors.borderNegative', disabled: 'colors.borderDisabled', ai: 'MaterialTheme.ptColors.colorGreen400' },
-  secondary: { default: 'colors.borderAction', hover: 'colors.borderActionHover', negative: 'colors.borderNegative', disabled: 'colors.borderDisabled', ai: 'MaterialTheme.ptColors.colorGreen400' },
-  tertiary:  { default: 'Color.Transparent', hover: 'Color.Transparent', negative: 'Color.Transparent', disabled: 'Color.Transparent', ai: 'MaterialTheme.ptColors.colorGreen400' },
+  secondary: { default: 'colors.borderAction', hover: 'colors.borderActionHover', negative: 'colors.borderNegative', disabled: 'colors.borderDisabled', ai: 'colors.borderAction' },
+  tertiary:  { default: 'Color.Transparent', hover: 'Color.Transparent', negative: 'Color.Transparent', disabled: 'Color.Transparent', ai: 'Color.Transparent' },
 };
 const BTN_PADDING_COMPOSE = { sm: ['PTDimens.s2', 'PTDimens.s4'], md: ['PTDimens.s3', 'PTDimens.s5'], lg: ['PTDimens.s3', 'PTDimens.s6'] };
 const BTN_RADIUS_COMPOSE  = { sm: 'PTDimens.s1half', md: 'PTDimens.s2', lg: 'PTDimens.s2' };

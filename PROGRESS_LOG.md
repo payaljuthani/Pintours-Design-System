@@ -384,3 +384,35 @@ textView.setTextAppearance(R.style.PT_TextStyle_Large_H1_Regular)
 | 4 | Snippet panel clipping on small viewports | ⚠️ Low priority carry-over from Entry 2. |
 
 ---
+
+## Entry 4 · 2026-04-09 · PST
+
+### Work Completed Since Entry 3
+
+---
+
+### Button Component — Disabled State Fixes ✅
+
+**Source:** Figma cross-check (nodes 699:1013, 699:1017)
+
+**Secondary disabled** (was: filled grey like Primary)
+- Background: `--pt-semantic-surface-page` (not disabled surface)
+- Border: `--pt-semantic-border-disabled` (outline preserved)
+- Text: `--pt-semantic-typography-body_caption` (#869a9f)
+
+**Tertiary disabled** (was: invisible — no border, text too light)
+- Background: transparent
+- Border: transparent (no outline — matches Figma exactly)
+- Text: `--pt-semantic-typography-body_caption` (#869a9f)
+
+---
+
+### Button Component — AI Default Scoped to Primary Only ✅
+
+**Change:** AI Default gradient state removed from Secondary and Tertiary.
+
+- CSS rule changed from `.pt-btn-ai, .pt-btn-secondary.pt-btn-ai, .pt-btn-tertiary.pt-btn-ai` → `.pt-btn-primary.pt-btn-ai`
+- Secondary and Tertiary now fall back to their Default appearance when AI Default is selected
+- All snippet token maps (Web CSS, Swift, Android Compose) updated to reflect default values for secondary/tertiary AI state
+
+---
