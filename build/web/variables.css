@@ -189,7 +189,7 @@
 
 
   /* ── Effects ───────────────────────────── */
-  --pt-shadow-lg: 0px 12px 32px 0px #dce6e9, 0px 8px 16px 0px #b9cdd2;
+  --pt-shadow-lg: 0px 12px 32px 0px #cbd9dd, 0px 8px 16px 0px #a8c0c7;
 
 
   /* ── Semantic: Light (default) ──────────── */
@@ -221,10 +221,11 @@
   --pt-semantic-icon-on_action: #ffffff;
   --pt-semantic-icon-on_hover: #ffffff;
   --pt-semantic-icon-on_disabled: #111314;
-  --pt-semantic-surface-page: #f6f9f9;
-  --pt-semantic-surface-page_90: rgba(246,249,249,0.9);
+  --pt-semantic-surface-page: #f2f6f7;
+  --pt-semantic-surface-page_90: rgba(242,246,247,0.9);
   --pt-semantic-surface-card_primary: #ffffff;
   --pt-semantic-surface-card_85: rgba(255,255,255,0.85);
+  --pt-semantic-surface-card_deep: #dce6e9;
   --pt-semantic-surface-action: #5d9c4d;
   --pt-semantic-surface-action_hover: #4a7d3e;
   --pt-semantic-surface-negative: #d64545;
@@ -251,8 +252,8 @@
   --pt-semantic-border-error: #efb5b5;
   --pt-semantic-border-information: #99d7e9;
   --pt-semantic-border-disabled: #a8c0c7;
-  --pt-semantic-shadow: #dce6e9;
-  --pt-semantic-shadow-normal: #b9cdd2;
+  --pt-semantic-shadow: #cbd9dd;
+  --pt-semantic-shadow-normal: #a8c0c7;
   --pt-semantic-shadow: rgba(17,19,20,0.5);
 }
 
@@ -290,6 +291,7 @@
   --pt-semantic-surface-page_90: rgba(34,38,40,0.9);
   --pt-semantic-surface-card_primary: #323a3c;
   --pt-semantic-surface-card_85: rgba(50,58,60,0.85);
+  --pt-semantic-surface-card_deep: #657377;
   --pt-semantic-surface-action: #7db071;
   --pt-semantic-surface-action_hover: #5d9c4d;
   --pt-semantic-surface-negative: #d64545;
@@ -355,6 +357,7 @@
     --pt-semantic-surface-page_90: rgba(34,38,40,0.9);
     --pt-semantic-surface-card_primary: #323a3c;
     --pt-semantic-surface-card_85: rgba(50,58,60,0.85);
+    --pt-semantic-surface-card_deep: #657377;
     --pt-semantic-surface-action: #7db071;
     --pt-semantic-surface-action_hover: #5d9c4d;
     --pt-semantic-surface-negative: #d64545;

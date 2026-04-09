@@ -92,10 +92,11 @@
     <color name="pt_semantic_icon_on_action">#ffffff</color>
     <color name="pt_semantic_icon_on_hover">#ffffff</color>
     <color name="pt_semantic_icon_on_disabled">#111314</color>
-    <color name="pt_semantic_surface_page">#f6f9f9</color>
-    <!-- pt_semantic_surface_page_90: rgba(246,249,249,0.9) — requires ColorStateList for opacity -->
+    <color name="pt_semantic_surface_page">#f2f6f7</color>
+    <!-- pt_semantic_surface_page_90: rgba(242,246,247,0.9) — requires ColorStateList for opacity -->
     <color name="pt_semantic_surface_card_primary">#ffffff</color>
     <!-- pt_semantic_surface_card_85: rgba(255,255,255,0.85) — requires ColorStateList for opacity -->
+    <color name="pt_semantic_surface_card_deep">#dce6e9</color>
     <color name="pt_semantic_surface_action">#5d9c4d</color>
     <color name="pt_semantic_surface_action_hover">#4a7d3e</color>
     <color name="pt_semantic_surface_negative">#d64545</color>
@@ -122,8 +123,8 @@
     <color name="pt_semantic_border_error">#efb5b5</color>
     <color name="pt_semantic_border_information">#99d7e9</color>
     <color name="pt_semantic_border_disabled">#a8c0c7</color>
-    <color name="pt_semantic_shadow">#dce6e9</color>
-    <color name="pt_semantic_shadow_normal">#b9cdd2</color>
+    <color name="pt_semantic_shadow">#cbd9dd</color>
+    <color name="pt_semantic_shadow_normal">#a8c0c7</color>
     <!-- pt_semantic_shadow: rgba(17,19,20,0.5) — requires ColorStateList for opacity -->
 
 </resources>

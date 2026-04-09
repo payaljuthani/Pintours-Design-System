@@ -416,3 +416,45 @@ textView.setTextAppearance(R.style.PT_TextStyle_Large_H1_Regular)
 - All snippet token maps (Web CSS, Swift, Android Compose) updated to reflect default values for secondary/tertiary AI state
 
 ---
+
+## Entry 5 · 2026-04-09 · PST
+
+### Work Completed Since Entry 4
+
+---
+
+### Semantic Colour Token Cross-Check — Figma vs tokens.json ✅
+
+Compared all semantic colour categories against Figma variable screenshots.
+
+**Fixes applied:**
+
+| Token | Was | Now |
+|---|---|---|
+| `surface.page` light | `grey.50` (#f6f9f9) | `grey.75` (#f2f6f7) |
+| `surface.page_90` light | `rgba(246,249,249,0.9)` | `rgba(242,246,247,0.9)` |
+| `surface.card_deep` | Missing | Added: light=`grey.200`, dark=`grey.700` |
+| `shadow.light` light | `grey.200` (#dce6e9) | `grey.300` (#cbd9dd) |
+| `shadow.normal` light | `grey.400` (#b9cdd2) | `grey.500` (#a8c0c7) |
+
+**Everything else matched:** Typography, Icon, Border, all dark-mode surface values.
+
+---
+
+### Open Issue — Success Palette ⚠️
+
+**Finding:** Action green and Success green are intentionally different colours in PinTours — they serve different functions (action buttons vs success states on filter chips and other components).
+
+**Current state:** All `success` roles in tokens.json (`typography.success`, `icon.success`, `surface.success`, `border.success`) incorrectly reference `color.green.*` (the Primary/action palette).
+
+**Next step:** Add a separate `color.success` primitive palette to `tokens/tokens.json` and update all `success` semantic token references. Figma Success palette hex values needed to do this — to be pulled in next session.
+
+---
+
+### Netlify Deployment ✅
+
+- Site connected to `github.com/payaljuthani/Pintours-Design-System`
+- Build command: `npm run docs:build`, publish directory: `docs/dist`
+- Auto-deploys on every push to `main`
+
+---

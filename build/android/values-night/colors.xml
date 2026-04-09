@@ -41,6 +41,7 @@
     <!-- pt_semantic_surface_page_90: rgba(34,38,40,0.9) — requires ColorStateList for opacity -->
     <color name="pt_semantic_surface_card_primary">#323a3c</color>
     <!-- pt_semantic_surface_card_85: rgba(50,58,60,0.85) — requires ColorStateList for opacity -->
+    <color name="pt_semantic_surface_card_deep">#657377</color>
     <color name="pt_semantic_surface_action">#7db071</color>
     <color name="pt_semantic_surface_action_hover">#5d9c4d</color>
     <color name="pt_semantic_surface_negative">#d64545</color>

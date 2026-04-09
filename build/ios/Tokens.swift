@@ -351,12 +351,17 @@ public enum PT {
             public static let page = UIColor { trait in
                 trait.userInterfaceStyle == .dark
                     ? UIColor(hex: "#222628")
-                    : UIColor(hex: "#f6f9f9")
+                    : UIColor(hex: "#f2f6f7")
             }
             public static let cardPrimary = UIColor { trait in
                 trait.userInterfaceStyle == .dark
                     ? UIColor(hex: "#323a3c")
                     : UIColor(hex: "#ffffff")
+            }
+            public static let cardDeep = UIColor { trait in
+                trait.userInterfaceStyle == .dark
+                    ? UIColor(hex: "#657377")
+                    : UIColor(hex: "#dce6e9")
             }
             public static let action = UIColor { trait in
                 trait.userInterfaceStyle == .dark
@@ -493,11 +498,11 @@ public enum PT {
         }
         public enum Shadow {
             /// Dark value unavailable — using light fallback
-            public static let light = UIColor(hex: "#dce6e9")
+            public static let light = UIColor(hex: "#cbd9dd")
             public static let normal = UIColor { trait in
                 trait.userInterfaceStyle == .dark
                     ? UIColor(hex: "#111314")
-                    : UIColor(hex: "#b9cdd2")
+                    : UIColor(hex: "#a8c0c7")
             }
         }
     }
