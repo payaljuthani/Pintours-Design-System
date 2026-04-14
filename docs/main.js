@@ -1432,6 +1432,416 @@ function buildIconGallery() {
 
 buildIconGallery();
 
+// ─── SuperIcon playground ─────────────────────────────────────────────────────
+
+// Container size (px) for each icon size — always larger than the icon
+const SI_CONTAINER_PX    = { '12': 20,  '16': 24,  '20': 32,  '24': 40,  '32': 56  };
+// Corresponding scale steps for token names
+const SI_CONTAINER_SCALE = { '12': '5', '16': '6', '20': '8', '24': '10', '32': '14' };
+// Icon size → matching scale step (12→3, 16→4, 20→5, 24→6, 32→8)
+const SI_ICON_SCALE      = { '12': '3', '16': '4', '20': '5', '24': '6',  '32': '8'  };
+// Square border-radius tokens per size
+const SI_RADIUS_CSS      = { '12': '--pt-scale-half', '16': '--pt-scale-3quat', '20': '--pt-scale-1', '24': '--pt-scale-1half', '32': '--pt-scale-2' };
+const SI_RADIUS_PX       = { '12': '2px', '16': '3px', '20': '4px', '24': '6px', '32': '8px' };
+const SI_RADIUS_SWIFT    = { '12': 'PT.Scale.shalf', '16': 'PT.Scale.s3quat', '20': 'PT.Scale.s1', '24': 'PT.Scale.s1half', '32': 'PT.Scale.s2' };
+const SI_RADIUS_COMPOSE  = { '12': 'PTDimens.shalf', '16': 'PTDimens.s3quat', '20': 'PTDimens.s1', '24': 'PTDimens.s1half', '32': 'PTDimens.s2' };
+
+const SI_FILLS = [
+  { val: 'default',         label: 'Default'         },
+  { val: 'square-fill',     label: 'Square Fill'     },
+  { val: 'circle-fill',     label: 'Circle Fill'     },
+  { val: 'selected-square', label: 'Selected Square' },
+  { val: 'selected-circle', label: 'Selected Circle' },
+];
+
+// Background tokens per fill variant
+const SI_BG_CSS = {
+  'default':         'transparent',
+  'square-fill':     'var(--pt-semantic-surface-card_primary)',
+  'circle-fill':     'var(--pt-semantic-surface-card_primary)',
+  'selected-square': 'var(--pt-semantic-surface-action)',
+  'selected-circle': 'var(--pt-semantic-surface-action)',
+};
+const SI_BG_OPACITY = {
+  'default': 0, 'square-fill': 0.85, 'circle-fill': 0.85,
+  'selected-square': 1, 'selected-circle': 1,
+};
+const SI_BG_SWIFT = {
+  'default':         null,
+  'square-fill':     'PT.Semantic.Surface.cardPrimary.withAlphaComponent(0.85)',
+  'circle-fill':     'PT.Semantic.Surface.cardPrimary.withAlphaComponent(0.85)',
+  'selected-square': 'PT.Semantic.Surface.action',
+  'selected-circle': 'PT.Semantic.Surface.action',
+};
+const SI_BG_COMPOSE = {
+  'default':         null,
+  'square-fill':     'colors.surfaceCardPrimary.copy(alpha = 0.85f)',
+  'circle-fill':     'colors.surfaceCardPrimary.copy(alpha = 0.85f)',
+  'selected-square': 'colors.surfaceAction',
+  'selected-circle': 'colors.surfaceAction',
+};
+
+// Icon color tokens per fill variant
+const SI_ICON_CSS = {
+  'default':         'var(--pt-semantic-icon-headings)',
+  'square-fill':     'var(--pt-semantic-icon-headings)',
+  'circle-fill':     'var(--pt-semantic-icon-headings)',
+  'selected-square': 'var(--pt-semantic-icon-on_action)',
+  'selected-circle': 'var(--pt-semantic-icon-on_action)',
+};
+const SI_ICON_SWIFT = {
+  'default':         'PT.Semantic.Icon.headings',
+  'square-fill':     'PT.Semantic.Icon.headings',
+  'circle-fill':     'PT.Semantic.Icon.headings',
+  'selected-square': 'PT.Semantic.Icon.onAction',
+  'selected-circle': 'PT.Semantic.Icon.onAction',
+};
+const SI_ICON_COMPOSE = {
+  'default':         'colors.iconHeadings',
+  'square-fill':     'colors.iconHeadings',
+  'circle-fill':     'colors.iconHeadings',
+  'selected-square': 'colors.iconOnAction',
+  'selected-circle': 'colors.iconOnAction',
+};
+
+// Shared playground state
+const siState = { size: '32', icon: 'map-pin' };
+const siSnippetUpdaters = [];
+
+// ── DOM builder ──
+
+function buildSuperIconEl(fill, { size, icon }) {
+  const px       = SI_CONTAINER_PX[size];
+  const isCircle = fill.includes('circle');
+  const hasBg    = fill !== 'default';
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = `position:relative;display:inline-flex;align-items:center;justify-content:center;width:${px}px;height:${px}px;flex-shrink:0;`;
+
+  // Background layer (separate element so icon inherits full opacity)
+  const bg = document.createElement('div');
+  bg.style.cssText = [
+    'position:absolute;inset:0;',
+    `border-radius:${!hasBg ? '0' : isCircle ? '999px' : SI_RADIUS_PX[size]};`,
+    `background:${SI_BG_CSS[fill]};`,
+    `opacity:${SI_BG_OPACITY[fill]};`,
+  ].join('');
+  wrap.appendChild(bg);
+
+  // Icon layer
+  const iconWrap = document.createElement('div');
+  iconWrap.style.cssText = `position:relative;z-index:1;color:${SI_ICON_CSS[fill]};display:flex;align-items:center;justify-content:center;`;
+  iconWrap.innerHTML = buildIconSvg(icon, parseInt(size));
+  wrap.appendChild(iconWrap);
+
+  return wrap;
+}
+
+// ── Snippet generators ──
+
+function buildSIWebSnippet(fill, { size, icon }) {
+  const cStep  = SI_CONTAINER_SCALE[size];
+  const cPx    = SI_CONTAINER_PX[size];
+  const hasBg  = fill !== 'default';
+  const isCircle  = fill.includes('circle');
+  const isSelected = fill.startsWith('selected');
+  const bgColor    = SI_BG_CSS[fill];
+  const radiusVal  = isCircle ? '999px' : `var(${SI_RADIUS_CSS[size]})`;
+  const opacityNote = (!isSelected && hasBg) ? '\nopacity: 0.85; /* background layer only */' : '';
+
+  const bgBlock = hasBg ? [
+    '',
+    '/* Background — use ::before or a nested <div> to isolate opacity */',
+    `background: ${bgColor};`,
+    opacityNote,
+    `border-radius: ${radiusVal};`,
+  ].filter(Boolean).join('\n') : '';
+
+  return [
+    `/* SuperIcon · ${fill} · ${size}px · ${icon} */`,
+    '',
+    '/* Container */',
+    `width: var(--pt-scale-${cStep});   /* ${cPx}px */`,
+    `height: var(--pt-scale-${cStep});`,
+    'position: relative;',
+    'display: inline-flex;',
+    'align-items: center;',
+    'justify-content: center;',
+    bgBlock,
+    '',
+    '/* Icon */',
+    `color: ${SI_ICON_CSS[fill]};`,
+    `/* tabler icon "${icon}" (${size}×${size}px) — see Icons section */`,
+  ].join('\n');
+}
+
+function buildSIIOSSnippet(fill, { size, icon }) {
+  const cToken = `PT.Scale.s${SI_CONTAINER_SCALE[size]}`;
+  const iToken = `PT.Scale.s${SI_ICON_SCALE[size]}`;
+  const hasBg  = fill !== 'default';
+  const isCircle = fill.includes('circle');
+  const bgToken  = SI_BG_SWIFT[fill];
+  const tintToken = SI_ICON_SWIFT[fill];
+  const assetName = 'pt-icon-' + icon;
+
+  const bgLines = hasBg ? [
+    `container.backgroundColor = ${bgToken}`,
+    isCircle
+      ? `container.layer.cornerRadius = ${cToken} / 2`
+      : `container.layer.cornerRadius = ${SI_RADIUS_SWIFT[size]}`,
+  ] : [];
+
+  return [
+    `// SuperIcon · ${fill} · ${size}px · ${icon}`,
+    '',
+    'let container = UIView()',
+    `container.frame.size = CGSize(width: ${cToken}, height: ${cToken})`,
+    ...bgLines,
+    '',
+    'let iconView = UIImageView(image:',
+    `    UIImage(named: "${assetName}")?`,
+    '        .withRenderingMode(.alwaysTemplate)',
+    ')',
+    `iconView.tintColor = ${tintToken}`,
+    `iconView.frame = CGRect(`,
+    `    x: (${cToken} - ${iToken}) / 2,`,
+    `    y: (${cToken} - ${iToken}) / 2,`,
+    `    width: ${iToken}, height: ${iToken}`,
+    ')',
+    'container.addSubview(iconView)',
+  ].join('\n');
+}
+
+function buildSIAndroidSnippet(fill, { size, icon }) {
+  const cToken = `PTDimens.s${SI_CONTAINER_SCALE[size]}`;
+  const hasBg  = fill !== 'default';
+  const isCircle = fill.includes('circle');
+  const bgToken  = SI_BG_COMPOSE[fill];
+  const tintToken = SI_ICON_COMPOSE[fill];
+  const drawable  = 'pt_icon_' + icon.replace(/-/g, '_');
+  const shapePart = isCircle ? 'CircleShape' : `RoundedCornerShape(${SI_RADIUS_COMPOSE[size]})`;
+  const bgMod = hasBg
+    ? `\n        .background(\n            color = ${bgToken},\n            shape = ${shapePart}\n        )`
+    : '';
+
+  return [
+    `// SuperIcon · ${fill} · ${size}px · ${icon}`,
+    'val colors = MaterialTheme.ptColors',
+    '',
+    'Box(',
+    '    contentAlignment = Alignment.Center,',
+    '    modifier = Modifier',
+    `        .size(${cToken})${bgMod}`,
+    ') {',
+    '    Icon(',
+    `        painter = painterResource(R.drawable.${drawable}),`,
+    '        contentDescription = null,',
+    `        tint = ${tintToken},`,
+    `        modifier = Modifier.size(${parseInt(size)}.dp)`,
+    '    )',
+    '}',
+  ].join('\n');
+}
+
+// ── Build playground ──
+
+function updateSIPreviews() {
+  document.querySelectorAll('.si-row-wrap[data-fill]').forEach(wrap => {
+    const fill = wrap.dataset.fill;
+    const preview = wrap.querySelector('.btn-row-preview');
+    preview.innerHTML = '';
+    preview.appendChild(buildSuperIconEl(fill, siState));
+  });
+}
+
+function buildSuperIconPlayground() {
+  const container = document.getElementById('superIconPlayground');
+  if (!container) return;
+
+  // ── Size control ──
+  const ctrlsEl = document.createElement('div');
+  ctrlsEl.className = 'btn-controls';
+
+  const sizeRow = document.createElement('div');
+  sizeRow.className = 'btn-ctrl-row';
+  const sizeLbl = document.createElement('span');
+  sizeLbl.className = 'btn-ctrl-label';
+  sizeLbl.textContent = 'Size';
+  sizeRow.appendChild(sizeLbl);
+
+  ['12', '16', '20', '24', '32'].forEach(sz => {
+    const btn = document.createElement('button');
+    btn.className   = 'btn-ctrl' + (sz === siState.size ? ' active' : '');
+    btn.textContent = sz + 'px';
+    btn.addEventListener('click', () => {
+      sizeRow.querySelectorAll('.btn-ctrl').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      siState.size = sz;
+      updateSIPreviews();
+      siSnippetUpdaters.forEach(fn => fn());
+    });
+    sizeRow.appendChild(btn);
+  });
+
+  ctrlsEl.appendChild(sizeRow);
+  container.appendChild(ctrlsEl);
+
+  // ── Icon picker (always visible — library swap) ──
+  const pickerWrap = document.createElement('div');
+  pickerWrap.className = 'si-icon-picker';
+
+  const pickerHeader = document.createElement('div');
+  pickerHeader.className = 'si-icon-picker-header';
+
+  const pickerLbl = document.createElement('span');
+  pickerLbl.className = 'btn-ctrl-label';
+  pickerLbl.style.minWidth = 'auto';
+  pickerLbl.textContent = 'Icon';
+
+  const iconSearch = document.createElement('input');
+  iconSearch.type        = 'search';
+  iconSearch.placeholder = 'Search to swap icon…';
+  iconSearch.className   = 'si-icon-search';
+
+  const selectedNameEl = document.createElement('span');
+  selectedNameEl.className   = 'si-selected-name';
+  selectedNameEl.textContent = siState.icon;
+
+  pickerHeader.append(pickerLbl, iconSearch, selectedNameEl);
+
+  const iconGrid = document.createElement('div');
+  iconGrid.className = 'si-icon-grid';
+
+  pickerWrap.append(pickerHeader, iconGrid);
+  container.appendChild(pickerWrap);
+
+  // Render icon grid (initial: first 120 icons; filtered: all matches)
+  let siQuery = '';
+
+  function renderSIGrid() {
+    iconGrid.innerHTML = '';
+    const allNames = Object.keys(iconNodes);
+    const filtered = siQuery
+      ? allNames.filter(n => n.includes(siQuery) || (iconMeta[n]?.tags || []).some(t => String(t).includes(siQuery)))
+      : allNames.slice(0, 120);
+
+    if (!filtered.length) {
+      const msg = document.createElement('p');
+      msg.className   = 'si-no-results';
+      msg.textContent = 'No icons match.';
+      iconGrid.appendChild(msg);
+      return;
+    }
+
+    filtered.forEach(name => {
+      const tile = document.createElement('div');
+      tile.className = 'si-icon-tile' + (name === siState.icon ? ' selected' : '');
+      tile.title     = name;
+      tile.innerHTML = buildIconSvg(name, 20) + `<span class="si-icon-tile-name">${name}</span>`;
+      tile.addEventListener('click', () => {
+        iconGrid.querySelectorAll('.si-icon-tile').forEach(t => t.classList.remove('selected'));
+        tile.classList.add('selected');
+        siState.icon = name;
+        selectedNameEl.textContent = name;
+        updateSIPreviews();
+        siSnippetUpdaters.forEach(fn => fn());
+      });
+      iconGrid.appendChild(tile);
+    });
+  }
+
+  iconSearch.addEventListener('input', () => {
+    siQuery = iconSearch.value.trim().toLowerCase();
+    renderSIGrid();
+  });
+
+  renderSIGrid();
+
+  // ── Preview rows — one per fill variant ──
+  const rowsEl = document.createElement('div');
+  rowsEl.className = 'btn-rows';
+
+  SI_FILLS.forEach(({ val, label }) => {
+    const rowWrap = document.createElement('div');
+    rowWrap.className = 'btn-row-wrap si-row-wrap';
+    rowWrap.dataset.fill = val;
+
+    const row = document.createElement('div');
+    row.className = 'btn-row';
+
+    const meta = document.createElement('div');
+    meta.className = 'btn-row-meta';
+    meta.innerHTML = `<div class="btn-row-label">${label}</div>`;
+
+    const preview = document.createElement('div');
+    preview.className = 'btn-row-preview';
+    preview.appendChild(buildSuperIconEl(val, siState));
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'snippet-toggle';
+    toggleBtn.textContent = '▸ {}';
+
+    row.append(meta, preview, toggleBtn);
+
+    // Snippet panel
+    const panel = document.createElement('div');
+    panel.className = 'snippet-panel inline';
+    panel.innerHTML = `
+      <div class="snippet-tabs">
+        <button class="tab-btn active" data-tab="web">Web</button>
+        <button class="tab-btn" data-tab="ios">iOS</button>
+        <button class="tab-btn" data-tab="android">Android</button>
+      </div>
+      <div class="snippet-code-wrap">
+        <code class="snippet-text"></code>
+        <button class="copy-btn">Copy</button>
+      </div>
+    `;
+
+    const tabs    = panel.querySelectorAll('.tab-btn');
+    const codeEl  = panel.querySelector('.snippet-text');
+    const copyBtn = panel.querySelector('.copy-btn');
+    let activeTab = 'web';
+
+    const generators = {
+      web:     () => buildSIWebSnippet(val, siState),
+      ios:     () => buildSIIOSSnippet(val, siState),
+      android: () => buildSIAndroidSnippet(val, siState),
+    };
+
+    function refresh() { codeEl.textContent = generators[activeTab](); }
+    refresh();
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeTab = tab.dataset.tab;
+        refresh();
+      });
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(generators[activeTab]());
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+    });
+
+    panel._toggleBtn = toggleBtn;
+    toggleBtn.addEventListener('click', () => {
+      toggleBtn.classList.toggle('active', !panel.classList.contains('open'));
+      togglePanel(panel);
+    });
+
+    siSnippetUpdaters.push(refresh);
+    rowWrap.append(row, panel);
+    rowsEl.appendChild(rowWrap);
+  });
+
+  container.appendChild(rowsEl);
+}
+
+
 buildBtnPlayground();
 
 // ─── Filter Chip playground ───────────────────────────────────────────────────
@@ -2524,3 +2934,4 @@ function buildTagPlayground() {
 }
 
 buildTagPlayground();
+buildSuperIconPlayground();
