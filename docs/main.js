@@ -810,7 +810,8 @@ sectionIds.forEach(id => {
 // ─── Button playground ────────────────────────────────────────────────────────
 
 const ICON_SIZE = { sm: 16, md: 20, lg: 24 };
-const BTN_ICON_NAME = 'arrow-right';
+let btnIconName = 'arrow-right';        // updated when user picks an icon in the gallery
+let btnIconLinkEl = null;              // <code> element in the button controls status row
 
 const btnState = { size: 'md', state: 'default', icon: 'none' };
 
@@ -852,9 +853,9 @@ function buildBtnElement(type, { size, state, icon }) {
   const btn = document.createElement('button');
   btn.className = getBtnClasses(type, { size, state }).join(' ');
   if (state === 'disabled') btn.disabled = true;
-  if (icon === 'leading')  btn.insertAdjacentHTML('beforeend', buildIconSvg(BTN_ICON_NAME, ICON_SIZE[size]));
+  if (icon === 'leading')  btn.insertAdjacentHTML('beforeend', buildIconSvg(btnIconName, ICON_SIZE[size]));
   btn.insertAdjacentText('beforeend', 'Button');
-  if (icon === 'trailing') btn.insertAdjacentHTML('beforeend', buildIconSvg(BTN_ICON_NAME, ICON_SIZE[size]));
+  if (icon === 'trailing') btn.insertAdjacentHTML('beforeend', buildIconSvg(btnIconName, ICON_SIZE[size]));
   return btn;
 }
 
@@ -927,7 +928,7 @@ function buildBtnWebSnippet(type, { size, state, icon }) {
   const radius = BTN_RADIUS[size];
   const dis    = state === 'disabled' ? '\ncursor: not-allowed;' : '';
   const iconPx   = ICON_SIZE[size] || 20;
-  const iconNote = icon !== 'none' ? `\n/* tabler icon "${BTN_ICON_NAME}" (${iconPx}×${iconPx}px) — see Icons section */\n/* place ${icon === 'leading' ? 'before' : 'after'} label, stroke="currentColor" */` : '';
+  const iconNote = icon !== 'none' ? `\n/* tabler icon "${btnIconName}" (${iconPx}×${iconPx}px) — see Icons section */\n/* place ${icon === 'leading' ? 'before' : 'after'} label, stroke="currentColor" */` : '';
   return [
     `/* ${type[0].toUpperCase() + type.slice(1)} · ${state} · ${size} */`,
     `background: ${bg};`,
@@ -1091,6 +1092,16 @@ function buildBtnPlayground() {
   });
 
   container.appendChild(ctrlsEl);
+
+  // Icon-link status row
+  const btnIconLinkRow = document.createElement('div');
+  btnIconLinkRow.className = 'chip-icon-link';
+  btnIconLinkRow.innerHTML =
+    `<span class="chip-icon-link-label">Icon</span>` +
+    `<code class="chip-icon-link-name">arrow-right</code>` +
+    `<span class="chip-icon-link-hint">— pick any icon in the <a href="#icons" class="chip-icon-link-anchor">Icons ↑</a> section to swap</span>`;
+  btnIconLinkEl = btnIconLinkRow.querySelector('.chip-icon-link-name');
+  container.appendChild(btnIconLinkRow);
 
   // Preview rows (one per type — mirrors Typography rows)
   const rowsEl = document.createElement('div');
@@ -1367,6 +1378,46 @@ function buildIconGallery() {
         snippetWrap.style.display = 'block';
         refreshSnippet();
         snippetWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        // ── Push selection into the Button playground ────────────────
+        btnIconName = name;
+        if (btnIconLinkEl) {
+          btnIconLinkEl.textContent = name;
+          btnIconLinkEl.classList.add('chip-icon-link-name--updated');
+          setTimeout(() => btnIconLinkEl.classList.remove('chip-icon-link-name--updated'), 800);
+        }
+        updateBtnPreviews();
+        btnSnippetUpdaters.forEach(fn => fn());
+
+        // ── Push selection into the Filter Chip playground ──────────
+        chipIconName = name;
+        if (chipIconLinkEl) {
+          chipIconLinkEl.textContent = name;
+          chipIconLinkEl.classList.add('chip-icon-link-name--updated');
+          setTimeout(() => chipIconLinkEl.classList.remove('chip-icon-link-name--updated'), 800);
+        }
+        updateChipPreviews();
+        chipSnippetUpdaters.forEach(fn => fn());
+
+        // ── Push selection into the Eyebrow Highlight playground ─────
+        eyebrowIconName = name;
+        if (eyebrowIconLinkEl) {
+          eyebrowIconLinkEl.textContent = name;
+          eyebrowIconLinkEl.classList.add('chip-icon-link-name--updated');
+          setTimeout(() => eyebrowIconLinkEl.classList.remove('chip-icon-link-name--updated'), 800);
+        }
+        updateEyebrowPreviews();
+        eyebrowSnippetUpdaters.forEach(fn => fn());
+
+        // ── Push selection into the Tag playground ───────────────────
+        tagIconName = name;
+        if (tagIconLinkEl) {
+          tagIconLinkEl.textContent = name;
+          tagIconLinkEl.classList.add('chip-icon-link-name--updated');
+          setTimeout(() => tagIconLinkEl.classList.remove('chip-icon-link-name--updated'), 800);
+        }
+        updateTagPreviews();
+        tagSnippetUpdaters.forEach(fn => fn());
       });
 
       grid.appendChild(tile);
@@ -1382,3 +1433,1094 @@ function buildIconGallery() {
 buildIconGallery();
 
 buildBtnPlayground();
+
+// ─── Filter Chip playground ───────────────────────────────────────────────────
+
+let chipIconName = 'map-pin';           // updated when user picks an icon in the gallery
+let chipIconLinkEl = null;              // <code> element in the chip controls status row
+const CHIP_ICON_SIZE = { sm: 12, regular: 16, lg: 16 };
+
+const chipState = { size: 'regular', icon: true };
+
+const chipStates = [
+  { key: 'default',     label: 'Default'     },
+  { key: 'highlighted', label: 'Highlighted' },
+  { key: 'active',      label: 'Active'      },
+  { key: 'outline',     label: 'Outline'     },
+];
+
+const chipControls = [
+  { key: 'size', label: 'Size', opts: [
+    { val: 'sm',      label: 'Small'             },
+    { val: 'regular', label: 'Regular', active: true },
+    { val: 'lg',      label: 'Large'             },
+  ]},
+  { key: 'icon', label: 'Icon', opts: [
+    { val: true,  label: 'Show', active: true },
+    { val: false, label: 'Hide'               },
+  ]},
+];
+
+function buildChipElement(stateKey, { size, icon }) {
+  const chip = document.createElement('div');
+  chip.className = `pt-chip pt-chip-${size} pt-chip-${stateKey}`;
+  if (icon) chip.insertAdjacentHTML('beforeend', buildIconSvg(chipIconName, CHIP_ICON_SIZE[size]));
+  chip.insertAdjacentText('beforeend', 'Filter text');
+  return chip;
+}
+
+// ── Snippet token maps ────────────────────────────────────────────────────────
+
+const CHIP_BG = {
+  default:     'var(--pt-semantic-surface-card_primary)',
+  highlighted: 'var(--pt-semantic-surface-success)',
+  active:      'var(--pt-semantic-surface-action)',
+  outline:     'transparent',
+};
+const CHIP_COLOR = {
+  default:     'var(--pt-semantic-typography-body)',
+  highlighted: 'var(--pt-semantic-typography-success)',
+  active:      'var(--pt-semantic-typography-on_action)',
+  outline:     'var(--pt-semantic-typography-body)',
+};
+const CHIP_BORDER = {
+  default:     'var(--pt-semantic-border-card_primary)',
+  highlighted: 'var(--pt-semantic-border-action)',
+  active:      'var(--pt-semantic-border-action)',
+  outline:     'var(--pt-semantic-border-default)',
+};
+const CHIP_PADDING = {
+  sm:      ['var(--pt-scale-1)', 'var(--pt-scale-3)'],
+  regular: ['var(--pt-scale-2)', 'var(--pt-scale-4)'],
+  lg:      ['var(--pt-scale-2)', 'var(--pt-scale-4)'],
+};
+const CHIP_FONT = {
+  sm:      'var(--pt-typography-body-xs-font_size)',
+  regular: 'var(--pt-typography-body-sm-font_size)',
+  lg:      'var(--pt-typography-body-default-font_size)',
+};
+const CHIP_LINE_HEIGHT = {
+  sm:      'var(--pt-typography-body-xs-line_height)',
+  regular: 'var(--pt-typography-body-sm-line_height)',
+  lg:      'var(--pt-scale-6)',
+};
+const CHIP_RADIUS = {
+  sm:      'var(--pt-scale-2)',
+  regular: 'var(--pt-scale-4)',
+  lg:      'var(--pt-scale-4)',
+};
+
+const CHIP_BG_SWIFT = {
+  default:     'PT.Semantic.Surface.cardPrimary',
+  highlighted: 'PT.Semantic.Surface.success',
+  active:      'PT.Semantic.Surface.action',
+  outline:     '.clear',
+};
+const CHIP_COLOR_SWIFT = {
+  default:     'PT.Semantic.Typography.body',
+  highlighted: 'PT.Semantic.Typography.success',
+  active:      'PT.Semantic.Typography.onAction',
+  outline:     'PT.Semantic.Typography.body',
+};
+const CHIP_BORDER_SWIFT = {
+  default:     'PT.Semantic.Border.cardPrimary',
+  highlighted: 'PT.Semantic.Border.action',
+  active:      'PT.Semantic.Border.action',
+  outline:     'PT.Semantic.Border.default',
+};
+const CHIP_PADDING_SWIFT = {
+  sm:      ['PT.Scale.s1', 'PT.Scale.s3'],
+  regular: ['PT.Scale.s2', 'PT.Scale.s4'],
+  lg:      ['PT.Scale.s2', 'PT.Scale.s4'],
+};
+const CHIP_RADIUS_SWIFT = {
+  sm: 'PT.Scale.s2', regular: 'PT.Scale.s4', lg: 'PT.Scale.s4',
+};
+const CHIP_TEXT_STYLE_SWIFT = {
+  sm:      'PT.TextStyle.Small.bodyXsRegular',
+  regular: 'PT.TextStyle.Small.bodySmRegular',
+  lg:      'PT.TextStyle.Small.bodyDefaultRegular',
+};
+
+const CHIP_BG_COMPOSE = {
+  default:     'colors.surfaceCardPrimary',
+  highlighted: 'colors.surfaceSuccess',
+  active:      'colors.surfaceAction',
+  outline:     'Color.Transparent',
+};
+const CHIP_COLOR_COMPOSE = {
+  default:     'colors.typographyBody',
+  highlighted: 'colors.typographySuccess',
+  active:      'colors.typographyOnAction',
+  outline:     'colors.typographyBody',
+};
+const CHIP_BORDER_COMPOSE = {
+  default:     'colors.borderCardPrimary',
+  highlighted: 'colors.borderAction',
+  active:      'colors.borderAction',
+  outline:     'colors.borderDefault',
+};
+const CHIP_PADDING_COMPOSE = {
+  sm:      ['PTDimens.s1', 'PTDimens.s3'],
+  regular: ['PTDimens.s2', 'PTDimens.s4'],
+  lg:      ['PTDimens.s2', 'PTDimens.s4'],
+};
+const CHIP_RADIUS_COMPOSE = {
+  sm: 'PTDimens.s2', regular: 'PTDimens.s4', lg: 'PTDimens.s4',
+};
+const CHIP_TEXT_STYLE_COMPOSE = {
+  sm:      'PTTextStyles.smallBodyXsRegular',
+  regular: 'PTTextStyles.smallBodySmRegular',
+  lg:      'PTTextStyles.smallBodyDefaultRegular',
+};
+
+function buildChipWebSnippet(stateKey, { size, icon }) {
+  const iconPx   = CHIP_ICON_SIZE[size];
+  const iconNote = icon ? `\n/* leading icon: "${chipIconName}" (${iconPx}×${iconPx}px) — see Icons section */\n/* set stroke="currentColor" so it inherits color */` : '';
+  return [
+    `/* Filter Chip · ${stateKey} · ${size} */`,
+    `background: ${CHIP_BG[stateKey]};`,
+    `color: ${CHIP_COLOR[stateKey]};`,
+    `border: 1px solid ${CHIP_BORDER[stateKey]};`,
+    `padding: ${CHIP_PADDING[size][0]} ${CHIP_PADDING[size][1]};`,
+    `font-size: ${CHIP_FONT[size]};`,
+    `line-height: ${CHIP_LINE_HEIGHT[size]};`,
+    `border-radius: ${CHIP_RADIUS[size]};`,
+    `display: inline-flex; align-items: center; gap: var(--pt-scale-1);`,
+    iconNote,
+  ].filter(Boolean).join('\n');
+}
+
+function buildChipIOSSnippet(stateKey, { size, icon }) {
+  const bg     = CHIP_BG_SWIFT[stateKey];
+  const color  = CHIP_COLOR_SWIFT[stateKey];
+  const border = CHIP_BORDER_SWIFT[stateKey];
+  const [pv, ph] = CHIP_PADDING_SWIFT[size];
+  const radius = CHIP_RADIUS_SWIFT[size];
+  const textStyle = CHIP_TEXT_STYLE_SWIFT[size];
+  const borderLine = bg === '.clear' ? '' : `\nchip.layer.borderColor = ${border}.cgColor\nchip.layer.borderWidth = 1`;
+  const iconNote = icon ? `\n// Leading icon: UIImageView tintColor = ${color}` : '';
+  return [
+    `// Filter Chip · ${stateKey} · ${size}`,
+    `chip.backgroundColor = ${bg}`,
+    `chip.setTitleColor(${color}, for: .normal)`,
+    borderLine,
+    `chip.layer.cornerRadius = ${radius}`,
+    `chip.contentEdgeInsets = UIEdgeInsets(`,
+    `  top: ${pv}, left: ${ph},`,
+    `  bottom: ${pv}, right: ${ph}`,
+    `)`,
+    `chip.titleLabel?.font = ${textStyle}.uiFont`,
+    iconNote,
+  ].filter(Boolean).join('\n');
+}
+
+function buildChipAndroidSnippet(stateKey, { size, icon }) {
+  const bg     = CHIP_BG_COMPOSE[stateKey];
+  const color  = CHIP_COLOR_COMPOSE[stateKey];
+  const border = CHIP_BORDER_COMPOSE[stateKey];
+  const [pv, ph] = CHIP_PADDING_COMPOSE[size];
+  const radius = CHIP_RADIUS_COMPOSE[size];
+  const textStyle = CHIP_TEXT_STYLE_COMPOSE[size];
+  const selected = stateKey === 'active' ? 'true' : 'false';
+  const borderLine = bg === 'Color.Transparent'
+    ? ''
+    : `\n  border = FilterChipDefaults.filterChipBorder(\n    borderColor = ${border}\n  ),`;
+  const iconNote = icon
+    ? `\n  leadingIcon = {\n    Icon(painterResource(R.drawable.pt_icon_map_pin),\n      tint = ${color}, contentDescription = null)\n  },`
+    : '';
+  return [
+    `// Filter Chip · ${stateKey} · ${size}`,
+    `val colors = MaterialTheme.ptColors`,
+    `FilterChip(`,
+    `  selected = ${selected},`,
+    `  colors = FilterChipDefaults.filterChipColors(`,
+    `    containerColor = ${bg},`,
+    `    labelColor = ${color},`,
+    `    selectedContainerColor = ${bg},`,
+    `    selectedLabelColor = ${color},`,
+    `  ),`,
+    borderLine,
+    `  shape = RoundedCornerShape(${radius}),`,
+    `  label = { Text("Filter text", style = ${textStyle}) },`,
+    iconNote,
+    `) {}`,
+  ].filter(Boolean).join('\n');
+}
+
+// ── Playground ────────────────────────────────────────────────────────────────
+
+const chipSnippetUpdaters = [];
+
+function buildChipSnippetPanel(stateKey) {
+  const panel = document.createElement('div');
+  panel.className = 'snippet-panel inline';
+  panel.innerHTML = `
+    <div class="snippet-tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn" data-tab="ios">iOS</button>
+      <button class="tab-btn" data-tab="android">Android</button>
+    </div>
+    <div class="snippet-code-wrap">
+      <code class="snippet-text"></code>
+      <button class="copy-btn">Copy</button>
+    </div>
+  `;
+
+  const tabs    = panel.querySelectorAll('.tab-btn');
+  const codeEl  = panel.querySelector('.snippet-text');
+  const copyBtn = panel.querySelector('.copy-btn');
+  let activeTab = 'web';
+
+  const generators = {
+    web:     () => buildChipWebSnippet(stateKey, chipState),
+    ios:     () => buildChipIOSSnippet(stateKey, chipState),
+    android: () => buildChipAndroidSnippet(stateKey, chipState),
+  };
+
+  function refresh() { codeEl.textContent = generators[activeTab](); }
+  refresh();
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      refresh();
+    });
+  });
+
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(generators[activeTab]());
+    copyBtn.textContent = 'Copied!';
+    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+  });
+
+  chipSnippetUpdaters.push(refresh);
+  return panel;
+}
+
+function updateChipPreviews() {
+  document.querySelectorAll('.chip-row-wrap').forEach(wrap => {
+    const preview = wrap.querySelector('.btn-row-preview');
+    preview.innerHTML = '';
+    preview.appendChild(buildChipElement(wrap.dataset.state, chipState));
+  });
+}
+
+function buildChipPlayground() {
+  const container = document.getElementById('chipPlayground');
+  if (!container) return;
+
+  // Controls — reuse btn-controls / btn-ctrl-row styles
+  const ctrlsEl = document.createElement('div');
+  ctrlsEl.className = 'btn-controls';
+
+  chipControls.forEach(({ key, label, opts }) => {
+    const row = document.createElement('div');
+    row.className = 'btn-ctrl-row';
+
+    const lbl = document.createElement('span');
+    lbl.className   = 'btn-ctrl-label';
+    lbl.textContent = label;
+    row.appendChild(lbl);
+
+    opts.forEach(({ val, label: optLabel, active }) => {
+      const btn = document.createElement('button');
+      btn.className   = 'btn-ctrl' + (active ? ' active' : '');
+      btn.textContent = optLabel;
+      btn.addEventListener('click', () => {
+        row.querySelectorAll('.btn-ctrl').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        chipState[key] = val;
+        updateChipPreviews();
+        chipSnippetUpdaters.forEach(fn => fn());
+      });
+      row.appendChild(btn);
+    });
+
+    ctrlsEl.appendChild(row);
+  });
+
+  container.appendChild(ctrlsEl);
+
+  // Icon-link status row — shows the currently active icon and links to the gallery
+  const iconLinkRow = document.createElement('div');
+  iconLinkRow.className = 'chip-icon-link';
+  iconLinkRow.innerHTML =
+    `<span class="chip-icon-link-label">Icon</span>` +
+    `<code class="chip-icon-link-name">map-pin</code>` +
+    `<span class="chip-icon-link-hint">— pick any icon in the <a href="#icons" class="chip-icon-link-anchor">Icons ↑</a> section to swap</span>`;
+  chipIconLinkEl = iconLinkRow.querySelector('.chip-icon-link-name');
+  container.appendChild(iconLinkRow);
+
+  // One row per state — reuses btn-row-wrap / btn-row styles
+  const rowsEl = document.createElement('div');
+  rowsEl.className = 'btn-rows';
+
+  chipStates.forEach(({ key, label }) => {
+    const rowWrap = document.createElement('div');
+    rowWrap.className    = 'btn-row-wrap chip-row-wrap';
+    rowWrap.dataset.state = key;
+
+    const row = document.createElement('div');
+    row.className = 'btn-row';
+
+    const meta = document.createElement('div');
+    meta.className = 'btn-row-meta';
+    meta.innerHTML = `<div class="btn-row-label">${label}</div>`;
+
+    const preview = document.createElement('div');
+    preview.className = 'btn-row-preview';
+    preview.appendChild(buildChipElement(key, chipState));
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className   = 'snippet-toggle';
+    toggleBtn.textContent = '▸ {}';
+
+    row.append(meta, preview, toggleBtn);
+
+    const panel = buildChipSnippetPanel(key);
+    panel._toggleBtn = toggleBtn;
+
+    toggleBtn.addEventListener('click', () => {
+      toggleBtn.classList.toggle('active', !panel.classList.contains('open'));
+      togglePanel(panel);
+    });
+
+    rowWrap.append(row, panel);
+    rowsEl.appendChild(rowWrap);
+  });
+
+  container.appendChild(rowsEl);
+}
+
+buildChipPlayground();
+
+// ─── Eyebrow Highlight playground ────────────────────────────────────────────
+
+let eyebrowIconName = 'map-pin';       // updated when user picks an icon in the gallery
+let eyebrowIconLinkEl = null;
+
+const EYEBROW_STATES = [
+  { key: 'positive',    label: 'Positive'    },
+  { key: 'information', label: 'Information' },
+  { key: 'warning',     label: 'Warning'     },
+  { key: 'error',       label: 'Error'       },
+  { key: 'neutral',     label: 'Neutral'     },
+];
+
+const eyebrowPlaygroundState = { type: 'light', icon: true };
+
+const eyebrowControls = [
+  { key: 'type', label: 'Type', opts: [
+    { val: 'light', label: 'Light', active: true },
+    { val: 'dark',  label: 'Dark'                },
+  ]},
+  { key: 'icon', label: 'Icon', opts: [
+    { val: true,  label: 'Show', active: true },
+    { val: false, label: 'Hide'               },
+  ]},
+];
+
+function buildEyebrowElement(stateKey, { type, icon }) {
+  const el = document.createElement('div');
+  el.className = `pt-eyebrow pt-eyebrow-${stateKey}-${type}`;
+  if (icon) el.insertAdjacentHTML('beforeend', buildIconSvg(eyebrowIconName, 12));
+  el.insertAdjacentText('beforeend', 'Important');
+  return el;
+}
+
+// ── Snippet token maps ────────────────────────────────────────────────────────
+
+const EYEBROW_BG = {
+  'positive-light':    'var(--pt-semantic-surface-success)',
+  'information-light': 'var(--pt-semantic-surface-information)',
+  'warning-light':     'var(--pt-semantic-surface-warning)',
+  'error-light':       'var(--pt-semantic-surface-error)',
+  'neutral-light':     'transparent',
+  'positive-dark':     'var(--pt-semantic-surface-action)',
+  'information-dark':  'var(--pt-semantic-surface-information_core)',
+  'warning-dark':      'var(--pt-semantic-surface-warning_core)',
+  'error-dark':        'var(--pt-semantic-surface-negative)',
+  'neutral-dark':      'var(--pt-semantic-surface-disabled)',
+};
+const EYEBROW_BORDER = {
+  'positive-light':    'var(--pt-semantic-border-success)',
+  'information-light': 'var(--pt-semantic-border-information)',
+  'warning-light':     'var(--pt-semantic-border-warning)',
+  'error-light':       'var(--pt-semantic-border-error)',
+  'neutral-light':     'var(--pt-semantic-border-divider)',
+  'positive-dark':     null,
+  'information-dark':  null,
+  'warning-dark':      null,
+  'error-dark':        null,
+  'neutral-dark':      null,
+};
+const EYEBROW_COLOR = {
+  'positive-light':    'var(--pt-semantic-typography-success)',
+  'information-light': 'var(--pt-semantic-typography-information)',
+  'warning-light':     'var(--pt-semantic-typography-warning)',
+  'error-light':       'var(--pt-semantic-typography-error)',
+  'neutral-light':     'var(--pt-semantic-typography-body_secondary)',
+  'positive-dark':     'var(--pt-semantic-typography-on_action)',
+  'information-dark':  'var(--pt-semantic-typography-on_action)',
+  'warning-dark':      'var(--pt-semantic-typography-warning)',
+  'error-dark':        'var(--pt-semantic-typography-on_action)',
+  'neutral-dark':      'var(--pt-semantic-typography-on_action)',
+};
+
+const EYEBROW_BG_SWIFT = {
+  'positive-light':    'PT.Semantic.Surface.success',
+  'information-light': 'PT.Semantic.Surface.information',
+  'warning-light':     'PT.Semantic.Surface.warning',
+  'error-light':       'PT.Semantic.Surface.error',
+  'neutral-light':     '.clear',
+  'positive-dark':     'PT.Semantic.Surface.action',
+  'information-dark':  'PT.Semantic.Surface.informationCore',
+  'warning-dark':      'PT.Semantic.Surface.warningCore',
+  'error-dark':        'PT.Semantic.Surface.negative',
+  'neutral-dark':      'PT.Semantic.Surface.disabled',
+};
+const EYEBROW_BORDER_SWIFT = {
+  'positive-light':    'PT.Semantic.Border.success',
+  'information-light': 'PT.Semantic.Border.information',
+  'warning-light':     'PT.Semantic.Border.warning',
+  'error-light':       'PT.Semantic.Border.error',
+  'neutral-light':     'PT.Semantic.Border.divider',
+  'positive-dark':     null,
+  'information-dark':  null,
+  'warning-dark':      null,
+  'error-dark':        null,
+  'neutral-dark':      null,
+};
+const EYEBROW_COLOR_SWIFT = {
+  'positive-light':    'PT.Semantic.Typography.success',
+  'information-light': 'PT.Semantic.Typography.information',
+  'warning-light':     'PT.Semantic.Typography.warning',
+  'error-light':       'PT.Semantic.Typography.error',
+  'neutral-light':     'PT.Semantic.Typography.bodySecondary',
+  'positive-dark':     'PT.Semantic.Typography.onAction',
+  'information-dark':  'PT.Semantic.Typography.onAction',
+  'warning-dark':      'PT.Semantic.Typography.warning',
+  'error-dark':        'PT.Semantic.Typography.onAction',
+  'neutral-dark':      'PT.Semantic.Typography.onAction',
+};
+
+const EYEBROW_BG_COMPOSE = {
+  'positive-light':    'colors.surfaceSuccess',
+  'information-light': 'colors.surfaceInformation',
+  'warning-light':     'colors.surfaceWarning',
+  'error-light':       'colors.surfaceError',
+  'neutral-light':     'Color.Transparent',
+  'positive-dark':     'colors.surfaceAction',
+  'information-dark':  'colors.surfaceInformationCore',
+  'warning-dark':      'colors.surfaceWarningCore',
+  'error-dark':        'colors.surfaceNegative',
+  'neutral-dark':      'colors.surfaceDisabled',
+};
+const EYEBROW_BORDER_COMPOSE = {
+  'positive-light':    'colors.borderSuccess',
+  'information-light': 'colors.borderInformation',
+  'warning-light':     'colors.borderWarning',
+  'error-light':       'colors.borderError',
+  'neutral-light':     'colors.borderDivider',
+  'positive-dark':     null,
+  'information-dark':  null,
+  'warning-dark':      null,
+  'error-dark':        null,
+  'neutral-dark':      null,
+};
+const EYEBROW_COLOR_COMPOSE = {
+  'positive-light':    'colors.typographySuccess',
+  'information-light': 'colors.typographyInformation',
+  'warning-light':     'colors.typographyWarning',
+  'error-light':       'colors.typographyError',
+  'neutral-light':     'colors.typographyBodySecondary',
+  'positive-dark':     'colors.typographyOnAction',
+  'information-dark':  'colors.typographyOnAction',
+  'warning-dark':      'colors.typographyWarning',
+  'error-dark':        'colors.typographyOnAction',
+  'neutral-dark':      'colors.typographyOnAction',
+};
+
+function buildEyebrowWebSnippet(stateKey, { type, icon }) {
+  const key    = `${stateKey}-${type}`;
+  const bg     = EYEBROW_BG[key];
+  const border = EYEBROW_BORDER[key];
+  const color  = EYEBROW_COLOR[key];
+  const borderLine = border ? `border: 1px solid ${border};` : `border: none;`;
+  const iconNote = icon ? `\n/* leading icon: "${eyebrowIconName}" (12×12px) — see Icons section */\n/* set stroke="currentColor" so it inherits color */` : '';
+  return [
+    `/* Eyebrow Highlight · ${stateKey} · ${type} */`,
+    `background: ${bg};`,
+    borderLine,
+    `color: ${color};`,
+    `padding: var(--pt-scale-half) var(--pt-scale-1);`,
+    `font-size: var(--pt-typography-body-xs-font_size);`,
+    `line-height: var(--pt-typography-body-xs-line_height);`,
+    `border-radius: var(--pt-scale-1);`,
+    `display: inline-flex; align-items: center; gap: var(--pt-scale-1);`,
+    iconNote,
+  ].filter(Boolean).join('\n');
+}
+
+function buildEyebrowIOSSnippet(stateKey, { type, icon }) {
+  const key    = `${stateKey}-${type}`;
+  const bg     = EYEBROW_BG_SWIFT[key];
+  const border = EYEBROW_BORDER_SWIFT[key];
+  const color  = EYEBROW_COLOR_SWIFT[key];
+  const borderLine = border
+    ? `\nview.layer.borderColor = ${border}.cgColor\nview.layer.borderWidth = 1`
+    : '';
+  const iconNote = icon ? `\n// Leading icon: UIImageView tintColor = ${color}` : '';
+  return [
+    `// Eyebrow Highlight · ${stateKey} · ${type}`,
+    `view.backgroundColor = ${bg}`,
+    borderLine,
+    `label.textColor = ${color}`,
+    `label.font = PT.TextStyle.Small.bodyXsRegular.uiFont`,
+    `view.layer.cornerRadius = PT.Scale.s1`,
+    `// padding: PT.Scale.shalf (v) × PT.Scale.s1 (h)`,
+    iconNote,
+  ].filter(Boolean).join('\n');
+}
+
+function buildEyebrowAndroidSnippet(stateKey, { type, icon }) {
+  const key    = `${stateKey}-${type}`;
+  const bg     = EYEBROW_BG_COMPOSE[key];
+  const border = EYEBROW_BORDER_COMPOSE[key];
+  const color  = EYEBROW_COLOR_COMPOSE[key];
+  const borderLine = border
+    ? `  .border(1.dp, ${border}, RoundedCornerShape(PTDimens.s1))`
+    : '';
+  const iconNote = icon
+    ? `  Icon(painterResource(R.drawable.pt_icon_${eyebrowIconName.replace(/-/g, '_')}),\n    tint = ${color}, contentDescription = null, modifier = Modifier.size(12.dp))`
+    : '';
+  return [
+    `// Eyebrow Highlight · ${stateKey} · ${type}`,
+    `val colors = MaterialTheme.ptColors`,
+    `Row(`,
+    `  modifier = Modifier`,
+    `    .background(${bg}, RoundedCornerShape(PTDimens.s1))`,
+    borderLine,
+    `    .padding(vertical = PTDimens.shalf, horizontal = PTDimens.s1),`,
+    `  horizontalArrangement = Arrangement.spacedBy(PTDimens.s1),`,
+    `  verticalAlignment = Alignment.CenterVertically`,
+    `) {`,
+    iconNote,
+    `  Text("Important", style = PTTextStyles.smallBodyXsRegular, color = ${color})`,
+    `}`,
+  ].filter(Boolean).join('\n');
+}
+
+// ── Playground ────────────────────────────────────────────────────────────────
+
+const eyebrowSnippetUpdaters = [];
+
+function buildEyebrowSnippetPanel(stateKey) {
+  const panel = document.createElement('div');
+  panel.className = 'snippet-panel inline';
+  panel.innerHTML = `
+    <div class="snippet-tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn" data-tab="ios">iOS</button>
+      <button class="tab-btn" data-tab="android">Android</button>
+    </div>
+    <div class="snippet-code-wrap">
+      <code class="snippet-text"></code>
+      <button class="copy-btn">Copy</button>
+    </div>
+  `;
+  const tabs    = panel.querySelectorAll('.tab-btn');
+  const codeEl  = panel.querySelector('.snippet-text');
+  const copyBtn = panel.querySelector('.copy-btn');
+  let activeTab = 'web';
+
+  const generators = {
+    web:     () => buildEyebrowWebSnippet(stateKey, eyebrowPlaygroundState),
+    ios:     () => buildEyebrowIOSSnippet(stateKey, eyebrowPlaygroundState),
+    android: () => buildEyebrowAndroidSnippet(stateKey, eyebrowPlaygroundState),
+  };
+
+  function refresh() { codeEl.textContent = generators[activeTab](); }
+  refresh();
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      refresh();
+    });
+  });
+
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(generators[activeTab]());
+    copyBtn.textContent = 'Copied!';
+    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+  });
+
+  eyebrowSnippetUpdaters.push(refresh);
+  return panel;
+}
+
+function updateEyebrowPreviews() {
+  document.querySelectorAll('.eyebrow-row-wrap').forEach(wrap => {
+    const preview = wrap.querySelector('.btn-row-preview');
+    preview.innerHTML = '';
+    preview.appendChild(buildEyebrowElement(wrap.dataset.state, eyebrowPlaygroundState));
+  });
+}
+
+function buildEyebrowPlayground() {
+  const container = document.getElementById('eyebrowPlayground');
+  if (!container) return;
+
+  // Controls
+  const ctrlsEl = document.createElement('div');
+  ctrlsEl.className = 'btn-controls';
+
+  eyebrowControls.forEach(({ key, label, opts }) => {
+    const row = document.createElement('div');
+    row.className = 'btn-ctrl-row';
+    const lbl = document.createElement('span');
+    lbl.className   = 'btn-ctrl-label';
+    lbl.textContent = label;
+    row.appendChild(lbl);
+
+    opts.forEach(({ val, label: optLabel, active }) => {
+      const btn = document.createElement('button');
+      btn.className   = 'btn-ctrl' + (active ? ' active' : '');
+      btn.textContent = optLabel;
+      btn.addEventListener('click', () => {
+        row.querySelectorAll('.btn-ctrl').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        eyebrowPlaygroundState[key] = val;
+        updateEyebrowPreviews();
+        eyebrowSnippetUpdaters.forEach(fn => fn());
+      });
+      row.appendChild(btn);
+    });
+
+    ctrlsEl.appendChild(row);
+  });
+
+  container.appendChild(ctrlsEl);
+
+  // Icon-link status row
+  const iconLinkRow = document.createElement('div');
+  iconLinkRow.className = 'chip-icon-link';
+  iconLinkRow.innerHTML =
+    `<span class="chip-icon-link-label">Icon</span>` +
+    `<code class="chip-icon-link-name">map-pin</code>` +
+    `<span class="chip-icon-link-hint">— pick any icon in the <a href="#icons" class="chip-icon-link-anchor">Icons ↑</a> section to swap</span>`;
+  eyebrowIconLinkEl = iconLinkRow.querySelector('.chip-icon-link-name');
+  container.appendChild(iconLinkRow);
+
+  // One row per semantic state
+  const rowsEl = document.createElement('div');
+  rowsEl.className = 'btn-rows';
+
+  EYEBROW_STATES.forEach(({ key, label }) => {
+    const rowWrap = document.createElement('div');
+    rowWrap.className     = 'btn-row-wrap eyebrow-row-wrap';
+    rowWrap.dataset.state = key;
+
+    const row = document.createElement('div');
+    row.className = 'btn-row';
+
+    const meta = document.createElement('div');
+    meta.className = 'btn-row-meta';
+    meta.innerHTML = `<div class="btn-row-label">${label}</div>`;
+
+    const preview = document.createElement('div');
+    preview.className = 'btn-row-preview';
+    preview.appendChild(buildEyebrowElement(key, eyebrowPlaygroundState));
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className   = 'snippet-toggle';
+    toggleBtn.textContent = '▸ {}';
+
+    row.append(meta, preview, toggleBtn);
+
+    const panel = buildEyebrowSnippetPanel(key);
+    panel._toggleBtn = toggleBtn;
+
+    toggleBtn.addEventListener('click', () => {
+      toggleBtn.classList.toggle('active', !panel.classList.contains('open'));
+      togglePanel(panel);
+    });
+
+    rowWrap.append(row, panel);
+    rowsEl.appendChild(rowWrap);
+  });
+
+  container.appendChild(rowsEl);
+}
+
+buildEyebrowPlayground();
+
+// ─── Tag playground ───────────────────────────────────────────────────────────
+
+let tagIconName = 'tag';               // updated when user picks an icon in the gallery
+let tagIconLinkEl = null;
+
+const TAG_STATES = [
+  { key: 'positive',    label: 'Positive'    },
+  { key: 'information', label: 'Information' },
+  { key: 'warning',     label: 'Warning'     },
+  { key: 'error',       label: 'Error'       },
+  { key: 'neutral',     label: 'Neutral'     },
+];
+
+const tagPlaygroundState = { type: 'light', icon: false };
+
+const tagControls = [
+  { key: 'type', label: 'Type', opts: [
+    { val: 'light', label: 'Light', active: true },
+    { val: 'dark',  label: 'Dark'                },
+  ]},
+  { key: 'icon', label: 'Icon', opts: [
+    { val: false, label: 'None', active: true },
+    { val: true,  label: 'Show'               },
+  ]},
+];
+
+function buildTagElement(stateKey, { type, icon }) {
+  const el = document.createElement('div');
+  el.className = `pt-tag pt-tag-${stateKey}-${type}`;
+  if (icon) el.insertAdjacentHTML('beforeend', buildIconSvg(tagIconName, 16));
+  el.insertAdjacentText('beforeend', 'Important');
+  return el;
+}
+
+// ── Snippet token maps ────────────────────────────────────────────────────────
+
+const TAG_BG = {
+  'positive-light':    'var(--pt-semantic-surface-success)',
+  'information-light': 'var(--pt-semantic-surface-information)',
+  'warning-light':     'var(--pt-semantic-surface-warning)',
+  'error-light':       'var(--pt-semantic-surface-error)',
+  'neutral-light':     'transparent',
+  'positive-dark':     'var(--pt-semantic-surface-action)',
+  'information-dark':  'var(--pt-semantic-surface-information_core)',
+  'warning-dark':      'var(--pt-semantic-surface-warning_core)',
+  'error-dark':        'var(--pt-semantic-surface-negative)',
+  'neutral-dark':      'var(--pt-semantic-surface-disabled)',
+};
+const TAG_BORDER = {
+  'positive-light':    'var(--pt-semantic-border-success)',
+  'information-light': 'var(--pt-semantic-border-information)',
+  'warning-light':     'var(--pt-semantic-border-warning)',
+  'error-light':       'var(--pt-semantic-border-error)',
+  'neutral-light':     'var(--pt-semantic-border-divider)',
+  'positive-dark':     null,
+  'information-dark':  null,
+  'warning-dark':      null,
+  'error-dark':        null,
+  'neutral-dark':      null,
+};
+const TAG_COLOR = {
+  'positive-light':    'var(--pt-semantic-typography-success)',
+  'information-light': 'var(--pt-semantic-typography-information)',
+  'warning-light':     'var(--pt-semantic-typography-warning)',
+  'error-light':       'var(--pt-semantic-typography-error)',
+  'neutral-light':     'var(--pt-semantic-typography-body_secondary)',
+  'positive-dark':     'var(--pt-semantic-typography-on_action)',
+  'information-dark':  'var(--pt-semantic-typography-on_action)',
+  'warning-dark':      'var(--pt-semantic-typography-warning)',
+  'error-dark':        'var(--pt-semantic-typography-on_action)',
+  'neutral-dark':      'var(--pt-semantic-typography-on_action)',
+};
+
+const TAG_BG_SWIFT = {
+  'positive-light':    'PT.Semantic.Surface.success',
+  'information-light': 'PT.Semantic.Surface.information',
+  'warning-light':     'PT.Semantic.Surface.warning',
+  'error-light':       'PT.Semantic.Surface.error',
+  'neutral-light':     '.clear',
+  'positive-dark':     'PT.Semantic.Surface.action',
+  'information-dark':  'PT.Semantic.Surface.informationCore',
+  'warning-dark':      'PT.Semantic.Surface.warningCore',
+  'error-dark':        'PT.Semantic.Surface.negative',
+  'neutral-dark':      'PT.Semantic.Surface.disabled',
+};
+const TAG_BORDER_SWIFT = {
+  'positive-light':    'PT.Semantic.Border.success',
+  'information-light': 'PT.Semantic.Border.information',
+  'warning-light':     'PT.Semantic.Border.warning',
+  'error-light':       'PT.Semantic.Border.error',
+  'neutral-light':     'PT.Semantic.Border.divider',
+  'positive-dark':     null,
+  'information-dark':  null,
+  'warning-dark':      null,
+  'error-dark':        null,
+  'neutral-dark':      null,
+};
+const TAG_COLOR_SWIFT = {
+  'positive-light':    'PT.Semantic.Typography.success',
+  'information-light': 'PT.Semantic.Typography.information',
+  'warning-light':     'PT.Semantic.Typography.warning',
+  'error-light':       'PT.Semantic.Typography.error',
+  'neutral-light':     'PT.Semantic.Typography.bodySecondary',
+  'positive-dark':     'PT.Semantic.Typography.onAction',
+  'information-dark':  'PT.Semantic.Typography.onAction',
+  'warning-dark':      'PT.Semantic.Typography.warning',
+  'error-dark':        'PT.Semantic.Typography.onAction',
+  'neutral-dark':      'PT.Semantic.Typography.onAction',
+};
+
+const TAG_BG_COMPOSE = {
+  'positive-light':    'colors.surfaceSuccess',
+  'information-light': 'colors.surfaceInformation',
+  'warning-light':     'colors.surfaceWarning',
+  'error-light':       'colors.surfaceError',
+  'neutral-light':     'Color.Transparent',
+  'positive-dark':     'colors.surfaceAction',
+  'information-dark':  'colors.surfaceInformationCore',
+  'warning-dark':      'colors.surfaceWarningCore',
+  'error-dark':        'colors.surfaceNegative',
+  'neutral-dark':      'colors.surfaceDisabled',
+};
+const TAG_BORDER_COMPOSE = {
+  'positive-light':    'colors.borderSuccess',
+  'information-light': 'colors.borderInformation',
+  'warning-light':     'colors.borderWarning',
+  'error-light':       'colors.borderError',
+  'neutral-light':     'colors.borderDivider',
+  'positive-dark':     null,
+  'information-dark':  null,
+  'warning-dark':      null,
+  'error-dark':        null,
+  'neutral-dark':      null,
+};
+const TAG_COLOR_COMPOSE = {
+  'positive-light':    'colors.typographySuccess',
+  'information-light': 'colors.typographyInformation',
+  'warning-light':     'colors.typographyWarning',
+  'error-light':       'colors.typographyError',
+  'neutral-light':     'colors.typographyBodySecondary',
+  'positive-dark':     'colors.typographyOnAction',
+  'information-dark':  'colors.typographyOnAction',
+  'warning-dark':      'colors.typographyWarning',
+  'error-dark':        'colors.typographyOnAction',
+  'neutral-dark':      'colors.typographyOnAction',
+};
+
+function buildTagWebSnippet(stateKey, { type, icon }) {
+  const key    = `${stateKey}-${type}`;
+  const bg     = TAG_BG[key];
+  const border = TAG_BORDER[key];
+  const color  = TAG_COLOR[key];
+  const borderLine = border ? `border: 1px solid ${border};` : `border: none;`;
+  const iconNote = icon ? `\n/* optional leading icon: "${tagIconName}" (16×16px) — see Icons section */\n/* set stroke="currentColor" so it inherits color */` : '';
+  return [
+    `/* Tag · ${stateKey} · ${type} */`,
+    `background: ${bg};`,
+    borderLine,
+    `color: ${color};`,
+    `padding: var(--pt-scale-half) var(--pt-scale-3);`,
+    `font-size: var(--pt-typography-body-sm-font_size);`,
+    `line-height: var(--pt-typography-body-sm-line_height);`,
+    `border-radius: var(--pt-scale-1);`,
+    `display: inline-flex; align-items: center; gap: var(--pt-scale-1);`,
+    iconNote,
+  ].filter(Boolean).join('\n');
+}
+
+function buildTagIOSSnippet(stateKey, { type, icon }) {
+  const key    = `${stateKey}-${type}`;
+  const bg     = TAG_BG_SWIFT[key];
+  const border = TAG_BORDER_SWIFT[key];
+  const color  = TAG_COLOR_SWIFT[key];
+  const borderLine = border
+    ? `\nview.layer.borderColor = ${border}.cgColor\nview.layer.borderWidth = 1`
+    : '';
+  const iconNote = icon ? `\n// Optional leading icon: UIImageView tintColor = ${color}` : '';
+  return [
+    `// Tag · ${stateKey} · ${type}`,
+    `view.backgroundColor = ${bg}`,
+    borderLine,
+    `label.textColor = ${color}`,
+    `label.font = PT.TextStyle.Small.bodySmRegular.uiFont`,
+    `view.layer.cornerRadius = PT.Scale.s1`,
+    `// padding: PT.Scale.shalf (v) × PT.Scale.s3 (h)`,
+    iconNote,
+  ].filter(Boolean).join('\n');
+}
+
+function buildTagAndroidSnippet(stateKey, { type, icon }) {
+  const key    = `${stateKey}-${type}`;
+  const bg     = TAG_BG_COMPOSE[key];
+  const border = TAG_BORDER_COMPOSE[key];
+  const color  = TAG_COLOR_COMPOSE[key];
+  const borderLine = border
+    ? `  .border(1.dp, ${border}, RoundedCornerShape(PTDimens.s1))`
+    : '';
+  const iconNote = icon
+    ? `  Icon(painterResource(R.drawable.pt_icon_${tagIconName.replace(/-/g, '_')}),\n    tint = ${color}, contentDescription = null, modifier = Modifier.size(16.dp))`
+    : '';
+  return [
+    `// Tag · ${stateKey} · ${type}`,
+    `val colors = MaterialTheme.ptColors`,
+    `Row(`,
+    `  modifier = Modifier`,
+    `    .background(${bg}, RoundedCornerShape(PTDimens.s1))`,
+    borderLine,
+    `    .padding(vertical = PTDimens.shalf, horizontal = PTDimens.s3),`,
+    `  horizontalArrangement = Arrangement.spacedBy(PTDimens.s1),`,
+    `  verticalAlignment = Alignment.CenterVertically`,
+    `) {`,
+    iconNote,
+    `  Text("Important", style = PTTextStyles.smallBodySmRegular, color = ${color})`,
+    `}`,
+  ].filter(Boolean).join('\n');
+}
+
+// ── Playground ────────────────────────────────────────────────────────────────
+
+const tagSnippetUpdaters = [];
+
+function buildTagSnippetPanel(stateKey) {
+  const panel = document.createElement('div');
+  panel.className = 'snippet-panel inline';
+  panel.innerHTML = `
+    <div class="snippet-tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn" data-tab="ios">iOS</button>
+      <button class="tab-btn" data-tab="android">Android</button>
+    </div>
+    <div class="snippet-code-wrap">
+      <code class="snippet-text"></code>
+      <button class="copy-btn">Copy</button>
+    </div>
+  `;
+  const tabs    = panel.querySelectorAll('.tab-btn');
+  const codeEl  = panel.querySelector('.snippet-text');
+  const copyBtn = panel.querySelector('.copy-btn');
+  let activeTab = 'web';
+
+  const generators = {
+    web:     () => buildTagWebSnippet(stateKey, tagPlaygroundState),
+    ios:     () => buildTagIOSSnippet(stateKey, tagPlaygroundState),
+    android: () => buildTagAndroidSnippet(stateKey, tagPlaygroundState),
+  };
+
+  function refresh() { codeEl.textContent = generators[activeTab](); }
+  refresh();
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      refresh();
+    });
+  });
+
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(generators[activeTab]());
+    copyBtn.textContent = 'Copied!';
+    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+  });
+
+  tagSnippetUpdaters.push(refresh);
+  return panel;
+}
+
+function updateTagPreviews() {
+  document.querySelectorAll('.tag-row-wrap').forEach(wrap => {
+    const preview = wrap.querySelector('.btn-row-preview');
+    preview.innerHTML = '';
+    preview.appendChild(buildTagElement(wrap.dataset.state, tagPlaygroundState));
+  });
+}
+
+function buildTagPlayground() {
+  const container = document.getElementById('tagPlayground');
+  if (!container) return;
+
+  // Controls
+  const ctrlsEl = document.createElement('div');
+  ctrlsEl.className = 'btn-controls';
+
+  tagControls.forEach(({ key, label, opts }) => {
+    const row = document.createElement('div');
+    row.className = 'btn-ctrl-row';
+    const lbl = document.createElement('span');
+    lbl.className   = 'btn-ctrl-label';
+    lbl.textContent = label;
+    row.appendChild(lbl);
+
+    opts.forEach(({ val, label: optLabel, active }) => {
+      const btn = document.createElement('button');
+      btn.className   = 'btn-ctrl' + (active ? ' active' : '');
+      btn.textContent = optLabel;
+      btn.addEventListener('click', () => {
+        row.querySelectorAll('.btn-ctrl').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        tagPlaygroundState[key] = val;
+        updateTagPreviews();
+        tagSnippetUpdaters.forEach(fn => fn());
+      });
+      row.appendChild(btn);
+    });
+
+    ctrlsEl.appendChild(row);
+  });
+
+  container.appendChild(ctrlsEl);
+
+  // Icon-link status row
+  const iconLinkRow = document.createElement('div');
+  iconLinkRow.className = 'chip-icon-link';
+  iconLinkRow.innerHTML =
+    `<span class="chip-icon-link-label">Icon</span>` +
+    `<code class="chip-icon-link-name">tag</code>` +
+    `<span class="chip-icon-link-hint">— pick any icon in the <a href="#icons" class="chip-icon-link-anchor">Icons ↑</a> section to swap</span>`;
+  tagIconLinkEl = iconLinkRow.querySelector('.chip-icon-link-name');
+  container.appendChild(iconLinkRow);
+
+  // One row per semantic state
+  const rowsEl = document.createElement('div');
+  rowsEl.className = 'btn-rows';
+
+  TAG_STATES.forEach(({ key, label }) => {
+    const rowWrap = document.createElement('div');
+    rowWrap.className     = 'btn-row-wrap tag-row-wrap';
+    rowWrap.dataset.state = key;
+
+    const row = document.createElement('div');
+    row.className = 'btn-row';
+
+    const meta = document.createElement('div');
+    meta.className = 'btn-row-meta';
+    meta.innerHTML = `<div class="btn-row-label">${label}</div>`;
+
+    const preview = document.createElement('div');
+    preview.className = 'btn-row-preview';
+    preview.appendChild(buildTagElement(key, tagPlaygroundState));
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className   = 'snippet-toggle';
+    toggleBtn.textContent = '▸ {}';
+
+    row.append(meta, preview, toggleBtn);
+
+    const panel = buildTagSnippetPanel(key);
+    panel._toggleBtn = toggleBtn;
+
+    toggleBtn.addEventListener('click', () => {
+      toggleBtn.classList.toggle('active', !panel.classList.contains('open'));
+      togglePanel(panel);
+    });
+
+    rowWrap.append(row, panel);
+    rowsEl.appendChild(rowWrap);
+  });
+
+  container.appendChild(rowsEl);
+}
+
+buildTagPlayground();
