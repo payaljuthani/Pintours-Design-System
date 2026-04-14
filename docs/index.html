@@ -723,6 +723,85 @@
       header { padding: 12px 16px; }
       .sidebar { display: none; }
     }
+
+    /* ─── SuperIcon playground ──────────────────────────────────── */
+    .si-icon-picker {
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .si-icon-picker-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border-bottom: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+    }
+    .si-icon-search {
+      flex: 1;
+      min-width: 0;
+      padding: 5px 10px;
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 6px;
+      background: var(--pt-semantic-surface-page, #f6f9f9);
+      color: var(--pt-semantic-typography-body, #222628);
+      font: 12px/1.4 'Poppins', sans-serif;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .si-icon-search:focus { border-color: var(--pt-semantic-border-action, #5d9c4d); }
+    .si-selected-name {
+      font: 12px/1 'SFMono-Regular', Consolas, monospace;
+      color: var(--pt-semantic-typography-action, #5d9c4d);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .si-icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      gap: 2px;
+      padding: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      background: var(--pt-semantic-surface-page, #f6f9f9);
+    }
+    .si-icon-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 4px 6px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      color: var(--pt-semantic-icon-headings, #222628);
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .si-icon-tile:hover {
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border-color: var(--pt-semantic-border-divider, #a8c0c7);
+    }
+    .si-icon-tile.selected {
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border-color: var(--pt-semantic-border-action, #5d9c4d);
+    }
+    .si-icon-tile-name {
+      font-size: 9px;
+      color: var(--pt-semantic-typography-body_secondary, #657377);
+      text-align: center;
+      word-break: break-all;
+      line-height: 1.2;
+    }
+    .si-no-results {
+      grid-column: 1 / -1;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--pt-semantic-typography-body_secondary, #657377);
+    }
+
     /* ─── Icons page ─────────────────────────────────────────────── */
     .icon-controls {
       display: flex;
@@ -875,7 +954,8 @@
           <span class="nav-toggle-icon" id="components-icon">−</span>
         </button>
         <div class="nav-section-items" id="components-items">
-          <a href="#components-button" class="nav-link" data-section="components-button">Button</a>
+          <a href="#components-button"     class="nav-link" data-section="components-button">Button</a>
+          <a href="#components-super-icon" class="nav-link" data-section="components-super-icon">Super Icon</a>
         </div>
       </div>
     </nav>
@@ -934,6 +1014,12 @@
       <h2>Button</h2>
       <p class="comp-description">Allow users to trigger actions, submit forms, or navigate. Three types, three sizes, five states.</p>
       <div id="btnPlayground"></div>
+    </section>
+    <!-- ── Super Icon Component ── -->
+    <section id="components-super-icon">
+      <h2>Super Icon</h2>
+      <p class="comp-description">A wrapper that pairs any Tabler icon with a container shape and state. Swap the icon from the library below — the shape, size, and color tokens update across all platform snippets.</p>
+      <div id="superIconPlayground"></div>
     </section>
   </main>
 
