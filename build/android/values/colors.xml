@@ -103,10 +103,10 @@
     <color name="pt_semantic_surface_negative_hover">#ab3737</color>
     <color name="pt_semantic_surface_information_core">#009bc8</color>
     <color name="pt_semantic_surface_warning_core">#f4b740</color>
-    <color name="pt_semantic_surface_success">#eff5ed</color>
-    <color name="pt_semantic_surface_warning">#fef8ec</color>
-    <color name="pt_semantic_surface_error">#fbecec</color>
-    <color name="pt_semantic_surface_information">#e5f5f9</color>
+    <color name="pt_semantic_surface_success">#dfebdb</color>
+    <color name="pt_semantic_surface_warning">#fdf1d9</color>
+    <color name="pt_semantic_surface_error">#f7dada</color>
+    <color name="pt_semantic_surface_information">#ccebf4</color>
     <color name="pt_semantic_surface_disabled">#a8c0c7</color>
     <color name="pt_semantic_border_page">#f6f9f9</color>
     <color name="pt_semantic_border_default">#222628</color>

@@ -396,22 +396,22 @@ public enum PT {
             public static let success = UIColor { trait in
                 trait.userInterfaceStyle == .dark
                     ? UIColor(hex: "#253e1f")
-                    : UIColor(hex: "#eff5ed")
+                    : UIColor(hex: "#dfebdb")
             }
             public static let warning = UIColor { trait in
                 trait.userInterfaceStyle == .dark
                     ? UIColor(hex: "#62491a")
-                    : UIColor(hex: "#fef8ec")
+                    : UIColor(hex: "#fdf1d9")
             }
             public static let error = UIColor { trait in
                 trait.userInterfaceStyle == .dark
                     ? UIColor(hex: "#561c1c")
-                    : UIColor(hex: "#fbecec")
+                    : UIColor(hex: "#f7dada")
             }
             public static let information = UIColor { trait in
                 trait.userInterfaceStyle == .dark
                     ? UIColor(hex: "#003e50")
-                    : UIColor(hex: "#e5f5f9")
+                    : UIColor(hex: "#ccebf4")
             }
             public static let disabled = UIColor { trait in
                 trait.userInterfaceStyle == .dark

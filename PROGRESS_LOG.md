@@ -417,6 +417,51 @@ textView.setTextAppearance(R.style.PT_TextStyle_Large_H1_Regular)
 
 ---
 
+## Entry 6 · 2026-04-14 · PST
+
+### Work Completed Since Entry 5
+
+---
+
+### Super Icon Component — Interactive Playground ✅
+
+**Source:** Figma node 707:1883
+
+**What was done:**
+- Added `<section id="components-super-icon">` to `docs/index.html` with `#superIconPlayground` shell populated by JS
+- Added "Super Icon" nav link to sidebar under Components
+- Built `buildSuperIconPlayground()` in `docs/main.js`:
+  - **Size control:** 12 / 16 / 20 / 24 / 32px — updates all rows simultaneously
+  - **Icon picker:** Always-visible searchable grid (120 icons on load, filters to full set on search). Current icon name shown in header. Click any tile to swap — preview and all snippets update live
+  - **Five preview rows:** Default / Square Fill / Circle Fill / Selected Square / Selected Circle — all update on size or icon change
+  - **Per-row snippet panel** (`▸ {}`) with Web / iOS / Android tabs using the same updater registry pattern as Button
+
+**Token decisions from Figma:**
+- Container is always larger than icon: 12→20px, 16→24px, 20→32px, 24→40px, 32→56px (mapped to `--pt-scale-5/6/8/10/14`)
+- Square corner radius per size: 2/3/4/6/8px (`scale-half/3quat/1/1half/2`)
+- Circle variant uses 999px pill (64px in Figma, CSS equivalent is 999px)
+- Background opacity: Default=0 (transparent), Fill variants=0.85, Selected=1.0
+- Icon color: headings token for Default/Fill, `on_action` (white) for Selected
+- Background: `card_primary` for fill variants, `action` for selected variants
+
+**Platform snippets:**
+- **Web:** Container size via `--pt-scale-N`, background via semantic token with opacity note, icon color via semantic icon token
+- **iOS:** `UIView` container with `PT.Scale` tokens, `UIImageView` with template rendering mode, `PT.Semantic.Icon.*` tint
+- **Android:** Compose `Box` with `PTDimens` size, `Modifier.background()` with `RoundedCornerShape` or `CircleShape`, `Icon` composable with `ptColors.*` tint
+
+---
+
+### Open Items
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Success palette — `success` semantic tokens incorrectly reference `color.green.*` | ⚠️ Carry-over from Entry 5 |
+| 2 | Font weight discrepancies (Thin: tokens=300, Figma=400; Regular: tokens=500, Figma=600) | ⚠️ Carry-over from Entry 3 |
+| 3 | Button component stylesheet not distributed | ⚠️ Carry-over from Entry 3 |
+| 4 | Super Icon component stylesheet not distributed | ⚠️ Same as button — CSS/UIKit/Compose implementations exist only in docs |
+
+---
+
 ## Entry 5 · 2026-04-09 · PST
 
 ### Work Completed Since Entry 4
