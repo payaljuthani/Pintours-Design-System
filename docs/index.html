@@ -476,6 +476,74 @@
       box-shadow: none;
     }
 
+    /* ─── Gradient section ──────────────────────────────────────── */
+    .gradient-pattern-card {
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      max-width: 480px;
+    }
+    .gradient-pattern-preview {
+      height: 220px;
+      position: relative;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+    }
+    .gradient-pattern-preview::before {
+      content: '';
+      position: absolute;
+      inset: -120px;
+      background: conic-gradient(
+        from 200deg at 55% -10%,
+        var(--pt-color-teal-100, #ccebf4),
+        var(--pt-color-yellow-100, #fdf1d9),
+        var(--pt-color-green-100, #dfebdb),
+        var(--pt-semantic-surface-card_primary, #ffffff) 55%
+      );
+      filter: blur(120px);
+    }
+    .gradient-pattern-meta {
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-top: none;
+      border-radius: 0 0 20px 20px;
+      padding: 20px 24px;
+    }
+    .gradient-pattern-name {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--pt-semantic-typography-headings, #222628);
+    }
+    .gradient-token-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .gradient-token-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-family: monospace;
+      background: var(--pt-semantic-surface-page, #f6f9f9);
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 6px;
+      padding: 4px 8px;
+      color: var(--pt-semantic-typography-body, #222628);
+    }
+    .gradient-token-chip-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .gradient-snippet-wrap .snippet-panel {
+      position: static;
+      width: 100%;
+      box-shadow: none;
+    }
+
     /* ─── PT Tag ────────────────────────────────────────────────── */
     .pt-tag {
       display: inline-flex;
@@ -1314,8 +1382,9 @@
           <a href="#semantic" class="nav-link" data-section="semantic">Semantic</a>
           <a href="#type"     class="nav-link" data-section="type">Typography</a>
           <a href="#scale"    class="nav-link" data-section="scale">Spacing</a>
-          <a href="#shadows"  class="nav-link" data-section="shadows">Shadows</a>
-          <a href="#icons"    class="nav-link" data-section="icons">Icons</a>
+          <a href="#shadows"   class="nav-link" data-section="shadows">Shadows</a>
+          <a href="#gradients" class="nav-link" data-section="gradients">Gradients</a>
+          <a href="#icons"     class="nav-link" data-section="icons">Icons</a>
         </div>
       </div>
 
@@ -1374,6 +1443,12 @@
     <!-- ── Shadows ── -->
     <section id="shadows">
       <h2>Shadows</h2>
+      <!-- populated by main.js -->
+    </section>
+
+    <!-- ── Gradients ── -->
+    <section id="gradients">
+      <h2>Gradients</h2>
       <!-- populated by main.js -->
     </section>
 
