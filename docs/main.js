@@ -800,7 +800,7 @@ gradientToggleBtn.className = 'snippet-toggle';
 gradientToggleBtn.style.cssText = 'font-size:12px; padding:5px 12px; margin-bottom:10px;';
 gradientToggleBtn.textContent = '▸ {} Show code snippet';
 
-const webSnippet = `/* Requires: build/web/variables.css */
+const pageWashWebSnippet = `/* Requires: build/web/variables.css */
 .page-wash {
   position: relative;
   overflow: hidden;
@@ -820,7 +820,7 @@ const webSnippet = `/* Requires: build/web/variables.css */
   pointer-events: none;
 }`;
 
-const iosSnippet = `// Requires: build/ios/Tokens.swift
+const pageWashIosSnippet = `// Requires: build/ios/Tokens.swift
 private func addPageWash(to view: UIView) {
     let gradient = CAGradientLayer()
     gradient.type = .conic
@@ -843,7 +843,7 @@ private func addPageWash(to view: UIView) {
     view.insertSubview(container, at: 0)
 }`;
 
-const androidSnippet = `// Requires: build/android/compose/PTTheme.kt
+const pageWashAndroidSnippet = `// Requires: build/android/compose/PTTheme.kt
 @Composable
 fun PageWashBackground(modifier: Modifier = Modifier) {
     val colors = MaterialTheme.ptColors
@@ -879,9 +879,9 @@ gradientPanelEl.innerHTML = `
     <button class="panel-tab" data-tab="android">Android</button>
   </div>
   <div class="panel-body">
-    <pre class="panel-code" data-pane="web">${webSnippet}</pre>
-    <pre class="panel-code" data-pane="ios" style="display:none">${iosSnippet}</pre>
-    <pre class="panel-code" data-pane="android" style="display:none">${androidSnippet}</pre>
+    <pre class="panel-code" data-pane="web">${pageWashWebSnippet}</pre>
+    <pre class="panel-code" data-pane="ios" style="display:none">${pageWashIosSnippet}</pre>
+    <pre class="panel-code" data-pane="android" style="display:none">${pageWashAndroidSnippet}</pre>
     <button class="copy-btn">Copy</button>
   </div>
 `;
