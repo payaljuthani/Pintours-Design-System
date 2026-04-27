@@ -462,6 +462,40 @@ textView.setTextAppearance(R.style.PT_TextStyle_Large_H1_Regular)
 
 ---
 
+## Entry 7 · 2026-04-27 · PST
+
+### Work Completed Since Entry 6
+
+---
+
+### Status Surface Tokens — Shade Update (50 → 100, Light Mode) ✅
+
+**Source:** Updated Figma color variables (Success/100, Warning/100, Error/100, Information/100)
+
+**Change:** The four status surface semantic tokens were updated in light mode to use the `/100` primitive shade instead of `/50`. Dark mode was already correctly referencing `/800` and was not changed.
+
+| Token | Before | After |
+|---|---|---|
+| `semantic.surface.light.success` | `{color.green.50}` → `#eff5ed` | `{color.green.100}` → `#dfebdb` |
+| `semantic.surface.light.warning` | `{color.yellow.50}` → `#fef8ec` | `{color.yellow.100}` → `#fdf1d9` |
+| `semantic.surface.light.error` | `{color.red.50}` → `#fbecec` | `{color.red.100}` → `#f7dada` |
+| `semantic.surface.light.information` | `{color.teal.50}` → `#e5f5f9` | `{color.teal.100}` → `#ccebf4` |
+
+**Files changed:** `tokens/tokens.json`, all platform build outputs (`build/web/variables.css`, `build/ios/Tokens.swift`, `build/android/values/colors.xml`, `build/android/compose/PTTheme.kt`), docs site.
+
+---
+
+### Open Items
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Success palette — `success` semantic tokens incorrectly reference `color.green.*` | ⚠️ Carry-over from Entry 5/6 |
+| 2 | Font weight discrepancies (Thin: tokens=300, Figma=400; Regular: tokens=500, Figma=600) | ⚠️ Carry-over from Entry 3 |
+| 3 | Button component stylesheet not distributed | ⚠️ Carry-over from Entry 3 |
+| 4 | Super Icon component stylesheet not distributed | ⚠️ Carry-over from Entry 6 |
+
+---
+
 ## Entry 5 · 2026-04-09 · PST
 
 ### Work Completed Since Entry 4
