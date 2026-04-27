@@ -462,6 +462,54 @@ textView.setTextAppearance(R.style.PT_TextStyle_Large_H1_Regular)
 
 ---
 
+## Entry 8 · 2026-04-27 · PST
+
+### Work Completed Since Entry 7
+
+---
+
+### Gradients — Page Wash Pattern Added to Docs ✅
+
+**Source:** Figma design screenshot showing an angular/conic gradient with 120px blur used as a page background.
+
+**What was done:**
+- Added a Gradients section to the sidebar nav under Foundations
+- Added `<section id="gradients">` to `docs/index.html`
+- Built the section in `docs/main.js` with:
+  - Live CSS preview of the Page Wash gradient (conic-gradient + `filter: blur(120px)` via `::before` pseudo-element)
+  - Token chips showing the four primitives used
+  - Snippet panel (Web / iOS / Android tabs) with paste-ready implementation code
+- Added gradient-specific CSS styles to `docs/index.html`
+
+**Tokens used:**
+
+| Color | Token | Value |
+|---|---|---|
+| Teal | `--pt-color-teal-100` | `#ccebf4` |
+| Yellow | `--pt-color-yellow-100` | `#fdf1d9` |
+| Green | `--pt-color-green-100` | `#dfebdb` |
+| Fade to | `--pt-semantic-surface-card_primary` | `#ffffff` |
+
+**Decision — no gradient token added:** The conic + blur technique is not representable as a Style Dictionary token value (no native gradient type, blur is a CSS filter not a color). Documented as a named pattern instead.
+
+**Bug fixed — Netlify build failure:**
+- Variable names `webSnippet`, `iosSnippet`, `androidSnippet` collided with an existing top-level function `androidSnippet()` (line 72)
+- Renamed all three to `pageWashWebSnippet`, `pageWashIosSnippet`, `pageWashAndroidSnippet`
+- Build confirmed passing locally (`npm run docs:build`) before push
+
+---
+
+### Open Items
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Success palette — `success` semantic tokens incorrectly reference `color.green.*` | ⚠️ Carry-over from Entry 5/6 |
+| 2 | Font weight discrepancies (Thin: tokens=300, Figma=400; Regular: tokens=500, Figma=600) | ⚠️ Carry-over from Entry 3 |
+| 3 | Button component stylesheet not distributed | ⚠️ Carry-over from Entry 3 |
+| 4 | Super Icon component stylesheet not distributed | ⚠️ Carry-over from Entry 6 |
+
+---
+
 ## Entry 7 · 2026-04-27 · PST
 
 ### Work Completed Since Entry 6
