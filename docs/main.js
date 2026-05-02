@@ -3102,35 +3102,35 @@ const PIN_STATES = [
 
 const PIN_BODY_CSS = {
   default:  'var(--pt-semantic-typography-headings)',
-  selected: 'var(--pt-semantic-typography-headings)',   // dark body on all states
-  visited:  'var(--pt-semantic-border-divider)',
+  selected: 'var(--pt-semantic-typography-headings)',
+  visited:  'var(--pt-semantic-icon-body_secondary)',
 };
 const PIN_BODY_SWIFT = {
   default:  'PT.Semantic.Typography.headings',
   selected: 'PT.Semantic.Typography.headings',
-  visited:  'PT.Semantic.Border.divider',
+  visited:  'PT.Semantic.Icon.bodySecondary',
 };
 const PIN_BODY_COMPOSE = {
   default:  'colors.typographyHeadings',
   selected: 'colors.typographyHeadings',
-  visited:  'colors.borderDivider',
+  visited:  'colors.iconBodySecondary',
 };
 
-// Ring fill — teal gradient for selected, light surface for default/visited
+// Ring fill — Gradient/Default for selected, Surface/Success for default/visited
 const PIN_RING_CSS = {
-  default:  'var(--pt-semantic-surface-page)',
+  default:  'var(--pt-semantic-surface-success)',
   selected: 'url(#pt-mp-sel-ring)  /* Gradient/Default — teal */',
-  visited:  'var(--pt-semantic-surface-page)',
+  visited:  'var(--pt-semantic-surface-success)',
 };
 const PIN_RING_SWIFT = {
-  default:  'PT.Semantic.Surface.page',
+  default:  'PT.Semantic.Surface.success',
   selected: '/* apply pt-mp-sel-ring CAGradientLayer — see below */',
-  visited:  'PT.Semantic.Surface.page',
+  visited:  'PT.Semantic.Surface.success',
 };
 const PIN_RING_COMPOSE = {
-  default:  'colors.surfacePage',
+  default:  'colors.surfaceSuccess',
   selected: '/* Brush.linearGradient — see below */',
-  visited:  'colors.surfacePage',
+  visited:  'colors.surfaceSuccess',
 };
 
 const PIN_TEXT_CSS = {
