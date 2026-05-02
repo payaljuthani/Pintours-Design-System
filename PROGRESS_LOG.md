@@ -585,3 +585,95 @@ Compared all semantic colour categories against Figma variable screenshots.
 - Auto-deploys on every push to `main`
 
 ---
+
+## Entry 9 · 2026-05-02 · PST
+
+### Work Completed Since Entry 8
+
+---
+
+### Map Pin Component — Interactive Playground ✅
+
+**Source:** Figma node 743:843 (`PinTours-Design-System` → Map Pin component)
+
+**What was done:**
+- Added Map Pin playground to the docs site with a number picker (increment / decrement / free-type), live preview of all three states, and per-state snippet panels (Web / iOS / Android)
+- Playground built via `buildMapPinPlayground()` in `docs/main.js`
+
+---
+
+### Map Pin — Figma Alignment Fixes ✅
+
+Several rounds of corrections were made to align the component with the Figma design.
+
+#### Round 1 — Icon library switch (reverted)
+- Initial attempt replaced the custom SVG with the Tabler `map-pin` stroke icon via `buildIconSvg('map-pin', 36)`
+- **Problem:** Tabler icons are stroke/outline; the Figma design uses bold filled shapes. The visual difference was unacceptable.
+- **Reverted** in the same session.
+
+#### Round 2 — Filled SVG restored with correct geometry ✅
+
+**Root causes identified from Figma cross-check:**
+
+| Issue | Detail |
+|---|---|
+| Stroke vs fill | Tabler icon is outline; Figma uses a solid filled teardrop body |
+| Selected state colors inverted | Body was teal, ring was dark — Figma shows the opposite |
+| Inner circle too small | Previous `r=9`; Figma measures `r≈10` (default/visited), `r≈11` (selected) |
+| Number not centred | Circle `cy` was 14px; corrected to 16px; number insets updated to `top: 6px; bottom: 10px` |
+
+**Fixes applied:**
+- Restored custom filled SVG: `<path class="pin-body">` teardrop + `<circle class="pin-ring">`
+- Updated SVG path to `M18 3A13 13 0 0 0 5 16Q5 24 18 33Q31 24 31 16A13 13 0 0 0 18 3Z` (circle head at cy=16)
+- Ring radii: `r=10` (Default/Visited), `r=11` (Selected), `cy=16` for all states
+- Selected body: `--pt-semantic-typography-headings` (#222628) — was incorrectly `information_core` (teal)
+- Selected ring: SVG `linearGradient` (`#pt-mp-sel-ring`) — was incorrectly `rgba(0,0,0,0.12)`
+- Shared gradient defs SVG injected once by `buildMapPinPlayground()` before any pin elements are rendered
+
+#### Round 3 — Token corrections per Figma palette ✅
+
+| Pin | Property | Before | After |
+|---|---|---|---|
+| Default | Ring fill | `surface/page` | `surface/success` (#dfebdb) |
+| Selected | Ring fill | — | `Gradient/Default` (unchanged) |
+| Visited | Ring fill | `surface/page` | `surface/success` (#dfebdb) |
+| Visited | Body fill | `border/divider` (#a8c0c7) | `icon/body_secondary` (#869a9f) |
+
+#### Round 4 — Gradient corrected to Gradient/Default spec ✅
+
+- **Before:** Two teal tones (`#5ad4e4` → `#009bc8`), diagonal direction (top-right to bottom-left)
+- **After:** `linear-gradient(to right, var(--pt-color-green-400), var(--pt-color-teal-500))` — `#7db071` → `#009bc8`, left to right
+- SVG `linearGradient` updated: `x1="0" y1="0" x2="1" y2="0"` to match CSS `to right`
+- iOS snippet updated to use `PT.Color.Green.c400` and `PT.Color.Teal.c500` in `CAGradientLayer`
+- Android snippet updated to use `Brush.horizontalGradient` with `PTColors.colorGreen400` and `PTColors.colorTeal500`
+
+#### Bug fix — invalid CSS comment inside property value ✅
+
+- `PIN_RING_CSS.selected` previously embedded a CSS comment inside the value string: `url(#pt-mp-sel-ring) /* … */`
+- This produced invalid CSS in the generated snippet: `.pin-ring { fill: url(#pt-mp-sel-ring) /* … */; }`
+- Fix: removed comment from the value; emitted as a standalone `/* Inner ring — Gradient/Default: … */` comment line above the rule in the snippet output
+
+---
+
+### Commits This Session
+
+| Hash | Description |
+|---|---|
+| `854281c` | fix: replace custom map pin SVG with tabler map-pin icon (subsequently corrected) |
+| `f7c14f5` | fix: restore filled map pin — correct shape, colours and ring gradient |
+| `7fba302` | fix: update map pin ring and visited body token assignments |
+| `3aba81f` | fix: correct selected ring gradient to green-400 → teal-500 (left to right) |
+
+---
+
+### Open Items
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Success palette — `success` semantic tokens incorrectly reference `color.green.*` | ⚠️ Carry-over from Entry 5/6 |
+| 2 | Font weight discrepancies (Thin: tokens=300, Figma=400; Regular: tokens=500, Figma=600) | ⚠️ Carry-over from Entry 3 |
+| 3 | Button component stylesheet not distributed | ⚠️ Carry-over from Entry 3 |
+| 4 | Super Icon component stylesheet not distributed | ⚠️ Carry-over from Entry 6 |
+| 5 | Map Pin component stylesheet not distributed | ⚠️ Map Pin CSS/UIKit/Compose implementations exist only in docs |
+
+---
