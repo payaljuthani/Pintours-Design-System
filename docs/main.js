@@ -3148,24 +3148,11 @@ const PIN_WEIGHT_COMPOSE = {
   visited:  'PTTextStyles.smallBodyDefaultRegular',
 };
 
-// Inner ring: white window for default (dark text contrast), subtle overlay for selected, translucent for visited
-const PIN_RING_NOTE = {
-  default:  'fill: var(--pt-semantic-surface-card_primary);  /* white window — dark text sits here */',
-  selected: 'fill: rgba(0, 0, 0, 0.12);                     /* depth shadow on teal body */',
-  visited:  'fill: rgba(255, 255, 255, 0.5);                 /* lightened window on muted body */',
-};
-
-// ── SVG path — teardrop pin, 36×36 viewBox, circle head (r=13) at (18,15), point at (18,34) ──
-const PIN_SVG_PATH = 'M18 2A13 13 0 0 0 5 15Q5 23 18 34Q31 23 31 15A13 13 0 0 0 18 2Z';
-
 function buildMapPinEl(stateKey, number) {
   const wrap = document.createElement('div');
   wrap.className = `pt-map-pin pt-map-pin-${stateKey}`;
   wrap.innerHTML = `
-    <svg class="pt-map-pin-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path class="pin-body" d="${PIN_SVG_PATH}"/>
-      <circle class="pin-ring" cx="18" cy="14" r="9"/>
-    </svg>
+    <span class="pt-map-pin-icon" aria-hidden="true">${buildIconSvg('map-pin', 36)}</span>
     <span class="pt-map-pin-number">${number}</span>
   `;
   return wrap;
@@ -3185,11 +3172,14 @@ function buildMPWebSnippet(stateKey, number) {
     '  height: var(--pt-scale-9);',
     '}',
     '',
-    '/* Pin body SVG path */',
-    `.pin-body { fill: ${PIN_BODY_CSS[stateKey]}; }`,
-    `/* Inner ring — */ ${PIN_RING_NOTE[stateKey]}`,
+    '/* Pin icon — tabler "map-pin", colour via currentColor */',
+    '.pt-map-pin-icon {',
+    '  position: absolute; inset: 0;',
+    '  display: flex; align-items: center; justify-content: center;',
+    `  color: ${PIN_BODY_CSS[stateKey]};`,
+    '}',
     '',
-    '/* Number label */',
+    '/* Number label — centred in the pin circle head */',
     '.pt-map-pin-number {',
     '  position: absolute;',
     '  top: var(--pt-scale-1); bottom: var(--pt-scale-1half);',
@@ -3204,49 +3194,38 @@ function buildMPWebSnippet(stateKey, number) {
     '',
     '<!-- HTML -->',
     `<div class="pt-map-pin pt-map-pin-${stateKey}">`,
-    '  <svg viewBox="0 0 36 36" fill="none">',
-    `    <path class="pin-body" d="${PIN_SVG_PATH}"/>`,
-    '    <circle class="pin-ring" cx="18" cy="14" r="9"/>',
-    '  </svg>',
+    '  <span class="pt-map-pin-icon" aria-hidden="true">',
+    '    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"',
+    '         fill="none" stroke="currentColor" stroke-width="2"',
+    '         stroke-linecap="round" stroke-linejoin="round">',
+    '      <!-- paths from tabler SVG file: map-pin.svg -->',
+    '    </svg>',
+    '  </span>',
     `  <span class="pt-map-pin-number">${number}</span>`,
     '</div>',
   ].join('\n');
 }
 
 function buildMPIOSSnippet(stateKey, number) {
-  const ringSetup = {
-    default:  'ringView.backgroundColor = PT.Semantic.Surface.cardPrimary',
-    selected: 'ringView.backgroundColor = UIColor(white: 0, alpha: 0.12)',
-    visited:  'ringView.backgroundColor = UIColor(white: 1, alpha: 0.5)',
-  };
   return [
     `// MapPin · ${stateKey} · number: "${number}"`,
     '',
     'let pinSize: CGFloat = PT.Scale.s9   // 36pt',
-    'let ringRadius: CGFloat = 9',
     '',
     '// Container',
     'let container = UIView()',
     'container.frame.size = CGSize(width: pinSize, height: pinSize)',
     '',
-    '// Pin body — use vector asset, tinted with token',
+    '// Pin icon — tabler "map-pin" exported to Xcode asset catalog as "pt-icon-map-pin"',
     'let pinView = UIImageView(',
-    `    image: UIImage(named: "pt_map_pin_${stateKey}")?`,
+    '    image: UIImage(named: "pt-icon-map-pin")?',
     '        .withRenderingMode(.alwaysTemplate)',
     ')',
     `pinView.tintColor = ${PIN_BODY_SWIFT[stateKey]}`,
     'pinView.frame = container.bounds',
     'container.addSubview(pinView)',
     '',
-    '// Inner ring',
-    'let ringView = UIView()',
-    'let ringOrigin = (pinSize - ringRadius * 2) / 2',
-    'ringView.frame = CGRect(x: ringOrigin, y: 5, width: ringRadius * 2, height: ringRadius * 2)',
-    'ringView.layer.cornerRadius = ringRadius',
-    ringSetup[stateKey],
-    'container.addSubview(ringView)',
-    '',
-    '// Number label',
+    '// Number label — centred in the pin circle head',
     'let label = UILabel()',
     `label.text = "${number}"`,
     `label.textColor = ${PIN_TEXT_SWIFT[stateKey]}`,
@@ -3256,17 +3235,12 @@ function buildMPIOSSnippet(stateKey, number) {
     '    attributes: style.attributes()',
     ')',
     'label.textAlignment = .center',
-    'label.frame = CGRect(x: 0, y: 4, width: pinSize, height: 24)',
+    'label.frame = CGRect(x: 7, y: 4, width: pinSize - 14, height: 25)',
     'container.addSubview(label)',
   ].join('\n');
 }
 
 function buildMPAndroidSnippet(stateKey, number) {
-  const ringColor = {
-    default:  'colors.surfaceCardPrimary',
-    selected: 'Color(0x1F000000)  // rgba(0,0,0,0.12)',
-    visited:  'Color(0x80FFFFFF)   // rgba(255,255,255,0.5)',
-  };
   return [
     `// MapPin · ${stateKey} · number: "${number}"`,
     'val colors = MaterialTheme.ptColors',
@@ -3274,31 +3248,24 @@ function buildMPAndroidSnippet(stateKey, number) {
     '@Composable',
     'fun MapPin(modifier: Modifier = Modifier) {',
     '    Box(',
-    '        contentAlignment = Alignment.TopCenter,',
+    '        contentAlignment = Alignment.Center,',
     '        modifier = modifier.size(PTDimens.s9)  // 36.dp',
     '    ) {',
-    '        // Pin body vector',
+    '        // Pin icon — tabler "map-pin" added to res/drawable as pt_icon_map_pin.xml',
     '        Icon(',
-    `            painter = painterResource(R.drawable.pt_map_pin_${stateKey}),`,
+    '            painter = painterResource(R.drawable.pt_icon_map_pin),',
     '            contentDescription = null,',
     `            tint = ${PIN_BODY_COMPOSE[stateKey]},`,
     '            modifier = Modifier.fillMaxSize()',
     '        )',
-    '        // Inner ring',
-    '        Box(',
-    '            modifier = Modifier',
-    '                .padding(top = 5.dp)',
-    '                .size(18.dp)',
-    `                .background(${ringColor[stateKey]}, CircleShape)`,
-    '        )',
-    '        // Number',
+    '        // Number — centred in the pin circle head',
     '        Text(',
     `            text = "${number}",`,
     `            style = ${PIN_WEIGHT_COMPOSE[stateKey]},`,
     `            color = ${PIN_TEXT_COMPOSE[stateKey]},`,
     '            textAlign = TextAlign.Center,',
     '            modifier = Modifier',
-    '                .padding(top = 4.dp)',
+    '                .padding(bottom = 7.dp)  // offset up into circle head',
     '                .width(22.dp)',
     '        )',
     '    }',
