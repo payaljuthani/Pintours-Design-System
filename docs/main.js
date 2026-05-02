@@ -3119,7 +3119,7 @@ const PIN_BODY_COMPOSE = {
 // Ring fill — Gradient/Default for selected, Surface/Success for default/visited
 const PIN_RING_CSS = {
   default:  'var(--pt-semantic-surface-success)',
-  selected: 'url(#pt-mp-sel-ring)  /* Gradient/Default — teal */',
+  selected: 'url(#pt-mp-sel-ring)',
   visited:  'var(--pt-semantic-surface-success)',
 };
 const PIN_RING_SWIFT = {
@@ -3193,9 +3193,9 @@ function buildMPWebSnippet(stateKey, number) {
     '<!-- Gradient defs — add once anywhere in the page SVG or as a hidden <svg> -->',
     '<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0" aria-hidden="true">',
     '  <defs>',
-    '    <linearGradient id="pt-mp-sel-ring" x1="1" y1="0" x2="0" y2="1">',
-    '      <stop offset="0%"   stop-color="#5ad4e4"/>',
-    '      <stop offset="100%" stop-color="#009bc8"/>',
+    '    <linearGradient id="pt-mp-sel-ring" x1="0" y1="0" x2="1" y2="0">',
+    '      <stop offset="0%"   stop-color="#7db071"/>',  /* --pt-color-green-400 */
+    '      <stop offset="100%" stop-color="#009bc8"/>',  /* --pt-color-teal-500  */
     '    </linearGradient>',
     '  </defs>',
     '</svg>',
@@ -3215,7 +3215,7 @@ function buildMPWebSnippet(stateKey, number) {
     '/* Pin body (filled teardrop) */',
     `.pin-body { fill: ${PIN_BODY_CSS[stateKey]}; }`,
     '',
-    '/* Inner ring */',
+    stateKey === 'selected' ? '/* Inner ring — Gradient/Default: linear-gradient(to right, var(--pt-color-green-400), var(--pt-color-teal-500)) */' : '/* Inner ring */',
     `.pin-ring { fill: ${PIN_RING_CSS[stateKey]}; }`,
     '',
     '/* Number label — centred in the ring (cy=16, r=${ringR}) */',
@@ -3251,10 +3251,10 @@ function buildMPIOSSnippet(stateKey, number) {
         'let ringLayer = CAGradientLayer()',
         `ringLayer.frame = CGRect(x: ${18 - ringR}, y: ${16 - ringR}, width: ${ringR * 2}, height: ${ringR * 2})`,
         'ringLayer.cornerRadius = ringLayer.frame.width / 2',
-        'ringLayer.startPoint = CGPoint(x: 1, y: 0)',
-        'ringLayer.endPoint   = CGPoint(x: 0, y: 1)',
-        'ringLayer.colors = [UIColor(red: 0.35, green: 0.83, blue: 0.89, alpha: 1).cgColor,',
-        '                    PT.Semantic.Surface.informationCore.cgColor]',
+        'ringLayer.startPoint = CGPoint(x: 0, y: 0.5)',
+        'ringLayer.endPoint   = CGPoint(x: 1, y: 0.5)',
+        'ringLayer.colors = [PT.Color.Green.c400.cgColor,   // #7db071',
+        '                    PT.Color.Teal.c500.cgColor]    // #009bc8',
         'container.layer.addSublayer(ringLayer)',
       ]
     : [
@@ -3311,8 +3311,8 @@ function buildMPAndroidSnippet(stateKey, number) {
         '            modifier = Modifier',
         `                .size((${ringR * 2}).dp)`,
         '                .background(',
-        '                    brush = Brush.linearGradient(',
-        '                        colors = listOf(Color(0xFF5AD4E4), colors.surfaceInformationCore)',
+        '                    brush = Brush.horizontalGradient(',
+        '                        colors = listOf(PTColors.colorGreen400, PTColors.colorTeal500)',
         '                    ),',
         '                    shape = CircleShape',
         '                )',
@@ -3388,8 +3388,8 @@ function buildMapPinPlayground() {
   gradDefs.setAttribute('aria-hidden', 'true');
   gradDefs.innerHTML = `
     <defs>
-      <linearGradient id="pt-mp-sel-ring" x1="1" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#5ad4e4"/>
+      <linearGradient id="pt-mp-sel-ring" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#7db071"/>
         <stop offset="100%" stop-color="#009bc8"/>
       </linearGradient>
     </defs>
