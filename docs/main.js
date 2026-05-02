@@ -3102,18 +3102,35 @@ const PIN_STATES = [
 
 const PIN_BODY_CSS = {
   default:  'var(--pt-semantic-typography-headings)',
-  selected: 'var(--pt-semantic-surface-information_core)',
+  selected: 'var(--pt-semantic-typography-headings)',   // dark body on all states
   visited:  'var(--pt-semantic-border-divider)',
 };
 const PIN_BODY_SWIFT = {
   default:  'PT.Semantic.Typography.headings',
-  selected: 'PT.Semantic.Surface.informationCore',
+  selected: 'PT.Semantic.Typography.headings',
   visited:  'PT.Semantic.Border.divider',
 };
 const PIN_BODY_COMPOSE = {
   default:  'colors.typographyHeadings',
-  selected: 'colors.surfaceInformationCore',
+  selected: 'colors.typographyHeadings',
   visited:  'colors.borderDivider',
+};
+
+// Ring fill — teal gradient for selected, light surface for default/visited
+const PIN_RING_CSS = {
+  default:  'var(--pt-semantic-surface-page)',
+  selected: 'url(#pt-mp-sel-ring)  /* Gradient/Default — teal */',
+  visited:  'var(--pt-semantic-surface-page)',
+};
+const PIN_RING_SWIFT = {
+  default:  'PT.Semantic.Surface.page',
+  selected: '/* apply pt-mp-sel-ring CAGradientLayer — see below */',
+  visited:  'PT.Semantic.Surface.page',
+};
+const PIN_RING_COMPOSE = {
+  default:  'colors.surfacePage',
+  selected: '/* Brush.linearGradient — see below */',
+  visited:  'colors.surfacePage',
 };
 
 const PIN_TEXT_CSS = {
@@ -3148,11 +3165,20 @@ const PIN_WEIGHT_COMPOSE = {
   visited:  'PTTextStyles.smallBodyDefaultRegular',
 };
 
+// Shared SVG gradient defs — injected once into the page by buildMapPinPlayground
+const MP_PIN_BODY_PATH = 'M18 3A13 13 0 0 0 5 16Q5 24 18 33Q31 24 31 16A13 13 0 0 0 18 3Z';
+// Selected ring is slightly larger (r=11) to match Figma; default/visited use r=10
+const MP_RING_R = { default: 10, selected: 11, visited: 10 };
+
 function buildMapPinEl(stateKey, number) {
   const wrap = document.createElement('div');
   wrap.className = `pt-map-pin pt-map-pin-${stateKey}`;
+  const r = MP_RING_R[stateKey];
   wrap.innerHTML = `
-    <span class="pt-map-pin-icon" aria-hidden="true">${buildIconSvg('map-pin', 36)}</span>
+    <svg class="pt-map-pin-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path class="pin-body" d="${MP_PIN_BODY_PATH}"/>
+      <circle class="pin-ring" cx="18" cy="16" r="${r}"/>
+    </svg>
     <span class="pt-map-pin-number">${number}</span>
   `;
   return wrap;
@@ -3161,6 +3187,20 @@ function buildMapPinEl(stateKey, number) {
 // ── Snippet generators ────────────────────────────────────────────────────────
 
 function buildMPWebSnippet(stateKey, number) {
+  const ringR = MP_RING_R[stateKey];
+  const gradDefsBlock = stateKey === 'selected' ? [
+    '',
+    '<!-- Gradient defs — add once anywhere in the page SVG or as a hidden <svg> -->',
+    '<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0" aria-hidden="true">',
+    '  <defs>',
+    '    <linearGradient id="pt-mp-sel-ring" x1="1" y1="0" x2="0" y2="1">',
+    '      <stop offset="0%"   stop-color="#5ad4e4"/>',
+    '      <stop offset="100%" stop-color="#009bc8"/>',
+    '    </linearGradient>',
+    '  </defs>',
+    '</svg>',
+  ] : [];
+
   return [
     `/* MapPin · ${stateKey} · number: "${number}" */`,
     '',
@@ -3172,18 +3212,17 @@ function buildMPWebSnippet(stateKey, number) {
     '  height: var(--pt-scale-9);',
     '}',
     '',
-    '/* Pin icon — tabler "map-pin", colour via currentColor */',
-    '.pt-map-pin-icon {',
-    '  position: absolute; inset: 0;',
-    '  display: flex; align-items: center; justify-content: center;',
-    `  color: ${PIN_BODY_CSS[stateKey]};`,
-    '}',
+    '/* Pin body (filled teardrop) */',
+    `.pin-body { fill: ${PIN_BODY_CSS[stateKey]}; }`,
     '',
-    '/* Number label — centred in the pin circle head */',
+    '/* Inner ring */',
+    `.pin-ring { fill: ${PIN_RING_CSS[stateKey]}; }`,
+    '',
+    '/* Number label — centred in the ring (cy=16, r=${ringR}) */',
     '.pt-map-pin-number {',
     '  position: absolute;',
-    '  top: var(--pt-scale-1); bottom: var(--pt-scale-1half);',
-    '  left: var(--pt-scale-1half); right: var(--pt-scale-1half);',
+    '  top: 6px; bottom: 10px;',
+    '  left: 6px; right: 6px;',
     `  color: ${PIN_TEXT_CSS[stateKey]};`,
     `  font-weight: ${PIN_WEIGHT_CSS[stateKey]};`,
     '  font-family: var(--pt-typography-font_family-primary);',
@@ -3191,22 +3230,43 @@ function buildMPWebSnippet(stateKey, number) {
     '  line-height: var(--pt-scale-6);',
     '  display: flex; align-items: center; justify-content: center;',
     '}',
+    ...gradDefsBlock,
     '',
     '<!-- HTML -->',
     `<div class="pt-map-pin pt-map-pin-${stateKey}">`,
-    '  <span class="pt-map-pin-icon" aria-hidden="true">',
-    '    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"',
-    '         fill="none" stroke="currentColor" stroke-width="2"',
-    '         stroke-linecap="round" stroke-linejoin="round">',
-    '      <!-- paths from tabler SVG file: map-pin.svg -->',
-    '    </svg>',
-    '  </span>',
+    '  <svg class="pt-map-pin-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">',
+    `    <path class="pin-body" d="${MP_PIN_BODY_PATH}"/>`,
+    `    <circle class="pin-ring" cx="18" cy="16" r="${ringR}"/>`,
+    '  </svg>',
     `  <span class="pt-map-pin-number">${number}</span>`,
     '</div>',
   ].join('\n');
 }
 
 function buildMPIOSSnippet(stateKey, number) {
+  const ringR = MP_RING_R[stateKey];
+  const ringSetup = stateKey === 'selected'
+    ? [
+        '// Inner ring — teal gradient (Gradient/Default)',
+        'let ringLayer = CAGradientLayer()',
+        `ringLayer.frame = CGRect(x: ${18 - ringR}, y: ${16 - ringR}, width: ${ringR * 2}, height: ${ringR * 2})`,
+        'ringLayer.cornerRadius = ringLayer.frame.width / 2',
+        'ringLayer.startPoint = CGPoint(x: 1, y: 0)',
+        'ringLayer.endPoint   = CGPoint(x: 0, y: 1)',
+        'ringLayer.colors = [UIColor(red: 0.35, green: 0.83, blue: 0.89, alpha: 1).cgColor,',
+        '                    PT.Semantic.Surface.informationCore.cgColor]',
+        'container.layer.addSublayer(ringLayer)',
+      ]
+    : [
+        '// Inner ring',
+        'let ringView = UIView()',
+        `let ringR: CGFloat = ${ringR}`,
+        `ringView.frame = CGRect(x: ${18 - ringR}, y: ${16 - ringR}, width: ringR * 2, height: ringR * 2)`,
+        'ringView.layer.cornerRadius = ringR',
+        `ringView.backgroundColor = ${PIN_RING_SWIFT[stateKey]}`,
+        'container.addSubview(ringView)',
+      ];
+
   return [
     `// MapPin · ${stateKey} · number: "${number}"`,
     '',
@@ -3216,16 +3276,18 @@ function buildMPIOSSnippet(stateKey, number) {
     'let container = UIView()',
     'container.frame.size = CGSize(width: pinSize, height: pinSize)',
     '',
-    '// Pin icon — tabler "map-pin" exported to Xcode asset catalog as "pt-icon-map-pin"',
+    '// Pin body — vector asset tinted with token',
     'let pinView = UIImageView(',
-    '    image: UIImage(named: "pt-icon-map-pin")?',
+    '    image: UIImage(named: "pt_map_pin_body")?',
     '        .withRenderingMode(.alwaysTemplate)',
     ')',
     `pinView.tintColor = ${PIN_BODY_SWIFT[stateKey]}`,
     'pinView.frame = container.bounds',
     'container.addSubview(pinView)',
     '',
-    '// Number label — centred in the pin circle head',
+    ...ringSetup,
+    '',
+    '// Number label — centred in ring (cy=16)',
     'let label = UILabel()',
     `label.text = "${number}"`,
     `label.textColor = ${PIN_TEXT_SWIFT[stateKey]}`,
@@ -3235,12 +3297,36 @@ function buildMPIOSSnippet(stateKey, number) {
     '    attributes: style.attributes()',
     ')',
     'label.textAlignment = .center',
-    'label.frame = CGRect(x: 7, y: 4, width: pinSize - 14, height: 25)',
+    'label.frame = CGRect(x: 6, y: 6, width: pinSize - 12, height: 20)',
     'container.addSubview(label)',
   ].join('\n');
 }
 
 function buildMPAndroidSnippet(stateKey, number) {
+  const ringR = MP_RING_R[stateKey];
+  const ringBlock = stateKey === 'selected'
+    ? [
+        '        // Inner ring — teal gradient (Gradient/Default)',
+        '        Box(',
+        '            modifier = Modifier',
+        `                .size((${ringR * 2}).dp)`,
+        '                .background(',
+        '                    brush = Brush.linearGradient(',
+        '                        colors = listOf(Color(0xFF5AD4E4), colors.surfaceInformationCore)',
+        '                    ),',
+        '                    shape = CircleShape',
+        '                )',
+        '        )',
+      ]
+    : [
+        '        // Inner ring',
+        '        Box(',
+        '            modifier = Modifier',
+        `                .size((${ringR * 2}).dp)`,
+        `                .background(${PIN_RING_COMPOSE[stateKey]}, CircleShape)`,
+        '        )',
+      ];
+
   return [
     `// MapPin · ${stateKey} · number: "${number}"`,
     'val colors = MaterialTheme.ptColors',
@@ -3251,22 +3337,23 @@ function buildMPAndroidSnippet(stateKey, number) {
     '        contentAlignment = Alignment.Center,',
     '        modifier = modifier.size(PTDimens.s9)  // 36.dp',
     '    ) {',
-    '        // Pin icon — tabler "map-pin" added to res/drawable as pt_icon_map_pin.xml',
+    '        // Pin body vector',
     '        Icon(',
-    '            painter = painterResource(R.drawable.pt_icon_map_pin),',
+    '            painter = painterResource(R.drawable.pt_map_pin_body),',
     '            contentDescription = null,',
     `            tint = ${PIN_BODY_COMPOSE[stateKey]},`,
     '            modifier = Modifier.fillMaxSize()',
     '        )',
-    '        // Number — centred in the pin circle head',
+    ...ringBlock,
+    '        // Number — centred in ring (cy=16)',
     '        Text(',
     `            text = "${number}",`,
     `            style = ${PIN_WEIGHT_COMPOSE[stateKey]},`,
     `            color = ${PIN_TEXT_COMPOSE[stateKey]},`,
     '            textAlign = TextAlign.Center,',
     '            modifier = Modifier',
-    '                .padding(bottom = 7.dp)  // offset up into circle head',
-    '                .width(22.dp)',
+    '                .padding(bottom = 10.dp)  // align with ring centre at 16dp from top',
+    '                .width(20.dp)',
     '        )',
     '    }',
     '}',
@@ -3293,6 +3380,21 @@ function updateMPPreviews() {
 function buildMapPinPlayground() {
   const container = document.getElementById('mapPinPlayground');
   if (!container) return;
+
+  // ── Shared SVG gradient defs (referenced by all selected pin rings) ───────
+  const gradDefs = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  gradDefs.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  gradDefs.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+  gradDefs.setAttribute('aria-hidden', 'true');
+  gradDefs.innerHTML = `
+    <defs>
+      <linearGradient id="pt-mp-sel-ring" x1="1" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#5ad4e4"/>
+        <stop offset="100%" stop-color="#009bc8"/>
+      </linearGradient>
+    </defs>
+  `;
+  container.appendChild(gradDefs);
 
   // ── Number picker widget ──────────────────────────────────────────────────
   const picker = document.createElement('div');
