@@ -817,3 +817,15 @@ Several rounds of corrections were made to align the component with the Figma de
 | 6 | Button Icon Only component stylesheet not distributed | ⚠️ CSS/UIKit/Compose implementations exist only in docs |
 
 ---
+
+## Entry 12 · 2026-05-03 · PST
+
+### Bug Fix — Button Icon Only Secondary border missing in Default and AI Default states ✅
+
+**Root cause:** `.pt-btn-icon` used the `border` shorthand (`border: 1px solid transparent`). Because `.pt-btn-icon` is declared *after* `.pt-btn-secondary` in the stylesheet, the shorthand's `border-color: transparent` overrode the action border-color set by `.pt-btn-secondary` — same cascade order issue that would affect any type class defined earlier in the file.
+
+**Fix:** Replaced `border: 1px solid transparent` in `.pt-btn-icon` with longhand `border-width: 1px; border-style: solid;` — no `border-color` in the base class. Border color is now owned entirely by the type classes (`.pt-btn-primary`, `.pt-btn-secondary`, `.pt-btn-tertiary`), which already set it correctly via their own `border-color` rules.
+
+**File changed:** `docs/index.html`
+
+---
