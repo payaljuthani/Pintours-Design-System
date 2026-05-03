@@ -1104,6 +1104,47 @@
       cursor: not-allowed;
     }
 
+    /* ─── PT Button Icon Only ───────────────────────────────────── */
+    .pt-btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid transparent;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    /* Sizes */
+    .pt-btn-icon-sm {
+      width: var(--pt-scale-9, 36px);
+      height: var(--pt-scale-9, 36px);
+      border-radius: var(--pt-scale-1half, 6px);
+    }
+    .pt-btn-icon-md {
+      width: var(--pt-scale-11, 44px);
+      height: var(--pt-scale-11, 44px);
+      border-radius: var(--pt-scale-2, 8px);
+    }
+    .pt-btn-icon-lg {
+      width: var(--pt-scale-13, 52px);
+      height: var(--pt-scale-13, 52px);
+      border-radius: var(--pt-scale-2, 8px);
+    }
+
+    /* Hover shadows — mirrors pt-btn shadow rules */
+    .pt-btn-icon:not(.pt-btn-tertiary).pt-btn-icon-sm:hover:not(:disabled),
+    .pt-btn-icon:not(.pt-btn-tertiary).pt-btn-icon-sm.pt-btn-is-hover {
+      box-shadow: var(--pt-shadow-solid-xs, 0px 2px 0px 0px #a8c0c7, 0px 0px 4px 0px #cbd9dd);
+    }
+    .pt-btn-icon:not(.pt-btn-tertiary).pt-btn-icon-md:hover:not(:disabled),
+    .pt-btn-icon:not(.pt-btn-tertiary).pt-btn-icon-md.pt-btn-is-hover,
+    .pt-btn-icon:not(.pt-btn-tertiary).pt-btn-icon-lg:hover:not(:disabled),
+    .pt-btn-icon:not(.pt-btn-tertiary).pt-btn-icon-lg.pt-btn-is-hover {
+      box-shadow: var(--pt-shadow-solid-sm, 0px 4px 0px 0px #a8c0c7, 0px 0px 6px 0px #cbd9dd);
+    }
+    .pt-btn-icon:disabled { box-shadow: none; cursor: not-allowed; }
+
     /* ─── Responsive ─────────────────────────────────────────────── */
     @media (max-width: 680px) {
       main { padding: 32px 16px 80px; }
@@ -1479,6 +1520,7 @@
         <div class="nav-section-items" id="components-items">
           <a href="#shadows"                class="nav-link" data-section="shadows">Shadows</a>
           <a href="#components-button"      class="nav-link" data-section="components-button">Button</a>
+          <a href="#components-button-icon" class="nav-link" data-section="components-button-icon">Button Icon Only</a>
           <a href="#components-filter-chip" class="nav-link" data-section="components-filter-chip">Filter Chip</a>
           <a href="#components-eyebrow"     class="nav-link" data-section="components-eyebrow">Eyebrow Highlight</a>
           <a href="#components-tag"         class="nav-link" data-section="components-tag">Tag</a>
@@ -1548,6 +1590,13 @@
       <h2>Button</h2>
       <p class="comp-description">Allow users to trigger actions, submit forms, or navigate. Three types, three sizes, five states.</p>
       <div id="btnPlayground"></div>
+    </section>
+
+    <!-- ── Button Icon Only Component ── -->
+    <section id="components-button-icon">
+      <h2>Button Icon Only</h2>
+      <p class="comp-description">A square button that holds a single icon — no label. Three types, three sizes, five states. Picks up the same icon chosen in the Button playground.</p>
+      <div id="btnIconPlayground"></div>
     </section>
 
     <!-- ── Filter Chip Component ── -->

@@ -764,3 +764,56 @@ Several rounds of corrections were made to align the component with the Figma de
 | 5 | Map Pin component stylesheet not distributed | ⚠️ Carry-over from Entry 9 |
 
 ---
+
+## Entry 11 · 2026-05-03 · PST
+
+### Work Completed Since Entry 10
+
+---
+
+### Button Icon Only Component — Interactive Playground ✅
+
+**Source:** Figma nodes 679:1063 (Small), 679:1087 (Default), 679:1111 (Large)
+
+**What was done:**
+- Added `<section id="components-button-icon">` to `docs/index.html` with `#btnIconPlayground` shell populated by JS
+- Added "Button Icon Only" nav link to sidebar under Components (between Button and Filter Chip)
+- Built `buildBtnIconPlayground()` in `docs/main.js`:
+  - **Controls:** Size (Small / Default / Large), State (Default / Hover / Negative / Negative_hover / Disabled / AI Default / AI Hover) — same 7 states as Button
+  - **Three live preview rows:** Primary, Secondary, Tertiary — all update simultaneously on any control change
+  - **Per-row snippet panel** (`▸ {}`) with Web / iOS / Android tabs using the updater registry pattern (`btnIconSnippetUpdaters[]`)
+  - **Icon picker integration:** Picking an icon in the Icons gallery updates the Button Icon Only previews and snippets in sync with Button and all other playgrounds
+
+**Sizes confirmed from Figma:**
+
+| Size label | Dimensions | Border-radius | Icon |
+|---|---|---|---|
+| Small | 36×36px (`--pt-scale-9`) | 6px (`--pt-scale-1half`) | 16px |
+| Default | 44×44px (`--pt-scale-11`) | 8px (`--pt-scale-2`) | 20px |
+| Large | 52×52px (`--pt-scale-13`) | 8px (`--pt-scale-2`) | 24px |
+
+**CSS added to `docs/index.html`:**
+- Base `.pt-btn-icon`: `inline-flex`, centered, `border: 1px solid transparent`, transition
+- Size variants `.pt-btn-icon-sm/md/lg`: fixed `width` and `height` via scale tokens, border-radius per Figma
+- Hover shadow rules mirroring Button: `pt-shadow-solid-xs` for sm, `pt-shadow-solid-sm` for md/lg, tertiary excluded
+- Type/state classes (`.pt-btn-primary`, `.pt-btn-ai`, `.pt-btn-negative`, etc.) shared with Button — no duplication
+
+**Snippet generators (all three platforms):**
+- Reuse Button token maps (`BTN_BG`, `BTN_BG_SWIFT`, `BTN_BG_COMPOSE`, etc.) — all states covered including AI gradient and Negative variants
+- Output uses fixed `width: N / height: N` (scale tokens) instead of padding — the key difference from the regular Button snippet
+- Icon referenced by name in all three snippets for copy-paste readiness
+
+---
+
+### Open Items
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Success palette — `success` semantic tokens incorrectly reference `color.green.*` | ⚠️ Carry-over from Entry 5/6 |
+| 2 | Font weight discrepancies (Thin: tokens=300, Figma=400; Regular: tokens=500, Figma=600) | ⚠️ Carry-over from Entry 3 |
+| 3 | Button component stylesheet not distributed | ⚠️ Carry-over from Entry 3 |
+| 4 | Super Icon component stylesheet not distributed | ⚠️ Carry-over from Entry 6 |
+| 5 | Map Pin component stylesheet not distributed | ⚠️ Carry-over from Entry 9 |
+| 6 | Button Icon Only component stylesheet not distributed | ⚠️ CSS/UIKit/Compose implementations exist only in docs |
+
+---

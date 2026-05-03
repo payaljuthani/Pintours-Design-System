@@ -1727,6 +1727,15 @@ function buildIconGallery() {
         updateBtnPreviews();
         btnSnippetUpdaters.forEach(fn => fn());
 
+        // ── Push selection into the Button Icon Only playground ──────
+        if (btnIconIconLinkEl) {
+          btnIconIconLinkEl.textContent = name;
+          btnIconIconLinkEl.classList.add('chip-icon-link-name--updated');
+          setTimeout(() => btnIconIconLinkEl.classList.remove('chip-icon-link-name--updated'), 800);
+        }
+        updateBtnIconPreviews();
+        btnIconSnippetUpdaters.forEach(fn => fn());
+
         // ── Push selection into the Filter Chip playground ──────────
         chipIconName = name;
         if (chipIconLinkEl) {
@@ -2181,6 +2190,336 @@ function buildSuperIconPlayground() {
 
 
 buildBtnPlayground();
+
+// ─── Button Icon Only playground ─────────────────────────────────────────────
+
+// Icon size per button-icon size key
+const BTN_ICON_ICON_SIZE = { sm: 16, md: 20, lg: 24 };
+
+// Fixed square dimensions (width = height)
+const BTN_ICON_SIZE_CSS    = { sm: 'var(--pt-scale-9, 36px)',  md: 'var(--pt-scale-11, 44px)', lg: 'var(--pt-scale-13, 52px)' };
+const BTN_ICON_RADIUS_CSS  = { sm: 'var(--pt-scale-1half, 6px)', md: 'var(--pt-scale-2, 8px)',   lg: 'var(--pt-scale-2, 8px)'   };
+const BTN_ICON_SIZE_SWIFT  = { sm: 'PT.Scale.s9',    md: 'PT.Scale.s11',   lg: 'PT.Scale.s13'   };
+const BTN_ICON_RADIUS_SWIFT = { sm: 'PT.Scale.s1half', md: 'PT.Scale.s2',  lg: 'PT.Scale.s2'    };
+const BTN_ICON_SIZE_COMPOSE = { sm: 'PTDimens.s9',   md: 'PTDimens.s11',   lg: 'PTDimens.s13'   };
+const BTN_ICON_RADIUS_COMPOSE = { sm: 'PTDimens.s1half', md: 'PTDimens.s2', lg: 'PTDimens.s2'   };
+
+const btnIconState = { size: 'md', state: 'default' };
+const btnIconTypes = [
+  { key: 'primary',   label: 'Primary'   },
+  { key: 'secondary', label: 'Secondary' },
+  { key: 'tertiary',  label: 'Tertiary'  },
+];
+const btnIconControls = [
+  { key: 'size', label: 'Size', opts: [
+    { val: 'sm', label: 'Small'           },
+    { val: 'md', label: 'Default', active: true },
+    { val: 'lg', label: 'Large'           },
+  ]},
+  { key: 'state', label: 'State', opts: [
+    { val: 'default',        label: 'Default',       active: true },
+    { val: 'hover',          label: 'Hover'          },
+    { val: 'negative',       label: 'Negative'       },
+    { val: 'negative_hover', label: 'Negative_hover' },
+    { val: 'disabled',       label: 'Disabled'       },
+    { val: 'ai',             label: 'AI Default'     },
+    { val: 'ai_hover',       label: 'AI Hover'       },
+  ]},
+];
+
+// Reuse BTN_BG / BTN_COLOR / BTN_BORDER / BTN_BG_SWIFT etc. from the Button playground above.
+
+function getBtnIconClasses(type, { size, state }) {
+  const cls = ['pt-btn-icon', `pt-btn-icon-${size}`, `pt-btn-${type}`];
+  if (['hover', 'ai_hover', 'negative_hover'].includes(state)) cls.push('pt-btn-is-hover');
+  if (['negative', 'negative_hover'].includes(state))          cls.push('pt-btn-negative');
+  if (['ai', 'ai_hover'].includes(state))                      cls.push('pt-btn-ai');
+  return cls;
+}
+
+function buildBtnIconElement(type, { size, state }) {
+  const btn = document.createElement('button');
+  btn.className = getBtnIconClasses(type, { size, state }).join(' ');
+  if (state === 'disabled') btn.disabled = true;
+  btn.innerHTML = buildIconSvg(btnIconName, BTN_ICON_ICON_SIZE[size]);
+  return btn;
+}
+
+// ── Snippet generators ────────────────────────────────────────────────────────
+
+function getBtnIconShadowWeb(type, size, state) {
+  if (type === 'tertiary' || state === 'disabled') return null;
+  const isHover = ['hover', 'ai_hover', 'negative_hover'].includes(state);
+  if (!isHover) return null;
+  if (size === 'sm') return 'box-shadow: var(--pt-shadow-solid-xs);';
+  return 'box-shadow: var(--pt-shadow-solid-sm);';
+}
+
+function buildBtnIconWebSnippet(type, { size, state }) {
+  const bg     = BTN_BG[type][state];
+  const color  = BTN_COLOR[type][state];
+  const border = BTN_BORDER[type][state];
+  const dim    = BTN_ICON_SIZE_CSS[size];
+  const radius = BTN_ICON_RADIUS_CSS[size];
+  const shadow = getBtnIconShadowWeb(type, size, state);
+  const dis    = state === 'disabled' ? '\ncursor: not-allowed;' : '';
+  const iconPx = BTN_ICON_ICON_SIZE[size];
+  const isGradientBorder = type === 'primary' && (state === 'ai' || state === 'ai_hover');
+  const bgLine = isGradientBorder
+    ? `background:\n  ${bg} padding-box,\n  ${bg} border-box;`
+    : `background: ${bg};`;
+  const borderLine = isGradientBorder
+    ? `border: 1px solid transparent;`
+    : `border: 1px solid ${border};`;
+  return [
+    `/* Button Icon Only · ${type} · ${state} · ${size} */`,
+    bgLine,
+    `color: ${color};`,
+    borderLine,
+    `width: ${dim}; height: ${dim};`,
+    `border-radius: ${radius};`,
+    `display: inline-flex; align-items: center; justify-content: center;`,
+    shadow,
+    `/* tabler icon "${btnIconName}" (${iconPx}×${iconPx}px) — stroke="currentColor" */`,
+    dis,
+  ].filter(Boolean).join('\n');
+}
+
+function buildBtnIconIOSSnippet(type, { size, state }) {
+  const bg     = BTN_BG_SWIFT[type][state];
+  const color  = BTN_COLOR_SWIFT[type][state];
+  const border = BTN_BORDER_SWIFT[type][state];
+  const dim    = BTN_ICON_SIZE_SWIFT[size];
+  const radius = BTN_ICON_RADIUS_SWIFT[size];
+  const dis    = state === 'disabled' ? '\nbutton.isEnabled = false' : '';
+  const aiNote = state === 'ai' ? '\n// AI gradient: apply CAGradientLayer with\n// colors: [PT.Color.Green.c400.cgColor, PT.Color.Teal.c500.cgColor]' : '';
+  const borderLine = border === '.clear' ? '' : `\nbutton.layer.borderColor = ${border}.cgColor\nbutton.layer.borderWidth = 1`;
+  const iconPx = BTN_ICON_ICON_SIZE[size];
+  let shadowLines = '';
+  if (type !== 'tertiary' && state !== 'disabled') {
+    const isHoverState = ['hover', 'ai_hover', 'negative_hover'].includes(state);
+    if (isHoverState) {
+      const offsetY = size === 'sm' ? 'PT.Scale.shalf' : 'PT.Scale.s1';
+      const blur    = size === 'sm' ? 'PT.Scale.s1'    : 'PT.Scale.s1half';
+      shadowLines = [
+        `\nbutton.layer.shadowColor   = PT.Semantic.Shadow.normal.cgColor`,
+        `button.layer.shadowOffset  = CGSize(width: 0, height: ${offsetY})`,
+        `button.layer.shadowOpacity = 1`,
+        `button.layer.shadowRadius  = ${blur}`,
+      ].join('\n');
+    }
+  }
+  return [
+    `// Button Icon Only · ${type} · ${state} · ${size}`,
+    `button.backgroundColor = ${bg}`,
+    `button.tintColor = ${color}`,
+    borderLine,
+    `button.layer.cornerRadius = ${radius}`,
+    `// Fixed square: set width/height constraint to ${dim}`,
+    `// Icon: pt-icon-${btnIconName} (${iconPx}pt) — UIImage.alwaysTemplate`,
+    shadowLines,
+    dis + aiNote,
+  ].filter(Boolean).join('\n');
+}
+
+function buildBtnIconAndroidSnippet(type, { size, state }) {
+  const colors = 'val colors = MaterialTheme.ptColors';
+  const bg     = BTN_BG_COMPOSE[type][state];
+  const color  = BTN_COLOR_COMPOSE[type][state];
+  const border = BTN_BORDER_COMPOSE[type][state];
+  const dim    = BTN_ICON_SIZE_COMPOSE[size];
+  const radius = BTN_ICON_RADIUS_COMPOSE[size];
+  const dis    = state === 'disabled' ? '\n  enabled = false,' : '';
+  const iconPx = BTN_ICON_ICON_SIZE[size];
+  const aiNote = state === 'ai'
+    ? '\n// AI gradient: Brush.horizontalGradient(listOf(MaterialTheme.ptColors.colorGreen400, MaterialTheme.ptColors.colorTeal500))'
+    : state === 'ai_hover'
+    ? '\n// AI gradient hover: Brush.horizontalGradient(listOf(MaterialTheme.ptColors.colorGreen500, MaterialTheme.ptColors.colorTeal600))'
+    : '';
+  const borderLine = border === 'Color.Transparent' ? '' : `\n  border = BorderStroke(1.dp, ${border}),`;
+  let shadowLine = '';
+  if (type !== 'tertiary' && state !== 'disabled') {
+    const isHoverState = ['hover', 'ai_hover', 'negative_hover'].includes(state);
+    if (isHoverState) {
+      shadowLine = size === 'sm'
+        ? `\n  // shadow: pt-shadow-solid-xs → elevation = PTDimens.shalf (2.dp)`
+        : `\n  // shadow: pt-shadow-solid-sm → elevation = PTDimens.s1 (4.dp)`;
+    }
+  }
+  return [
+    `// Button Icon Only · ${type} · ${state} · ${size}`,
+    colors,
+    `IconButton(`,
+    `  modifier = Modifier.size(${dim}).clip(RoundedCornerShape(${radius}))`,
+    `      .background(${bg}),`,
+    borderLine,
+    `  onClick = { /* handle click */ },`,
+    dis,
+    shadowLine,
+    `) {`,
+    `  Icon(`,
+    `    // pt_icon_${btnIconName.replace(/-/g, '_')} (${iconPx}dp)`,
+    `    tint = ${color}`,
+    `  )`,
+    `}`,
+    aiNote,
+  ].filter(Boolean).join('\n');
+}
+
+// ── Snippet panel ─────────────────────────────────────────────────────────────
+
+const btnIconSnippetUpdaters = [];
+
+function buildBtnIconSnippetPanel(type) {
+  const panel = document.createElement('div');
+  panel.className = 'snippet-panel inline';
+
+  panel.innerHTML = `
+    <div class="snippet-tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn" data-tab="ios">iOS</button>
+      <button class="tab-btn" data-tab="android">Android</button>
+    </div>
+    <div class="snippet-code-wrap">
+      <code class="snippet-text"></code>
+      <button class="copy-btn">Copy</button>
+    </div>
+  `;
+
+  const tabs    = panel.querySelectorAll('.tab-btn');
+  const codeEl  = panel.querySelector('.snippet-text');
+  const copyBtn = panel.querySelector('.copy-btn');
+  let activeTab = 'web';
+
+  const generators = {
+    web:     () => buildBtnIconWebSnippet(type, btnIconState),
+    ios:     () => buildBtnIconIOSSnippet(type, btnIconState),
+    android: () => buildBtnIconAndroidSnippet(type, btnIconState),
+  };
+
+  function refresh() { codeEl.textContent = generators[activeTab](); }
+  refresh();
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      refresh();
+    });
+  });
+
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(generators[activeTab]());
+    copyBtn.textContent = 'Copied!';
+    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+  });
+
+  btnIconSnippetUpdaters.push(refresh);
+  return panel;
+}
+
+// ── DOM builder ───────────────────────────────────────────────────────────────
+
+let btnIconIconLinkEl = null;
+
+function updateBtnIconPreviews() {
+  document.querySelectorAll('.btn-icon-row-wrap').forEach(wrap => {
+    const preview = wrap.querySelector('.btn-row-preview');
+    preview.innerHTML = '';
+    preview.appendChild(buildBtnIconElement(wrap.dataset.type, btnIconState));
+  });
+}
+
+function buildBtnIconPlayground() {
+  const container = document.getElementById('btnIconPlayground');
+  if (!container) return;
+
+  // Controls
+  const ctrlsEl = document.createElement('div');
+  ctrlsEl.className = 'btn-controls';
+
+  btnIconControls.forEach(({ key, label, opts }) => {
+    const row = document.createElement('div');
+    row.className = 'btn-ctrl-row';
+    const lbl = document.createElement('span');
+    lbl.className = 'btn-ctrl-label';
+    lbl.textContent = label;
+    row.appendChild(lbl);
+
+    opts.forEach(({ val, label: optLabel, active }) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-ctrl' + (active ? ' active' : '');
+      btn.dataset.ctrl = key;
+      btn.dataset.val  = val;
+      btn.textContent  = optLabel;
+      btn.addEventListener('click', () => {
+        row.querySelectorAll('.btn-ctrl').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        btnIconState[key] = val;
+        updateBtnIconPreviews();
+        btnIconSnippetUpdaters.forEach(fn => fn());
+      });
+      row.appendChild(btn);
+    });
+
+    ctrlsEl.appendChild(row);
+  });
+
+  container.appendChild(ctrlsEl);
+
+  // Icon-link status row (mirrors the Button playground link)
+  const iconLinkRow = document.createElement('div');
+  iconLinkRow.className = 'chip-icon-link';
+  iconLinkRow.innerHTML =
+    `<span class="chip-icon-link-label">Icon</span>` +
+    `<code class="chip-icon-link-name">arrow-right</code>` +
+    `<span class="chip-icon-link-hint">— pick any icon in the <a href="#icons" class="chip-icon-link-anchor">Icons ↑</a> section to swap</span>`;
+  btnIconIconLinkEl = iconLinkRow.querySelector('.chip-icon-link-name');
+  container.appendChild(iconLinkRow);
+
+  // Preview rows — one per type
+  const rowsEl = document.createElement('div');
+  rowsEl.className = 'btn-rows';
+
+  btnIconTypes.forEach(({ key, label }) => {
+    const rowWrap = document.createElement('div');
+    rowWrap.className = 'btn-row-wrap btn-icon-row-wrap';
+    rowWrap.dataset.type = key;
+
+    const row = document.createElement('div');
+    row.className = 'btn-row';
+
+    const meta = document.createElement('div');
+    meta.className = 'btn-row-meta';
+    meta.innerHTML = `<div class="btn-row-label">${label}</div>`;
+
+    const preview = document.createElement('div');
+    preview.className = 'btn-row-preview';
+    preview.appendChild(buildBtnIconElement(key, btnIconState));
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'snippet-toggle';
+    toggleBtn.textContent = '▸ {}';
+
+    row.append(meta, preview, toggleBtn);
+
+    const panel = buildBtnIconSnippetPanel(key);
+    panel._toggleBtn = toggleBtn;
+
+    toggleBtn.addEventListener('click', () => {
+      toggleBtn.classList.toggle('active', !panel.classList.contains('open'));
+      togglePanel(panel);
+    });
+
+    rowWrap.append(row, panel);
+    rowsEl.appendChild(rowWrap);
+  });
+
+  container.appendChild(rowsEl);
+}
+
+buildBtnIconPlayground();
 
 // ─── Filter Chip playground ───────────────────────────────────────────────────
 
