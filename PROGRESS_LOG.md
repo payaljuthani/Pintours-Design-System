@@ -818,6 +818,104 @@ Several rounds of corrections were made to align the component with the Figma de
 
 ---
 
+## Entry 13 · 2026-05-03 · PST
+
+### Work Completed Since Entry 12
+
+---
+
+### Selection Component Category — Interactive Playground ✅
+
+**Source:** Figma node 707:3114 (`PinTours-Design-System` → Selection section)
+
+**What was done:**
+- Added a "Selection" collapsible sub-section inside the Components sidebar group (nested below Map Pin, indented to 44px) — not a separate top-level nav section
+- Added three sub-component sections to `docs/index.html`: `#components-selection-checkbox`, `#components-selection-radio`, `#components-selection-toggle`
+- All three playgrounds use a shared horizontal card grid layout (`buildSelectionPlayground()`) identical to the Shadow section: states shown side-by-side as cards, a single shared snippet panel opens below the grid when any card's `▸ {}` is clicked
+- Added CSS to `docs/index.html` for `.pt-checkbox`, `.pt-radio`, `.pt-toggle`, `.sel-grid`, `.sel-card`, `.nav-sub-section`, `.nav-sub-link`
+
+---
+
+#### Checkbox
+
+**States (7):** Unselected · Unselected Neutral · Selected Color · Selected Neutral · Indeterminate · Indeterminate Neutral · Disabled
+
+**Sizes:** 16 / 20 / 24px (size control updates all card previews and open snippet simultaneously)
+
+**Token decisions from Figma:**
+
+| State | Background | Border | Icon |
+|---|---|---|---|
+| Unselected | transparent | `--pt-semantic-border-divider` | — |
+| Unselected Neutral | transparent | `--pt-semantic-border-default` | — |
+| Selected Color | `--pt-semantic-surface-action` | `--pt-semantic-border-action` | White checkmark SVG |
+| Selected Neutral | `--pt-semantic-typography-headings` | `--pt-semantic-border-default` | White checkmark SVG |
+| Indeterminate | `--pt-semantic-surface-action` | `--pt-semantic-border-action` | White minus SVG |
+| Indeterminate Neutral | `--pt-semantic-typography-headings` | `--pt-semantic-border-default` | White minus SVG |
+| Disabled | `--pt-semantic-surface-page` | `--pt-semantic-border-disabled` | — |
+
+**Implementation:** Pure CSS (`border: 1.5px solid`, `border-radius: 2–3px`). Checkmark and minus rendered as inline SVG (`viewBox="0 0 16 16"`, scaled via `width/height` attribute per size).
+
+---
+
+#### Radio Button
+
+**States (5):** Unselected · Unselected Hover · Selected Color · Selected Neutral · Disabled
+
+**Sizes:** 16 / 20 / 24px
+
+**Token decisions from Figma:**
+
+| State | Border | Inner dot |
+|---|---|---|
+| Unselected | `--pt-semantic-border-divider` | none |
+| Unselected Hover | `--pt-semantic-border-default` | none |
+| Selected Color | `--pt-semantic-border-action` | `--pt-semantic-surface-action` |
+| Selected Neutral | `--pt-semantic-border-default` | `--pt-semantic-typography-headings` |
+| Disabled | `--pt-semantic-border-disabled` | none |
+
+**Implementation:** `border: 2px solid`, `border-radius: 50%`. Inner dot is a child `div` (`border-radius: 50%`) sized at 7/9/11px for 16/20/24px containers.
+
+---
+
+#### Toggle
+
+**States (3):** False · True · Disabled
+
+**Sizes:** Small (32×16px) · Medium (40×20px) · Large (48×24px) — mapped to `--pt-scale-8/4`, `--pt-scale-10/5`, `--pt-scale-12/6`
+
+**Token decisions from Figma:**
+
+| State | Track background | Track border | Knob |
+|---|---|---|---|
+| False | `--pt-semantic-surface-disabled` | `--pt-semantic-border-disabled` | White (#fff) |
+| True | `--pt-semantic-surface-action` | `--pt-semantic-border-action` | White (#fff), right-aligned |
+| Disabled | `--pt-semantic-surface-page` | `--pt-semantic-border-disabled` | `--pt-semantic-surface-disabled` |
+
+**Implementation:** Track is `border-radius: 999px`, knob is an absolutely positioned child circle (20/16/12px). True state positions knob via `left: calc(100% - 2px); transform: translateX(-100%)`. Disabled knob uses `--pt-semantic-surface-disabled` (not white with opacity) — matches Figma's distinct visual treatment.
+
+---
+
+### Shared Playground Architecture
+
+Replaced the previous per-component boilerplate (separate `buildSnippetPanel`, `updatePreviews`, and `buildPlayground` functions per component) with a single `buildSelectionPlayground({ containerId, states, controls, stateObj, buildElement, buildSnippets })` helper. Each component now registers via a thin 7-line wrapper. Reduces ~300 lines of duplicated JS to ~110 lines.
+
+---
+
+### Open Items
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Success palette — `success` semantic tokens incorrectly reference `color.green.*` | ⚠️ Carry-over from Entry 5/6 |
+| 2 | Font weight discrepancies (Thin: tokens=300, Figma=400; Regular: tokens=500, Figma=600) | ⚠️ Carry-over from Entry 3 |
+| 3 | Button component stylesheet not distributed | ⚠️ Carry-over from Entry 3 |
+| 4 | Super Icon component stylesheet not distributed | ⚠️ Carry-over from Entry 6 |
+| 5 | Map Pin component stylesheet not distributed | ⚠️ Carry-over from Entry 9 |
+| 6 | Button Icon Only component stylesheet not distributed | ⚠️ Carry-over from Entry 12 |
+| 7 | Selection components stylesheet not distributed | ⚠️ Checkbox/Radio/Toggle CSS and native implementations exist only in docs |
+
+---
+
 ## Entry 12 · 2026-05-03 · PST
 
 ### Bug Fix — Button Icon Only Secondary border missing in Default and AI Default states ✅

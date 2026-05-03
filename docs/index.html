@@ -1484,6 +1484,248 @@
       color: var(--pt-semantic-typography-on_action);
       font-weight: 600;
     }
+
+    /* ─── Nav sub-section (nested within a nav-section-items) ───────── */
+    .nav-sub-section { margin-top: 2px; }
+
+    .nav-sub-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 6px 20px 6px 32px;
+      background: transparent;
+      border: none;
+      color: inherit;
+      font: 500 12px/1.4 'Poppins', sans-serif;
+      cursor: pointer;
+      text-align: left;
+      opacity: 0.6;
+    }
+    .nav-sub-header:hover { opacity: 1; }
+
+    .nav-sub-icon {
+      font-size: 14px;
+      font-weight: 300;
+      opacity: 0.45;
+      line-height: 1;
+    }
+
+    .nav-sub-items.collapsed { display: none; }
+
+    /* nav-sub-link shares nav-link base but sits deeper */
+    .nav-sub-link {
+      padding-left: 44px !important;
+      font-size: 12px !important;
+    }
+
+    /* ─── Selection playground — horizontal card grid ────────────── */
+    .sel-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 0;
+    }
+
+    .sel-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      background: var(--pt-semantic-surface-page, #f6f9f9);
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 10px;
+      padding: 18px 14px 14px;
+      min-width: 80px;
+      flex: 1;
+    }
+
+    .sel-card-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+    }
+
+    .sel-card-label {
+      font-size: 10px;
+      text-align: center;
+      opacity: 0.55;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    .sel-shared-panel {
+      display: none;
+      width: 100%;
+      margin-top: 12px;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .sel-shared-panel.open { display: block; }
+    .sel-shared-panel .snippet-tabs {
+      display: flex;
+      padding: 10px 14px 0;
+      border-bottom: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+    }
+    .sel-shared-panel .snippet-code-wrap {
+      position: relative;
+      padding: 16px;
+    }
+    .sel-shared-panel .snippet-text {
+      display: block;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre;
+      color: var(--pt-semantic-typography-headings, #222628);
+      overflow-x: auto;
+    }
+    .sel-shared-panel .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+    }
+
+    /* ─── PT Checkbox ───────────────────────────────────────────────── */
+    .pt-checkbox {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid;
+      flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .pt-checkbox-16 { width: 16px; height: 16px; border-radius: 2px; }
+    .pt-checkbox-20 { width: 20px; height: 20px; border-radius: 3px; }
+    .pt-checkbox-24 { width: 24px; height: 24px; border-radius: 3px; }
+
+    .pt-checkbox-unselected {
+      background: transparent;
+      border-color: var(--pt-semantic-border-divider, #a8c0c7);
+    }
+    .pt-checkbox-unselected_neutral {
+      background: transparent;
+      border-color: var(--pt-semantic-border-default, #222628);
+    }
+    .pt-checkbox-selected_color {
+      background: var(--pt-semantic-surface-action, #5d9c4d);
+      border-color: var(--pt-semantic-border-action, #5d9c4d);
+    }
+    .pt-checkbox-selected_neutral {
+      background: var(--pt-semantic-typography-headings, #222628);
+      border-color: var(--pt-semantic-border-default, #222628);
+    }
+    .pt-checkbox-indeterminate {
+      background: var(--pt-semantic-surface-action, #5d9c4d);
+      border-color: var(--pt-semantic-border-action, #5d9c4d);
+    }
+    .pt-checkbox-indeterminate_neutral {
+      background: var(--pt-semantic-typography-headings, #222628);
+      border-color: var(--pt-semantic-border-default, #222628);
+    }
+    .pt-checkbox-disabled {
+      background: var(--pt-semantic-surface-page, #f2f6f7);
+      border-color: var(--pt-semantic-border-disabled, #a8c0c7);
+      cursor: not-allowed;
+    }
+    .pt-checkbox svg { display: block; pointer-events: none; }
+
+    /* ─── PT Radio Button ───────────────────────────────────────────── */
+    .pt-radio {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .pt-radio-16 { width: 16px; height: 16px; }
+    .pt-radio-20 { width: 20px; height: 20px; }
+    .pt-radio-24 { width: 24px; height: 24px; }
+
+    .pt-radio-unselected {
+      background: transparent;
+      border-color: var(--pt-semantic-border-divider, #a8c0c7);
+    }
+    .pt-radio-unselected_hover {
+      background: transparent;
+      border-color: var(--pt-semantic-border-default, #222628);
+    }
+    .pt-radio-selected_color {
+      background: transparent;
+      border-color: var(--pt-semantic-border-action, #5d9c4d);
+    }
+    .pt-radio-selected_neutral {
+      background: transparent;
+      border-color: var(--pt-semantic-border-default, #222628);
+    }
+    .pt-radio-disabled {
+      background: transparent;
+      border-color: var(--pt-semantic-border-disabled, #a8c0c7);
+      cursor: not-allowed;
+    }
+    .pt-radio-dot {
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: transparent;
+    }
+    .pt-radio-16 .pt-radio-dot  { width: 7px;  height: 7px;  }
+    .pt-radio-20 .pt-radio-dot  { width: 9px;  height: 9px;  }
+    .pt-radio-24 .pt-radio-dot  { width: 11px; height: 11px; }
+    .pt-radio-selected_color .pt-radio-dot {
+      background: var(--pt-semantic-surface-action, #5d9c4d);
+    }
+    .pt-radio-selected_neutral .pt-radio-dot {
+      background: var(--pt-semantic-typography-headings, #222628);
+    }
+
+    /* ─── PT Toggle ─────────────────────────────────────────────────── */
+    .pt-toggle {
+      position: relative;
+      display: inline-block;
+      border-radius: 999px;
+      border: 1px solid;
+      flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .pt-toggle-lg { width: 48px; height: 24px; }
+    .pt-toggle-md { width: 40px; height: 20px; }
+    .pt-toggle-sm { width: 32px; height: 16px; }
+
+    .pt-toggle-false {
+      background: var(--pt-semantic-surface-disabled, #a8c0c7);
+      border-color: var(--pt-semantic-border-disabled, #a8c0c7);
+    }
+    .pt-toggle-true {
+      background: var(--pt-semantic-surface-action, #5d9c4d);
+      border-color: var(--pt-semantic-border-action, #5d9c4d);
+    }
+    .pt-toggle-disabled {
+      background: var(--pt-semantic-surface-page, #f2f6f7);
+      border-color: var(--pt-semantic-border-disabled, #a8c0c7);
+      cursor: not-allowed;
+    }
+    .pt-toggle-knob {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 50%;
+      background: #fff;
+      transition: left 0.2s, right 0.2s;
+    }
+    .pt-toggle-disabled .pt-toggle-knob { background: var(--pt-semantic-surface-disabled, #a8c0c7); }
+
+    .pt-toggle-lg .pt-toggle-knob { width: 20px; height: 20px; }
+    .pt-toggle-md .pt-toggle-knob { width: 16px; height: 16px; }
+    .pt-toggle-sm .pt-toggle-knob { width: 12px; height: 12px; }
+
+    .pt-toggle-false .pt-toggle-knob,
+    .pt-toggle-disabled .pt-toggle-knob { left: 2px; }
+    .pt-toggle-true .pt-toggle-knob    { left: calc(100% - 2px); transform: translateY(-50%) translateX(-100%); }
   </style>
 </head>
 <body>
@@ -1527,6 +1769,18 @@
           <a href="#components-tag"         class="nav-link" data-section="components-tag">Tag</a>
           <a href="#components-super-icon"  class="nav-link" data-section="components-super-icon">Super Icon</a>
           <a href="#components-map-pin"    class="nav-link" data-section="components-map-pin">Map Pin</a>
+
+          <div class="nav-sub-section">
+            <button class="nav-sub-header" id="selection-sub-toggle">
+              Selection
+              <span class="nav-sub-icon" id="selection-sub-icon">−</span>
+            </button>
+            <div class="nav-sub-items" id="selection-sub-items">
+              <a href="#components-selection-checkbox" class="nav-link nav-sub-link" data-section="components-selection-checkbox">Checkbox</a>
+              <a href="#components-selection-radio"    class="nav-link nav-sub-link" data-section="components-selection-radio">Radio Button</a>
+              <a href="#components-selection-toggle"   class="nav-link nav-sub-link" data-section="components-selection-toggle">Toggle</a>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
@@ -1633,6 +1887,27 @@
       <h2>Map Pin</h2>
       <p class="comp-description">Numbered location markers for tour stop sequences. Three states — Default (upcoming), Selected (active), Visited (completed). Type any number in the picker and all three states update live.</p>
       <div id="mapPinPlayground"></div>
+    </section>
+
+    <!-- ── Selection: Checkbox ── -->
+    <section id="components-selection-checkbox">
+      <h2>Checkbox</h2>
+      <p class="comp-description">Binary toggle for single or multiple selections. Seven states across three sizes — Unselected, Unselected Neutral, Selected Color, Selected Neutral, Indeterminate, Indeterminate Neutral, and Disabled.</p>
+      <div id="checkboxPlayground"></div>
+    </section>
+
+    <!-- ── Selection: Radio Button ── -->
+    <section id="components-selection-radio">
+      <h2>Radio Button</h2>
+      <p class="comp-description">Single-choice selector that restricts a group to one active option at a time. Five states across three sizes — Unselected, Hover, Selected Color, Selected Neutral, and Disabled.</p>
+      <div id="radioPlayground"></div>
+    </section>
+
+    <!-- ── Selection: Toggle ── -->
+    <section id="components-selection-toggle">
+      <h2>Toggle</h2>
+      <p class="comp-description">Binary on/off control for immediate setting changes. Three states (False, True, Disabled) across three sizes — Small, Medium, and Large.</p>
+      <div id="togglePlayground"></div>
     </section>
   </main>
 

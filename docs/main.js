@@ -1056,8 +1056,9 @@ gradientsSection.appendChild(gradientSnippetWrap);
 // ─── Sidebar — section toggle ─────────────────────────────────────────────────
 
 [
-  { toggleId: 'foundations-toggle', itemsId: 'foundations-items', iconId: 'foundations-icon' },
-  { toggleId: 'components-toggle',  itemsId: 'components-items',  iconId: 'components-icon'  },
+  { toggleId: 'foundations-toggle',   itemsId: 'foundations-items',   iconId: 'foundations-icon'   },
+  { toggleId: 'components-toggle',    itemsId: 'components-items',    iconId: 'components-icon'    },
+  { toggleId: 'selection-sub-toggle', itemsId: 'selection-sub-items', iconId: 'selection-sub-icon' },
 ].forEach(({ toggleId, itemsId, iconId }) => {
   const btn   = document.getElementById(toggleId);
   const items = document.getElementById(itemsId);
@@ -4091,3 +4092,618 @@ function buildMapPinPlayground() {
 }
 
 buildMapPinPlayground();
+
+// ─── Selection shared helper ──────────────────────────────────────────────────
+
+function buildSelectionPlayground({ containerId, states, controls, stateObj, buildElement, buildSnippets }) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  // ── Controls ──────────────────────────────────────────────────────────────
+  const ctrlsEl = document.createElement('div');
+  ctrlsEl.className = 'btn-controls';
+
+  controls.forEach(({ key, label, opts }) => {
+    const row = document.createElement('div');
+    row.className = 'btn-ctrl-row';
+    const lbl = document.createElement('span');
+    lbl.className = 'btn-ctrl-label';
+    lbl.textContent = label;
+    row.appendChild(lbl);
+
+    opts.forEach(({ val, label: optLabel, active }) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-ctrl' + (active ? ' active' : '');
+      btn.textContent = optLabel;
+      btn.addEventListener('click', () => {
+        row.querySelectorAll('.btn-ctrl').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        stateObj[key] = val;
+        // Rebuild each card preview and re-cache snippets
+        grid.querySelectorAll('.sel-card').forEach((card, i) => {
+          const stateKey = states[i].key;
+          const prev = card.querySelector('.sel-card-preview');
+          prev.innerHTML = '';
+          prev.appendChild(buildElement(stateKey, stateObj));
+          allSnippets[stateKey] = buildSnippets(stateKey, stateObj);
+        });
+        if (activeState && sharedPanel.classList.contains('open')) {
+          panelCode.textContent = allSnippets[activeState][activeTab];
+        }
+      });
+      row.appendChild(btn);
+    });
+
+    ctrlsEl.appendChild(row);
+  });
+
+  // ── Grid ──────────────────────────────────────────────────────────────────
+  const grid = document.createElement('div');
+  grid.className = 'sel-grid';
+
+  // ── Shared snippet panel ──────────────────────────────────────────────────
+  const sharedPanel = document.createElement('div');
+  sharedPanel.className = 'sel-shared-panel';
+  sharedPanel.innerHTML = `
+    <div class="snippet-tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn"        data-tab="ios">iOS</button>
+      <button class="tab-btn"        data-tab="android">Android</button>
+    </div>
+    <div class="snippet-code-wrap">
+      <code class="snippet-text"></code>
+      <button class="copy-btn">Copy</button>
+    </div>`;
+
+  const panelTabs = sharedPanel.querySelectorAll('.tab-btn');
+  const panelCode = sharedPanel.querySelector('.snippet-text');
+  const panelCopy = sharedPanel.querySelector('.copy-btn');
+  let activeTab   = 'web';
+  let activeState = null;
+
+  panelTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      panelTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      if (activeState) panelCode.textContent = allSnippets[activeState][activeTab];
+    });
+  });
+
+  panelCopy.addEventListener('click', () => {
+    if (!activeState) return;
+    navigator.clipboard.writeText(allSnippets[activeState][activeTab]);
+    panelCopy.textContent = 'Copied!';
+    setTimeout(() => { panelCopy.textContent = 'Copy'; }, 1500);
+  });
+
+  // ── Build cards ───────────────────────────────────────────────────────────
+  const allSnippets = {};
+
+  states.forEach(({ key, label }) => {
+    allSnippets[key] = buildSnippets(key, stateObj);
+
+    const card = document.createElement('div');
+    card.className = 'sel-card';
+
+    const prevWrap = document.createElement('div');
+    prevWrap.className = 'sel-card-preview';
+    prevWrap.appendChild(buildElement(key, stateObj));
+
+    const cardLabel = document.createElement('div');
+    cardLabel.className = 'sel-card-label';
+    cardLabel.textContent = label;
+
+    const snippetBtn = document.createElement('button');
+    snippetBtn.className = 'sem-snippet-btn';
+    snippetBtn.textContent = '▸ {}';
+
+    snippetBtn.addEventListener('click', () => {
+      const alreadyOpen = sharedPanel.classList.contains('open') && activeState === key;
+      grid.querySelectorAll('.sem-snippet-btn').forEach(b => { b.classList.remove('active'); b.textContent = '▸ {}'; });
+      if (alreadyOpen) {
+        sharedPanel.classList.remove('open');
+        activeState = null;
+      } else {
+        activeState = key;
+        snippetBtn.classList.add('active');
+        snippetBtn.textContent = '▾ {}';
+        panelCode.textContent = allSnippets[key][activeTab];
+        panelCopy.textContent = 'Copy';
+        sharedPanel.classList.add('open');
+      }
+    });
+
+    card.append(prevWrap, cardLabel, snippetBtn);
+    grid.appendChild(card);
+  });
+
+  container.append(ctrlsEl, grid, sharedPanel);
+}
+
+// ─── Selection helpers ────────────────────────────────────────────────────────
+
+function buildCheckSvg(size) {
+  const sw = size <= 16 ? '1.5' : '2';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 16 16" fill="none"><path d="M2.5 8.5L6.5 12L13.5 4.5" stroke="#fff" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function buildMinusSvg(size) {
+  const sw = size <= 16 ? '1.5' : '2';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 16 16" fill="none"><path d="M3 8H13" stroke="#fff" stroke-width="${sw}" stroke-linecap="round"/></svg>`;
+}
+
+// ─── Checkbox playground ──────────────────────────────────────────────────────
+
+const cbxState = { size: '24' };
+
+const cbxStates = [
+  { key: 'unselected',            label: 'Unselected'            },
+  { key: 'unselected_neutral',    label: 'Unselected Neutral'    },
+  { key: 'selected_color',        label: 'Selected Color'        },
+  { key: 'selected_neutral',      label: 'Selected Neutral'      },
+  { key: 'indeterminate',         label: 'Indeterminate'         },
+  { key: 'indeterminate_neutral', label: 'Indeterminate Neutral' },
+  { key: 'disabled',              label: 'Disabled'              },
+];
+
+const cbxControls = [
+  { key: 'size', label: 'Size', opts: [
+    { val: '16', label: '16px' },
+    { val: '20', label: '20px' },
+    { val: '24', label: '24px', active: true },
+  ]},
+];
+
+function buildCbxElement(stateKey, { size }) {
+  const el = document.createElement('div');
+  el.className = `pt-checkbox pt-checkbox-${size} pt-checkbox-${stateKey}`;
+  if (['selected_color', 'selected_neutral'].includes(stateKey)) {
+    el.innerHTML = buildCheckSvg(parseInt(size));
+  } else if (['indeterminate', 'indeterminate_neutral'].includes(stateKey)) {
+    el.innerHTML = buildMinusSvg(parseInt(size));
+  }
+  return el;
+}
+
+// ── Checkbox token maps ───────────────────────────────────────────────────────
+
+const CBX_BG = {
+  unselected:            'transparent',
+  unselected_neutral:    'transparent',
+  selected_color:        'var(--pt-semantic-surface-action)',
+  selected_neutral:      'var(--pt-semantic-typography-headings)',
+  indeterminate:         'var(--pt-semantic-surface-action)',
+  indeterminate_neutral: 'var(--pt-semantic-typography-headings)',
+  disabled:              'var(--pt-semantic-surface-page)',
+};
+const CBX_BORDER = {
+  unselected:            'var(--pt-semantic-border-divider)',
+  unselected_neutral:    'var(--pt-semantic-border-default)',
+  selected_color:        'var(--pt-semantic-border-action)',
+  selected_neutral:      'var(--pt-semantic-border-default)',
+  indeterminate:         'var(--pt-semantic-border-action)',
+  indeterminate_neutral: 'var(--pt-semantic-border-default)',
+  disabled:              'var(--pt-semantic-border-disabled)',
+};
+const CBX_SIZE_TOKEN = { '16': 'var(--pt-scale-4)', '20': 'var(--pt-scale-5)', '24': 'var(--pt-scale-6)' };
+const CBX_RADIUS     = { '16': '2px', '20': '3px', '24': '3px' };
+
+const CBX_BG_SWIFT = {
+  unselected:            '.clear',
+  unselected_neutral:    '.clear',
+  selected_color:        'PT.Semantic.Surface.action',
+  selected_neutral:      'PT.Semantic.Typography.headings',
+  indeterminate:         'PT.Semantic.Surface.action',
+  indeterminate_neutral: 'PT.Semantic.Typography.headings',
+  disabled:              'PT.Semantic.Surface.page',
+};
+const CBX_BORDER_SWIFT = {
+  unselected:            'PT.Semantic.Border.divider',
+  unselected_neutral:    'PT.Semantic.Border.default',
+  selected_color:        'PT.Semantic.Border.action',
+  selected_neutral:      'PT.Semantic.Border.default',
+  indeterminate:         'PT.Semantic.Border.action',
+  indeterminate_neutral: 'PT.Semantic.Border.default',
+  disabled:              'PT.Semantic.Border.disabled',
+};
+
+const CBX_BG_COMPOSE = {
+  unselected:            'Color.Transparent',
+  unselected_neutral:    'Color.Transparent',
+  selected_color:        'colors.surfaceAction',
+  selected_neutral:      'colors.typographyHeadings',
+  indeterminate:         'colors.surfaceAction',
+  indeterminate_neutral: 'colors.typographyHeadings',
+  disabled:              'colors.surfacePage',
+};
+const CBX_BORDER_COMPOSE = {
+  unselected:            'colors.borderDivider',
+  unselected_neutral:    'colors.borderDefault',
+  selected_color:        'colors.borderAction',
+  selected_neutral:      'colors.borderDefault',
+  indeterminate:         'colors.borderAction',
+  indeterminate_neutral: 'colors.borderDefault',
+  disabled:              'colors.borderDisabled',
+};
+
+// ── Checkbox snippet builders ─────────────────────────────────────────────────
+
+function buildCbxWebSnippet(stateKey, { size }) {
+  const hasIcon = ['selected_color', 'selected_neutral', 'indeterminate', 'indeterminate_neutral'].includes(stateKey);
+  const iconComment = hasIcon
+    ? `  /* ${stateKey.startsWith('indeterminate') ? 'Minus' : 'Checkmark'} icon: white SVG centered inside */\n`
+    : '';
+  return [
+    `/* Checkbox · ${stateKey} · ${size}px */`,
+    `.checkbox {`,
+    `  width: ${CBX_SIZE_TOKEN[size]};`,
+    `  height: ${CBX_SIZE_TOKEN[size]};`,
+    `  border-radius: ${CBX_RADIUS[size]};`,
+    `  border: 1.5px solid ${CBX_BORDER[stateKey]};`,
+    `  background: ${CBX_BG[stateKey]};`,
+    `  display: flex;`,
+    `  align-items: center;`,
+    `  justify-content: center;`,
+    `}`,
+    iconComment,
+  ].filter(Boolean).join('\n');
+}
+
+function buildCbxIOSSnippet(stateKey, { size }) {
+  const hasCheck  = ['selected_color', 'selected_neutral'].includes(stateKey);
+  const hasMinus  = ['indeterminate', 'indeterminate_neutral'].includes(stateKey);
+  const isDisabled = stateKey === 'disabled';
+  const sizePt    = `${size}pt`;
+  const radius    = CBX_RADIUS[size];
+  const iconLine  = hasCheck
+    ? `\n// Add SF Symbol "checkmark" (weight: medium) tinted with\n// PT.Semantic.Typography.onAction`
+    : hasMinus
+      ? `\n// Add SF Symbol "minus" (weight: medium) tinted with\n// PT.Semantic.Typography.onAction`
+      : '';
+  const disLine   = isDisabled ? `\nbox.isUserInteractionEnabled = false` : '';
+  return [
+    `// Checkbox · ${stateKey} · ${size}pt`,
+    `let box = UIView()`,
+    `box.frame.size = CGSize(width: ${size}, height: ${size})`,
+    `box.layer.cornerRadius = ${radius.replace('px', '')}`,
+    `box.layer.masksToBounds = true`,
+    `box.backgroundColor = ${CBX_BG_SWIFT[stateKey]}`,
+    `box.layer.borderColor = ${CBX_BORDER_SWIFT[stateKey]}.cgColor`,
+    `box.layer.borderWidth = 1.5`,
+    disLine,
+    iconLine,
+  ].filter(Boolean).join('\n');
+}
+
+function buildCbxAndroidSnippet(stateKey, { size }) {
+  const hasCheck = ['selected_color', 'selected_neutral', 'indeterminate', 'indeterminate_neutral'].includes(stateKey);
+  const isChecked = hasCheck ? 'true' : 'false';
+  const isDisabled = stateKey === 'disabled';
+  const disLine  = isDisabled ? `\n    android:enabled="false"` : '';
+  return [
+    `<!-- Checkbox · ${stateKey} · ${size}dp -->`,
+    `<CheckBox`,
+    `    android:layout_width="${size}dp"`,
+    `    android:layout_height="${size}dp"`,
+    `    android:checked="${isChecked}"`,
+    disLine,
+    `    app:buttonTint="@color/${CBX_BG_COMPOSE[stateKey].replace(/colors\.|Color\./, '').replace(/([A-Z])/g, c => '_' + c.toLowerCase()).replace(/^_/, 'pt_semantic_').replace(/^pt_semantic_transparent/, 'pt_semantic_surface_page')}" />`,
+  ].filter(Boolean).join('\n');
+}
+
+// ── Checkbox playground ───────────────────────────────────────────────────────
+
+function buildCbxSnippets(stateKey, state) {
+  return {
+    web:     buildCbxWebSnippet(stateKey, state),
+    ios:     buildCbxIOSSnippet(stateKey, state),
+    android: buildCbxAndroidSnippet(stateKey, state),
+  };
+}
+
+buildSelectionPlayground({
+  containerId:   'checkboxPlayground',
+  states:        cbxStates,
+  controls:      cbxControls,
+  stateObj:      cbxState,
+  buildElement:  buildCbxElement,
+  buildSnippets: buildCbxSnippets,
+});
+
+// ─── Radio Button playground ──────────────────────────────────────────────────
+
+const radioState = { size: '24' };
+
+const radioStates = [
+  { key: 'unselected',       label: 'Unselected'       },
+  { key: 'unselected_hover', label: 'Unselected Hover' },
+  { key: 'selected_color',   label: 'Selected Color'   },
+  { key: 'selected_neutral', label: 'Selected Neutral' },
+  { key: 'disabled',         label: 'Disabled'         },
+];
+
+const radioControls = [
+  { key: 'size', label: 'Size', opts: [
+    { val: '16', label: '16px' },
+    { val: '20', label: '20px' },
+    { val: '24', label: '24px', active: true },
+  ]},
+];
+
+function buildRadioElement(stateKey, { size }) {
+  const el = document.createElement('div');
+  el.className = `pt-radio pt-radio-${size} pt-radio-${stateKey}`;
+  const dot = document.createElement('div');
+  dot.className = 'pt-radio-dot';
+  el.appendChild(dot);
+  return el;
+}
+
+// ── Radio token maps ──────────────────────────────────────────────────────────
+
+const RADIO_BORDER = {
+  unselected:       'var(--pt-semantic-border-divider)',
+  unselected_hover: 'var(--pt-semantic-border-default)',
+  selected_color:   'var(--pt-semantic-border-action)',
+  selected_neutral: 'var(--pt-semantic-border-default)',
+  disabled:         'var(--pt-semantic-border-disabled)',
+};
+const RADIO_DOT = {
+  unselected:       'transparent',
+  unselected_hover: 'transparent',
+  selected_color:   'var(--pt-semantic-surface-action)',
+  selected_neutral: 'var(--pt-semantic-typography-headings)',
+  disabled:         'transparent',
+};
+const RADIO_SIZE_TOKEN = CBX_SIZE_TOKEN;
+
+const RADIO_BORDER_SWIFT = {
+  unselected:       'PT.Semantic.Border.divider',
+  unselected_hover: 'PT.Semantic.Border.default',
+  selected_color:   'PT.Semantic.Border.action',
+  selected_neutral: 'PT.Semantic.Border.default',
+  disabled:         'PT.Semantic.Border.disabled',
+};
+const RADIO_DOT_SWIFT = {
+  unselected:       null,
+  unselected_hover: null,
+  selected_color:   'PT.Semantic.Surface.action',
+  selected_neutral: 'PT.Semantic.Typography.headings',
+  disabled:         null,
+};
+
+const RADIO_BORDER_COMPOSE = {
+  unselected:       'colors.borderDivider',
+  unselected_hover: 'colors.borderDefault',
+  selected_color:   'colors.borderAction',
+  selected_neutral: 'colors.borderDefault',
+  disabled:         'colors.borderDisabled',
+};
+const RADIO_DOT_COMPOSE = {
+  unselected:       null,
+  unselected_hover: null,
+  selected_color:   'colors.surfaceAction',
+  selected_neutral: 'colors.typographyHeadings',
+  disabled:         null,
+};
+
+// ── Radio snippet builders ────────────────────────────────────────────────────
+
+function buildRadioWebSnippet(stateKey, { size }) {
+  const hasDot = RADIO_DOT[stateKey] !== 'transparent';
+  const dotSizeMap = { '16': '7px', '20': '9px', '24': '11px' };
+  const dotLine = hasDot
+    ? `\n.radio::after {\n  content: '';\n  width: ${dotSizeMap[size]};\n  height: ${dotSizeMap[size]};\n  border-radius: 50%;\n  background: ${RADIO_DOT[stateKey]};\n}`
+    : '';
+  return [
+    `/* Radio · ${stateKey} · ${size}px */`,
+    `.radio {`,
+    `  width: ${RADIO_SIZE_TOKEN[size]};`,
+    `  height: ${RADIO_SIZE_TOKEN[size]};`,
+    `  border-radius: 50%;`,
+    `  border: 2px solid ${RADIO_BORDER[stateKey]};`,
+    `  display: flex;`,
+    `  align-items: center;`,
+    `  justify-content: center;`,
+    `}`,
+    dotLine,
+  ].filter(Boolean).join('\n');
+}
+
+function buildRadioIOSSnippet(stateKey, { size }) {
+  const hasDot = !!RADIO_DOT_SWIFT[stateKey];
+  const dotSizeMap = { '16': '7', '20': '9', '24': '11' };
+  const isDisabled = stateKey === 'disabled';
+  const dotBlock = hasDot
+    ? `\nlet dot = UIView()\ndot.layer.cornerRadius = ${Math.floor(parseInt(dotSizeMap[size]) / 2)}\ndot.backgroundColor = ${RADIO_DOT_SWIFT[stateKey]}\nlet d = ${dotSizeMap[size]}.0\ndot.frame = CGRect(x: (${size} - d) / 2, y: (${size} - d) / 2, width: d, height: d)\nradio.addSubview(dot)`
+    : '';
+  const disLine = isDisabled ? `\nradio.isUserInteractionEnabled = false\nradio.alpha = 0.5` : '';
+  return [
+    `// Radio · ${stateKey} · ${size}pt`,
+    `let radio = UIView()`,
+    `radio.frame.size = CGSize(width: ${size}, height: ${size})`,
+    `radio.layer.cornerRadius = ${size / 2}`,
+    `radio.layer.borderWidth = 2`,
+    `radio.layer.borderColor = ${RADIO_BORDER_SWIFT[stateKey]}.cgColor`,
+    disLine,
+    dotBlock,
+  ].filter(Boolean).join('\n');
+}
+
+function buildRadioAndroidSnippet(stateKey, { size }) {
+  const isChecked = ['selected_color', 'selected_neutral'].includes(stateKey);
+  const isDisabled = stateKey === 'disabled';
+  const tintToken = isChecked
+    ? (stateKey === 'selected_color' ? '@color/pt_semantic_border_action' : '@color/pt_semantic_border_default')
+    : '@color/pt_semantic_border_divider';
+  const disLine = isDisabled ? `\n    android:enabled="false"` : '';
+  return [
+    `<!-- Radio · ${stateKey} · ${size}dp -->`,
+    `<RadioButton`,
+    `    android:layout_width="${size}dp"`,
+    `    android:layout_height="${size}dp"`,
+    `    android:checked="${isChecked}"`,
+    disLine,
+    `    app:buttonTint="${tintToken}" />`,
+  ].filter(Boolean).join('\n');
+}
+
+// ── Radio playground ──────────────────────────────────────────────────────────
+
+function buildRadioSnippets(stateKey, state) {
+  return {
+    web:     buildRadioWebSnippet(stateKey, state),
+    ios:     buildRadioIOSSnippet(stateKey, state),
+    android: buildRadioAndroidSnippet(stateKey, state),
+  };
+}
+
+buildSelectionPlayground({
+  containerId:   'radioPlayground',
+  states:        radioStates,
+  controls:      radioControls,
+  stateObj:      radioState,
+  buildElement:  buildRadioElement,
+  buildSnippets: buildRadioSnippets,
+});
+
+// ─── Toggle playground ────────────────────────────────────────────────────────
+
+const tglState = { size: 'lg' };
+
+const tglStates = [
+  { key: 'false',    label: 'False'    },
+  { key: 'true',     label: 'True'     },
+  { key: 'disabled', label: 'Disabled' },
+];
+
+const tglControls = [
+  { key: 'size', label: 'Size', opts: [
+    { val: 'sm', label: 'Small'  },
+    { val: 'md', label: 'Medium' },
+    { val: 'lg', label: 'Large', active: true },
+  ]},
+];
+
+function buildToggleElement(stateKey, { size }) {
+  const el = document.createElement('div');
+  el.className = `pt-toggle pt-toggle-${size} pt-toggle-${stateKey}`;
+  const knob = document.createElement('div');
+  knob.className = 'pt-toggle-knob';
+  el.appendChild(knob);
+  return el;
+}
+
+// ── Toggle token maps ─────────────────────────────────────────────────────────
+
+const TGL_BG = {
+  false:    'var(--pt-semantic-surface-disabled)',
+  true:     'var(--pt-semantic-surface-action)',
+  disabled: 'var(--pt-semantic-surface-page)',
+};
+const TGL_BORDER = {
+  false:    'var(--pt-semantic-border-disabled)',
+  true:     'var(--pt-semantic-border-action)',
+  disabled: 'var(--pt-semantic-border-disabled)',
+};
+const TGL_WIDTH  = { sm: 'var(--pt-scale-8)',  md: 'var(--pt-scale-10)', lg: 'var(--pt-scale-12)' };
+const TGL_HEIGHT = { sm: 'var(--pt-scale-4)',  md: 'var(--pt-scale-5)',  lg: 'var(--pt-scale-6)'  };
+const TGL_KNOB   = { sm: '12px', md: '16px', lg: '20px' };
+
+const TGL_BG_SWIFT = {
+  false:    'PT.Semantic.Surface.disabled',
+  true:     'PT.Semantic.Surface.action',
+  disabled: 'PT.Semantic.Surface.page',
+};
+const TGL_BG_COMPOSE = {
+  false:    'colors.surfaceDisabled',
+  true:     'colors.surfaceAction',
+  disabled: 'colors.surfacePage',
+};
+const TGL_SIZE_PT   = { sm: '32×16', md: '40×20', lg: '48×24' };
+const TGL_SIZE_DP   = { sm: '32×16', md: '40×20', lg: '48×24' };
+
+// ── Toggle snippet builders ───────────────────────────────────────────────────
+
+function buildTglWebSnippet(stateKey, { size }) {
+  const isTrue     = stateKey === 'true';
+  const isDisabled = stateKey === 'disabled';
+  const knobPos    = isTrue ? 'right: 2px;' : 'left: 2px;';
+  const disLine    = isDisabled ? '\n  opacity: 0.7;\n  cursor: not-allowed;' : '';
+  return [
+    `/* Toggle · ${stateKey} · ${size.toUpperCase()} */`,
+    `.toggle {`,
+    `  width: ${TGL_WIDTH[size]};`,
+    `  height: ${TGL_HEIGHT[size]};`,
+    `  border-radius: 999px;`,
+    `  background: ${TGL_BG[stateKey]};`,
+    `  border: 1px solid ${TGL_BORDER[stateKey]};`,
+    `  position: relative;`,
+    disLine,
+    `}`,
+    `.toggle-knob {`,
+    `  position: absolute;`,
+    `  width: ${TGL_KNOB[size]};`,
+    `  height: ${TGL_KNOB[size]};`,
+    `  border-radius: 50%;`,
+    `  background: #fff;`,
+    `  top: 50%;`,
+    `  transform: translateY(-50%);`,
+    `  ${knobPos}`,
+    `}`,
+  ].filter(Boolean).join('\n');
+}
+
+function buildTglIOSSnippet(stateKey, { size }) {
+  const isOn      = stateKey === 'true';
+  const isDisabled = stateKey === 'disabled';
+  const tintProp  = isOn ? 'onTintColor' : 'backgroundColor';
+  const tintVal   = isOn ? 'PT.Semantic.Surface.action' : 'PT.Semantic.Surface.disabled';
+  const disLine   = isDisabled ? `\ntgl.isEnabled = false` : '';
+  return [
+    `// Toggle · ${stateKey} · ${TGL_SIZE_PT[size]}pt`,
+    `let tgl = UISwitch()`,
+    `tgl.isOn = ${isOn}`,
+    `tgl.onTintColor = PT.Semantic.Surface.action`,
+    disLine,
+    `// Note: UISwitch has a fixed intrinsic size (~51×31pt).`,
+    `// Scale to match design spec using transform:`,
+    `// tgl.transform = CGAffineTransform(scaleX: 0.94, y: 0.77)`,
+  ].filter(Boolean).join('\n');
+}
+
+function buildTglAndroidSnippet(stateKey, { size }) {
+  const isChecked  = stateKey === 'true';
+  const isDisabled = stateKey === 'disabled';
+  const disLine    = isDisabled ? `\n    android:enabled="false"` : '';
+  return [
+    `<!-- Toggle · ${stateKey} · ${TGL_SIZE_DP[size]}dp -->`,
+    `<com.google.android.material.materialswitch.MaterialSwitch`,
+    `    android:layout_width="wrap_content"`,
+    `    android:layout_height="wrap_content"`,
+    `    android:checked="${isChecked}"`,
+    disLine,
+    `    app:trackTint="@color/pt_semantic_surface_${stateKey === 'true' ? 'action' : stateKey === 'disabled' ? 'page' : 'disabled'}"`,
+    `    app:thumbTint="@android:color/white" />`,
+  ].filter(Boolean).join('\n');
+}
+
+// ── Toggle playground ─────────────────────────────────────────────────────────
+
+function buildTglSnippets(stateKey, state) {
+  return {
+    web:     buildTglWebSnippet(stateKey, state),
+    ios:     buildTglIOSSnippet(stateKey, state),
+    android: buildTglAndroidSnippet(stateKey, state),
+  };
+}
+
+buildSelectionPlayground({
+  containerId:   'togglePlayground',
+  states:        tglStates,
+  controls:      tglControls,
+  stateObj:      tglState,
+  buildElement:  buildToggleElement,
+  buildSnippets: buildTglSnippets,
+});
