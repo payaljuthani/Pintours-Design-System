@@ -16,7 +16,7 @@ All tokens share the prefix `pt-` and follow a hierarchy based on their role.
 | Color palette | `--pt-color-{palette}-{shade}` | `PT.Color.{Palette}.c{shade}` | `@color/pt_color_{palette}_{shade}` |
 | Typography scale | `--pt-typography-{device}-{style}-{prop}` | n/a (use TextStyles) | `@dimen/pt_typography_{device}_{style}_{prop}` |
 | Spacing scale | `--pt-scale-{step}` | `PT.Scale.s{step}` | `@dimen/pt_scale_{step}` |
-| Shadow effect | `--pt-shadow-lg` | `PT.Shadow.lg` | `@style/pt_shadow_lg` |
+| Shadow effect | `--pt-shadow-{group}-{size}` | `PT.Shadow.{group}{Size}` | n/a (CSS-only) |
 | Breakpoint | `--pt-breakpoint-{name}` | n/a | n/a |
 
 Palette names: `green`, `teal`, `red`, `yellow`, `grey`.
@@ -88,11 +88,42 @@ Border-specific roles: `page`, `default`, `divider`, `card_primary`, `action`, `
 
 ### Shadow tokens
 
-| CSS | Swift | Android | Light value | Dark value |
-|---|---|---|---|---|
-| `--pt-semantic-shadow` | `PT.Semantic.Shadow.shadow` | `@color/pt_semantic_shadow` | `#dce6e9` | `rgba(17,19,20,0.5)` |
-| `--pt-semantic-shadow-normal` | `PT.Semantic.Shadow.normal` | `@color/pt_semantic_shadow_normal` | `#b9cdd2` | `#111314` |
-| `--pt-shadow-lg` | `PT.Shadow.lg` | `@style/pt_shadow_lg` | `0px 12px 32px 0px #dce6e9, 0px 8px 16px 0px #b9cdd2` | same |
+**Shadow color primitives** (use via the effect tokens below, not directly):
+
+| CSS | Light value | Dark value |
+|---|---|---|
+| `--pt-semantic-shadow` | `#cbd9dd` | `rgba(17,19,20,0.5)` |
+| `--pt-semantic-shadow-normal` | `#a8c0c7` | `#111314` |
+
+**Shadow effect tokens** — three groups, five sizes each. Use the CSS variable as a `box-shadow` value.
+
+Pattern: `--pt-shadow-{group}-{size}` where group = `gradient` | `solid` | `bottom_sheet`, size = `xs` | `sm` | `md` | `lg` | `xl`.
+
+| Group | Purpose | Example token |
+|---|---|---|
+| `gradient` | Soft blurred elevation (cards, modals) | `--pt-shadow-gradient-lg` |
+| `solid` | Crisp bottom-edge depth (buttons, inputs) | `--pt-shadow-solid-md` |
+| `bottom_sheet` | Upward shadow for bottom sheets / drawers | `--pt-shadow-bottom_sheet-lg` |
+
+Resolved light-mode values:
+
+| Token | Value |
+|---|---|
+| `--pt-shadow-gradient-xs` | `0px 2px 4px 0px #a8c0c7` |
+| `--pt-shadow-gradient-sm` | `0px 3px 6px 0px #a8c0c7` |
+| `--pt-shadow-gradient-md` | `0px 6px 12px 0px #a8c0c7, 0px 6px 12px 0px #cbd9dd` |
+| `--pt-shadow-gradient-lg` | `0px 12px 32px 0px #cbd9dd, 0px 8px 16px 0px #a8c0c7` |
+| `--pt-shadow-gradient-xl` | `0px 32px 48px 0px #cbd9dd, 0px 16px 24px 0px #a8c0c7` |
+| `--pt-shadow-solid-xs` | `0px 2px 0px 0px #a8c0c7, 0px 0px 4px 0px #cbd9dd` |
+| `--pt-shadow-solid-sm` | `0px 4px 0px 0px #a8c0c7, 0px 0px 6px 0px #cbd9dd` |
+| `--pt-shadow-solid-md` | `0px 6px 0px 0px #a8c0c7, 0px 0px 8px 0px #cbd9dd` |
+| `--pt-shadow-solid-lg` | `0px 8px 0px 0px #a8c0c7, 0px 0px 12px 0px #cbd9dd` |
+| `--pt-shadow-solid-xl` | `0px 12px 0px 0px #a8c0c7, 0px 0px 16px 0px #cbd9dd` |
+| `--pt-shadow-bottom_sheet-xs` | `0px -2px 4px 0px #a8c0c7` |
+| `--pt-shadow-bottom_sheet-sm` | `0px -3px 6px 0px #a8c0c7` |
+| `--pt-shadow-bottom_sheet-md` | `0px -3px 20px 0px #a8c0c7, 0px -6px 12px 0px #cbd9dd` |
+| `--pt-shadow-bottom_sheet-lg` | `0px -8px 24px 0px #a8c0c7, 0px -12px 40px 0px #cbd9dd` |
+| `--pt-shadow-bottom_sheet-xl` | `0px -12px 32px 0px #a8c0c7, 0px -24px 48px 0px #cbd9dd` |
 
 ### Spacing scale
 
@@ -156,7 +187,15 @@ When reading a Figma design, map fill and style names to tokens as follows:
 | Border/Action | `--pt-semantic-border-action` | `PT.Semantic.Border.action` | `@color/pt_semantic_border_action` |
 | Border/Error | `--pt-semantic-border-error` | `PT.Semantic.Border.error` | `@color/pt_semantic_border_error` |
 | Icon/Action | `--pt-semantic-icon-action` | `PT.Semantic.Icon.action` | `@color/pt_semantic_icon_action` |
-| Elevation/Large | `--pt-shadow-lg` | `PT.Shadow.lg` | `@style/pt_shadow_lg` |
+| Shadow/Gradient/Xs | `--pt-shadow-gradient-xs` | n/a | n/a |
+| Shadow/Gradient/Sm | `--pt-shadow-gradient-sm` | n/a | n/a |
+| Shadow/Gradient/Md | `--pt-shadow-gradient-md` | n/a | n/a |
+| Shadow/Gradient/Lg | `--pt-shadow-gradient-lg` | n/a | n/a |
+| Shadow/Gradient/Xl | `--pt-shadow-gradient-xl` | n/a | n/a |
+| Shadow/Solid/Xs | `--pt-shadow-solid-xs` | n/a | n/a |
+| Shadow/Solid/Md | `--pt-shadow-solid-md` | n/a | n/a |
+| Shadow/Solid/Lg | `--pt-shadow-solid-lg` | n/a | n/a |
+| Shadow/Bottom_sheet/Lg | `--pt-shadow-bottom_sheet-lg` | n/a | n/a |
 | Green/500 | `--pt-color-green-500` | `PT.Color.Green.c500` | `@color/pt_color_green_500` |
 | Teal/500 | `--pt-color-teal-500` | `PT.Color.Teal.c500` | `@color/pt_color_teal_500` |
 
@@ -467,4 +506,4 @@ Key semantic values (light mode):
 | `--pt-semantic-typography-on_action` | `#ffffff` | `#000000` |
 | `--pt-semantic-border-default` | `#222628` | `#f2f6f7` |
 | `--pt-semantic-border-divider` | `#a8c0c7` | `#657377` |
-| `--pt-shadow-lg` | `0px 12px 32px 0px #dce6e9, 0px 8px 16px 0px #b9cdd2` | same |
+| `--pt-shadow-gradient-lg` | `0px 12px 32px 0px #cbd9dd, 0px 8px 16px 0px #a8c0c7` | same |

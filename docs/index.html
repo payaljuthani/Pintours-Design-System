@@ -73,6 +73,13 @@
 
     .nav-section { margin-bottom: 4px; }
 
+    .nav-divider {
+      height: 1px;
+      background: var(--pt-semantic-border-divider, #a8c0c7);
+      margin: 12px 8px;
+      opacity: 0.5;
+    }
+
     .nav-section-header {
       display: flex;
       align-items: center;
@@ -343,6 +350,13 @@
       opacity: 0.6;
     }
     .sem-snippet-btn:hover { opacity: 1; background: var(--pt-semantic-surface-page, #f6f9f9); }
+    .sem-snippet-btn.active {
+      opacity: 1;
+      border-color: var(--pt-semantic-border-action, #5d9c4d);
+      color: var(--pt-semantic-typography-action, #5d9c4d);
+      background: transparent;
+    }
+
 
     /* Inline snippet panel inside semantic tiles */
     .sem-tile .snippet-panel {
@@ -452,28 +466,68 @@
     .scale-info { font-size: 12px; opacity: 0.55; min-width: 140px; font-family: monospace; }
 
     /* ─── Shadow section ─────────────────────────────────────────── */
-    .shadow-card {
-      display: inline-flex;
+    .shadow-group { margin-bottom: 40px; }
+    .shadow-group h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--pt-semantic-typography-headings, #222628); }
+    .shadow-group-desc { font-size: 12px; color: var(--pt-semantic-typography-body_secondary, #657377); margin-bottom: 16px; margin-top: -10px; }
+    .shadow-grid {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .shadow-preview-card {
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 24px;
-      background: var(--pt-semantic-surface-card_primary, #fff);
-      border-radius: 16px;
-      padding: 28px 36px;
-      margin-bottom: 24px;
-      box-shadow: var(--pt-shadow-lg, 0px 12px 32px 0px #dce6e9, 0px 8px 16px 0px #b9cdd2);
-    }
-    .shadow-card-dot {
-      width: 48px; height: 48px;
+      gap: 14px;
+      background: var(--pt-semantic-surface-page, #f6f9f9);
       border-radius: 12px;
-      background: var(--pt-semantic-surface-action, #5d9c4d);
+      padding: 24px 20px 18px;
+      min-width: 140px;
+      flex: 1;
     }
-    .shadow-card-label { font-size: 13px; }
-    .shadow-card-token { font-size: 14px; font-weight: 600; font-family: monospace; margin-top: 2px; }
-    .shadow-snippet-wrap { max-width: 480px; }
-    .shadow-snippet-wrap .snippet-panel {
-      position: static;
+    .shadow-preview-box {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+    }
+    .shadow-preview-label { font-size: 11px; color: var(--pt-semantic-typography-body_secondary, #657377); text-transform: uppercase; letter-spacing: 0.05em; }
+    .shadow-preview-token { font-size: 11px; font-weight: 600; font-family: monospace; color: var(--pt-semantic-typography-headings, #222628); text-align: center; word-break: break-all; }
+
+    /* Shared full-width panel that sits below the shadow grid */
+    .shadow-shared-panel {
+      display: none;
       width: 100%;
-      box-shadow: none;
+      margin-top: 12px;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .shadow-shared-panel.open { display: block; }
+    .shadow-shared-panel .snippet-tabs {
+      display: flex;
+      gap: 0;
+      padding: 10px 14px 0;
+      border-bottom: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+    }
+    .shadow-shared-panel .snippet-code-wrap {
+      position: relative;
+      padding: 16px;
+    }
+    .shadow-shared-panel .snippet-text {
+      display: block;
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre;
+      color: var(--pt-semantic-typography-headings, #222628);
+      overflow-x: auto;
+    }
+    .shadow-shared-panel .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
     }
 
     /* ─── Gradient section ──────────────────────────────────────── */
@@ -903,9 +957,6 @@
     .pt-btn-primary:hover:not(:disabled) {
       background: var(--pt-semantic-surface-action_hover, #4a7d3e);
       border-color: var(--pt-semantic-border-action_hover, #4a7d3e);
-      border-bottom-width: 4px;
-      box-shadow: 0 0 var(--pt-scale-1half, 6px) 0 var(--pt-semantic-shadow, #dce6e9),
-                  0 var(--pt-scale-1, 4px) 0 0 var(--pt-semantic-shadow-normal, #b9cdd2);
     }
 
     /* Secondary */
@@ -940,9 +991,6 @@
     .pt-btn-negative:hover:not(:disabled) {
       background: var(--pt-semantic-surface-negative_hover, #ab3737);
       border-color: var(--pt-semantic-border-negative_hover, #ab3737);
-      border-bottom-width: 4px;
-      box-shadow: 0 0 var(--pt-scale-1half, 6px) 0 var(--pt-semantic-shadow, #dce6e9),
-                  0 var(--pt-scale-1, 4px) 0 0 var(--pt-semantic-shadow-normal, #b9cdd2);
     }
 
     /* Gradient */
@@ -956,9 +1004,6 @@
     .pt-btn-primary.pt-btn-is-hover {
       background: var(--pt-semantic-surface-action_hover, #4a7d3e);
       border-color: var(--pt-semantic-border-action_hover, #4a7d3e);
-      border-bottom-width: 4px;
-      box-shadow: 0 0 var(--pt-scale-1half, 6px) 0 var(--pt-semantic-shadow, #dce6e9),
-                  0 var(--pt-scale-1, 4px) 0 0 var(--pt-semantic-shadow-normal, #b9cdd2);
     }
     .pt-btn-secondary.pt-btn-is-hover {
       background: var(--pt-semantic-surface-card_primary, #fff);
@@ -970,6 +1015,34 @@
       text-decoration: underline;
     }
 
+    /* Gradient (AI) hover — Default__Gradient_Hover */
+    .pt-btn-primary.pt-btn-ai:hover:not(:disabled),
+    .pt-btn-primary.pt-btn-ai.pt-btn-is-hover {
+      background:
+        linear-gradient(to right, var(--pt-color-green-500, #5d9c4d), var(--pt-color-teal-600, #007ca0)) padding-box,
+        linear-gradient(to right, var(--pt-color-green-500, #5d9c4d), var(--pt-color-teal-600, #007ca0)) border-box;
+      border-color: transparent;
+    }
+
+    /* Negative hover — primary fills darken, secondary/tertiary handled below */
+    .pt-btn-negative.pt-btn-is-hover {
+      background: var(--pt-semantic-surface-negative_hover, #ab3737);
+      border-color: var(--pt-semantic-border-negative_hover, #ab3737);
+    }
+
+    /* ─── Button shadows — hover states only, no tertiary ────────── */
+    .pt-btn:not(.pt-btn-tertiary).pt-btn-sm:hover:not(:disabled),
+    .pt-btn:not(.pt-btn-tertiary).pt-btn-sm.pt-btn-is-hover {
+      box-shadow: var(--pt-shadow-solid-xs, 0px 2px 0px 0px #a8c0c7, 0px 0px 4px 0px #cbd9dd);
+    }
+    .pt-btn:not(.pt-btn-tertiary).pt-btn-md:hover:not(:disabled),
+    .pt-btn:not(.pt-btn-tertiary).pt-btn-md.pt-btn-is-hover,
+    .pt-btn:not(.pt-btn-tertiary).pt-btn-lg:hover:not(:disabled),
+    .pt-btn:not(.pt-btn-tertiary).pt-btn-lg.pt-btn-is-hover {
+      box-shadow: var(--pt-shadow-solid-sm, 0px 4px 0px 0px #a8c0c7, 0px 0px 6px 0px #cbd9dd);
+    }
+    .pt-btn:disabled { box-shadow: none; }
+
     /* Negative — Secondary and Tertiary overrides */
     .pt-btn-secondary.pt-btn-negative {
       background: var(--pt-semantic-surface-page, #f6f9f9);
@@ -980,6 +1053,7 @@
     .pt-btn-secondary.pt-btn-negative.pt-btn-is-hover {
       background: var(--pt-semantic-surface-card_primary, #fff);
       border-color: var(--pt-semantic-border-negative_hover, #ab3737);
+      color: var(--pt-semantic-typography-error, #802929);
     }
     .pt-btn-tertiary.pt-btn-negative {
       background: transparent;
@@ -988,13 +1062,18 @@
     }
     .pt-btn-tertiary.pt-btn-negative:hover:not(:disabled),
     .pt-btn-tertiary.pt-btn-negative.pt-btn-is-hover {
+      background: transparent;
+      border-color: transparent;
+      color: var(--pt-semantic-typography-error, #802929);
       text-decoration: underline;
     }
 
     /* AI Default — Primary only */
     .pt-btn-primary.pt-btn-ai {
-      background: linear-gradient(to right, var(--pt-color-green-400, #7db071), var(--pt-color-teal-500, #009bc8));
-      border-color: var(--pt-color-green-400, #7db071);
+      background:
+        linear-gradient(to right, var(--pt-color-green-400, #7db071), var(--pt-color-teal-500, #009bc8)) padding-box,
+        linear-gradient(to right, var(--pt-color-green-400, #7db071), var(--pt-color-teal-500, #009bc8)) border-box;
+      border-color: transparent;
       color: var(--pt-semantic-typography-on_action, #fff);
       text-decoration: none;
     }
@@ -1385,11 +1464,12 @@
           <a href="#semantic" class="nav-link" data-section="semantic">Semantic</a>
           <a href="#type"     class="nav-link" data-section="type">Typography</a>
           <a href="#scale"    class="nav-link" data-section="scale">Spacing</a>
-          <a href="#shadows"   class="nav-link" data-section="shadows">Shadows</a>
           <a href="#gradients" class="nav-link" data-section="gradients">Gradients</a>
           <a href="#icons"     class="nav-link" data-section="icons">Icons</a>
         </div>
       </div>
+
+      <div class="nav-divider"></div>
 
       <div class="nav-section">
         <button class="nav-section-header" id="components-toggle">
@@ -1397,6 +1477,7 @@
           <span class="nav-toggle-icon" id="components-icon">−</span>
         </button>
         <div class="nav-section-items" id="components-items">
+          <a href="#shadows"                class="nav-link" data-section="shadows">Shadows</a>
           <a href="#components-button"      class="nav-link" data-section="components-button">Button</a>
           <a href="#components-filter-chip" class="nav-link" data-section="components-filter-chip">Filter Chip</a>
           <a href="#components-eyebrow"     class="nav-link" data-section="components-eyebrow">Eyebrow Highlight</a>
@@ -1443,12 +1524,6 @@
       <div id="spacingScale"></div>
     </section>
 
-    <!-- ── Shadows ── -->
-    <section id="shadows">
-      <h2>Shadows</h2>
-      <!-- populated by main.js -->
-    </section>
-
     <!-- ── Gradients ── -->
     <section id="gradients">
       <h2>Gradients</h2>
@@ -1460,6 +1535,12 @@
       <h2>Icons</h2>
       <p class="comp-description">PinTours uses <a href="https://tabler.io/icons" target="_blank" rel="noopener">Tabler Icons</a> — 5,000+ outline icons, MIT licensed. Use <code>currentColor</code> so icons inherit semantic color tokens from their parent.</p>
       <div id="iconGallery"></div>
+    </section>
+
+    <!-- ── Shadows ── -->
+    <section id="shadows">
+      <h2>Shadows</h2>
+      <!-- populated by main.js -->
     </section>
 
     <!-- ── Button Component ── -->

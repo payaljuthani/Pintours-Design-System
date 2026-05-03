@@ -27,6 +27,7 @@ function toCamel(str) {
 // ─── Snippet derivation ───────────────────────────────────────────────────────
 
 function cssSnippet(cssVar) {
+  if (/^--pt-shadow-/.test(cssVar)) return `box-shadow: var(${cssVar});`;
   return `var(${cssVar})`;
 }
 
@@ -60,10 +61,10 @@ function swiftSnippet(cssVar) {
     return `PT.Typography.${toCamel(typoMatch[1])}`;
   }
 
-  // --pt-shadow-{key} → PT.Shadow.{key}
+  // --pt-shadow-{key} → PT.Shadow.{camelKey}
   const shadowMatch = name.match(/^pt-shadow-(.+)$/);
   if (shadowMatch) {
-    return `PT.Shadow.${shadowMatch[1]}`;
+    return `PT.Shadow.${toCamel(shadowMatch[1])}`;
   }
 
   return `PT.${toCamel(name.replace(/^pt-/, ''))}`;
@@ -338,6 +339,62 @@ for (const { label, category, keys } of semanticGroups) {
 
   groupEl.appendChild(grid);
   semanticSection.appendChild(groupEl);
+}
+
+// Shadow color semantic tokens appended to the semantic section
+{
+  const shadowGroup = document.createElement('div');
+  shadowGroup.className = 'sem-group';
+  shadowGroup.innerHTML = '<h3>Shadow</h3>';
+
+  const shadowGrid = document.createElement('div');
+  shadowGrid.className = 'semantic-grid';
+
+  for (const [tokenKey, displayName] of [
+    ['shadow',        'shadow (light)'],
+    ['shadow-normal', 'shadow (normal)'],
+  ]) {
+    const cssVar = `--pt-semantic-${tokenKey}`;
+    const hexVal = getCSSVar(cssVar);
+
+    const tile = document.createElement('div');
+    tile.className = 'sem-tile';
+
+    const badge = document.createElement('span');
+    badge.className = 'sem-badge';
+    badge.textContent = 'Shadow';
+
+    const swatch = document.createElement('div');
+    swatch.className = 'sem-swatch';
+    swatch.style.background = `var(${cssVar})`;
+    swatch.dataset.cssvar = cssVar;
+
+    const name = document.createElement('div');
+    name.className = 'sem-name';
+    name.textContent = displayName;
+
+    const valueEl = document.createElement('div');
+    valueEl.className = 'sem-value';
+    valueEl.textContent = hexVal;
+
+    const snippetBtn = document.createElement('button');
+    snippetBtn.className = 'sem-snippet-btn';
+    snippetBtn.textContent = '▸ {}';
+
+    const panel = buildPanel(cssVar, { inline: true });
+    panel._toggleBtn = snippetBtn;
+
+    snippetBtn.addEventListener('click', () => {
+      snippetBtn.classList.toggle('active', !panel.classList.contains('open'));
+      togglePanel(panel);
+    });
+
+    tile.append(badge, swatch, name, valueEl, snippetBtn, panel);
+    shadowGrid.appendChild(tile);
+  }
+
+  shadowGroup.appendChild(shadowGrid);
+  semanticSection.appendChild(shadowGroup);
 }
 
 // ─── Typography scale ──────────────────────────────────────────────────────────
@@ -674,93 +731,176 @@ for (const key of scaleKeys) {
   spacingEl.appendChild(row);
 }
 
+// ─── Shadow snippet builder ────────────────────────────────────────────────────
+
+/**
+ * Parses the first layer of a resolved box-shadow value and returns
+ * { offsetY, blur } as numbers (absolute px values).
+ */
+function parseShadowLayer(resolved) {
+  const m = resolved.match(/(-?\d+)px\s+(-?\d+)px\s+(\d+)px/);
+  if (!m) return { offsetY: 2, blur: 4 };
+  return { offsetY: Math.abs(parseInt(m[2], 10)), blur: parseInt(m[3], 10) };
+}
+
+/** Returns { web, ios, android } snippet strings for a shadow effect token. */
+function buildShadowEffectSnippets(cssVar, groupKey) {
+  const resolved = getCSSVar(cssVar);
+  const { offsetY, blur } = parseShadowLayer(resolved);
+  const swiftKey   = toCamel(cssVar.replace(/^--pt-shadow-/, ''));
+  const androidKey = cssVar.replace(/^--/, '').replace(/-/g, '_');
+  const isUpward   = groupKey === 'bottom_sheet';
+  const iosOffsetY = isUpward ? -offsetY : offsetY;
+  const iosRadius  = Math.max(1, Math.round(blur / 2));
+  const elevation  = offsetY || Math.round(blur / 4) || 1;
+
+  return {
+    web:
+`/* Requires: build/web/variables.css */
+.element {
+  box-shadow: var(${cssVar});
+  /* resolves to: ${resolved} */
+}`,
+    ios:
+`// Requires: build/ios/Tokens.swift
+view.layer.shadowColor   = PT.Semantic.Shadow.normal.cgColor
+view.layer.shadowOffset  = CGSize(width: 0, height: ${iosOffsetY})
+view.layer.shadowOpacity = 1
+view.layer.shadowRadius  = ${iosRadius}
+// Token reference: PT.Shadow.${swiftKey}`,
+    android:
+`// Requires: build/android/compose/PTTheme.kt
+Box(
+    modifier = Modifier
+        .shadow(elevation = ${elevation}.dp)
+) { /* content */ }
+// Token reference: @style/${androidKey}`,
+  };
+}
+
 // ─── Shadows section ───────────────────────────────────────────────────────────
 
 const shadowsSection = document.getElementById('shadows');
 
-// Preview card
-const shadowCard = document.createElement('div');
-shadowCard.className = 'shadow-card';
-shadowCard.innerHTML = `
-  <div class="shadow-card-dot"></div>
-  <div>
-    <div class="shadow-card-label">Elevation · Large</div>
-    <div class="shadow-card-token">--pt-shadow-lg</div>
-  </div>
-`;
-shadowsSection.appendChild(shadowCard);
+const SHADOW_GROUPS = [
+  {
+    key:   'gradient',
+    label: 'Gradient',
+    desc:  'Soft blurred elevation — use on cards, modals, and floating surfaces.',
+  },
+  {
+    key:   'solid',
+    label: 'Solid',
+    desc:  'Crisp bottom-edge depth — use on buttons, inputs, and interactive controls.',
+  },
+  {
+    key:   'bottom_sheet',
+    label: 'Bottom Sheet',
+    desc:  'Upward shadow — use on bottom sheets and slide-up drawers.',
+  },
+];
+const SHADOW_SIZES = ['xs', 'sm', 'md', 'lg', 'xl'];
 
-// Snippet panel for --pt-shadow-lg
-const shadowSnippetWrap = document.createElement('div');
-shadowSnippetWrap.className = 'shadow-snippet-wrap';
+for (const { key, label, desc } of SHADOW_GROUPS) {
+  const group = document.createElement('div');
+  group.className = 'shadow-group';
+  group.innerHTML = `<h3>${label}</h3><p class="shadow-group-desc">${desc}</p>`;
 
-const shadowToggleBtn = document.createElement('button');
-shadowToggleBtn.className = 'snippet-toggle';
-shadowToggleBtn.style.cssText = 'font-size:12px; padding:5px 12px; margin-bottom:10px;';
-shadowToggleBtn.textContent = '▸ {} Show code snippet';
+  const grid = document.createElement('div');
+  grid.className = 'shadow-grid';
 
-const shadowPanel = buildPanel('--pt-shadow-lg', { inline: true });
-shadowPanel._toggleBtn = shadowToggleBtn;
+  // Pre-compute snippets for all sizes in this group
+  const allSnippets = {};
+  for (const size of SHADOW_SIZES) {
+    allSnippets[size] = buildShadowEffectSnippets(`--pt-shadow-${key}-${size}`, key);
+  }
 
-shadowToggleBtn.addEventListener('click', () => {
-  shadowToggleBtn.classList.toggle('active', !shadowPanel.classList.contains('open'));
-  // Manually toggle (no floating panel interference)
-  shadowPanel.classList.toggle('open');
-});
+  // Single shared panel below the grid
+  const sharedPanel = document.createElement('div');
+  sharedPanel.className = 'shadow-shared-panel';
+  sharedPanel.innerHTML = `
+    <div class="snippet-tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn"        data-tab="ios">iOS</button>
+      <button class="tab-btn"        data-tab="android">Android</button>
+    </div>
+    <div class="snippet-code-wrap">
+      <code class="snippet-text"></code>
+      <button class="copy-btn">Copy</button>
+    </div>`;
 
-shadowSnippetWrap.append(shadowToggleBtn, shadowPanel);
-shadowsSection.appendChild(shadowSnippetWrap);
+  const panelTabs   = sharedPanel.querySelectorAll('.tab-btn');
+  const panelCode   = sharedPanel.querySelector('.snippet-text');
+  const panelCopy   = sharedPanel.querySelector('.copy-btn');
+  let   activeTab   = 'web';
+  let   activeSize  = null;
 
-// Semantic shadow color tiles (shadow color tokens)
-const shadowColorGroup = document.createElement('div');
-shadowColorGroup.className = 'sem-group';
-shadowColorGroup.style.marginTop = '36px';
-shadowColorGroup.innerHTML = '<h3>Shadow Color Tokens</h3>';
+  function showPanelFor(size) {
+    panelCode.textContent = allSnippets[size][activeTab];
+    panelCopy.textContent = 'Copy';
+    sharedPanel.classList.add('open');
+  }
 
-const shadowGrid = document.createElement('div');
-shadowGrid.className = 'semantic-grid';
-
-for (const [tokenKey, label] of [
-  ['shadow',        'Shadow (overlay)'],
-  ['shadow-normal', 'Shadow (normal)'],
-]) {
-  const cssVar = `--pt-semantic-${tokenKey}`;
-  const hexVal = getCSSVar(cssVar);
-
-  const tile = document.createElement('div');
-  tile.className = 'sem-tile';
-
-  const swatch = document.createElement('div');
-  swatch.className = 'sem-swatch';
-  swatch.style.background = `var(${cssVar})`;
-  swatch.dataset.cssvar = cssVar;
-
-  const name = document.createElement('div');
-  name.className = 'sem-name';
-  name.textContent = label;
-
-  const valueEl = document.createElement('div');
-  valueEl.className = 'sem-value';
-  valueEl.textContent = hexVal;
-
-  const snippetBtn = document.createElement('button');
-  snippetBtn.className = 'sem-snippet-btn';
-  snippetBtn.textContent = '▸ {}';
-
-  const panel = buildPanel(cssVar, { inline: true });
-  panel._toggleBtn = snippetBtn;
-
-  snippetBtn.addEventListener('click', () => {
-    snippetBtn.classList.toggle('active', !panel.classList.contains('open'));
-    togglePanel(panel);
+  panelTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      panelTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      if (activeSize) panelCode.textContent = allSnippets[activeSize][activeTab];
+    });
   });
 
-  tile.append(swatch, name, valueEl, snippetBtn, panel);
-  shadowGrid.appendChild(tile);
+  panelCopy.addEventListener('click', () => {
+    if (!activeSize) return;
+    navigator.clipboard.writeText(allSnippets[activeSize][activeTab]);
+    panelCopy.textContent = 'Copied!';
+    setTimeout(() => { panelCopy.textContent = 'Copy'; }, 1500);
+  });
+
+  for (const size of SHADOW_SIZES) {
+    const cssVar = `--pt-shadow-${key}-${size}`;
+
+    const card = document.createElement('div');
+    card.className = 'shadow-preview-card';
+
+    const box = document.createElement('div');
+    box.className = 'shadow-preview-box';
+    box.style.boxShadow = `var(${cssVar})`;
+
+    const sizeLabel = document.createElement('div');
+    sizeLabel.className = 'shadow-preview-label';
+    sizeLabel.textContent = size.toUpperCase();
+
+    const snippetBtn = document.createElement('button');
+    snippetBtn.className = 'sem-snippet-btn';
+    snippetBtn.textContent = '▸ {}';
+
+    snippetBtn.addEventListener('click', () => {
+      const isAlreadyOpen = sharedPanel.classList.contains('open') && activeSize === size;
+      // Deactivate all cards and buttons in this group
+      grid.querySelectorAll('.sem-snippet-btn').forEach(b => {
+        b.classList.remove('active');
+        b.textContent = '▸ {}';
+      });
+      if (isAlreadyOpen) {
+        sharedPanel.classList.remove('open');
+        activeSize = null;
+      } else {
+        activeSize = size;
+        snippetBtn.classList.add('active');
+        snippetBtn.textContent = '▾ {}';
+        showPanelFor(size);
+      }
+    });
+
+    card.append(box, sizeLabel, snippetBtn);
+    grid.appendChild(card);
+  }
+
+  group.append(grid, sharedPanel);
+  shadowsSection.appendChild(group);
 }
 
-shadowColorGroup.appendChild(shadowGrid);
-shadowsSection.appendChild(shadowColorGroup);
 
 // ─── Gradients section ────────────────────────────────────────────────────────
 
@@ -979,11 +1119,13 @@ const btnControls = [
     { val: 'lg', label: 'Large'      },
   ]},
   { key: 'state', label: 'State', opts: [
-    { val: 'default',  label: 'Default',    active: true },
-    { val: 'hover',    label: 'Hover'       },
-    { val: 'negative', label: 'Negative'    },
-    { val: 'disabled', label: 'Disabled'    },
-    { val: 'ai',       label: 'AI Default'  },
+    { val: 'default',        label: 'Default',       active: true },
+    { val: 'hover',          label: 'Hover'          },
+    { val: 'negative',       label: 'Negative'       },
+    { val: 'negative_hover', label: 'Negative_hover'  },
+    { val: 'disabled',       label: 'Disabled'       },
+    { val: 'ai',             label: 'AI Default'     },
+    { val: 'ai_hover',       label: 'AI Hover'       },
   ]},
   { key: 'icon',  label: 'Icon',  opts: [
     { val: 'none',     label: 'None',     active: true },
@@ -994,9 +1136,9 @@ const btnControls = [
 
 function getBtnClasses(type, { size, state }) {
   const cls = ['pt-btn', `pt-btn-${type}`, `pt-btn-${size}`];
-  if (state === 'hover')    cls.push('pt-btn-is-hover');
-  if (state === 'negative') cls.push('pt-btn-negative');
-  if (state === 'ai')       cls.push('pt-btn-ai');
+  if (['hover', 'ai_hover', 'negative_hover'].includes(state)) cls.push('pt-btn-is-hover');
+  if (['negative', 'negative_hover'].includes(state))          cls.push('pt-btn-negative');
+  if (['ai', 'ai_hover'].includes(state))                      cls.push('pt-btn-ai');
   return cls;
 }
 
@@ -1014,19 +1156,19 @@ function buildBtnElement(type, { size, state, icon }) {
 
 // Token maps keyed by type × state
 const BTN_BG = {
-  primary:   { default: 'var(--pt-semantic-surface-action)', hover: 'var(--pt-semantic-surface-action_hover)', negative: 'var(--pt-semantic-surface-negative)', disabled: 'var(--pt-semantic-surface-disabled)', ai: 'linear-gradient(to right, var(--pt-color-green-400), var(--pt-color-teal-500))' },
-  secondary: { default: 'var(--pt-semantic-surface-page)', hover: 'var(--pt-semantic-surface-card_primary)', negative: 'var(--pt-semantic-surface-page)', disabled: 'var(--pt-semantic-surface-page)', ai: 'var(--pt-semantic-surface-page)' },
-  tertiary:  { default: 'transparent', hover: 'transparent', negative: 'transparent', disabled: 'transparent', ai: 'transparent' },
+  primary:   { default: 'var(--pt-semantic-surface-action)', hover: 'var(--pt-semantic-surface-action_hover)', negative: 'var(--pt-semantic-surface-negative)', negative_hover: 'var(--pt-semantic-surface-negative_hover)', disabled: 'var(--pt-semantic-surface-disabled)', ai: 'linear-gradient(to right, var(--pt-color-green-400), var(--pt-color-teal-500))', ai_hover: 'linear-gradient(to right, var(--pt-color-green-500), var(--pt-color-teal-600))' },
+  secondary: { default: 'var(--pt-semantic-surface-page)', hover: 'var(--pt-semantic-surface-card_primary)', negative: 'var(--pt-semantic-surface-page)', negative_hover: 'var(--pt-semantic-surface-card_primary)', disabled: 'var(--pt-semantic-surface-page)', ai: 'var(--pt-semantic-surface-page)', ai_hover: 'var(--pt-semantic-surface-page)' },
+  tertiary:  { default: 'transparent', hover: 'transparent', negative: 'transparent', negative_hover: 'transparent', disabled: 'transparent', ai: 'transparent', ai_hover: 'transparent' },
 };
 const BTN_COLOR = {
-  primary:   { default: 'var(--pt-semantic-typography-on_action)', hover: 'var(--pt-semantic-typography-on_action)', negative: 'var(--pt-semantic-typography-on_action)', disabled: 'var(--pt-semantic-typography-on_disabled)', ai: 'var(--pt-semantic-typography-on_action)' },
-  secondary: { default: 'var(--pt-semantic-typography-action)', hover: 'var(--pt-semantic-typography-action_hover)', negative: 'var(--pt-semantic-typography-error)', disabled: 'var(--pt-semantic-typography-body_caption)', ai: 'var(--pt-semantic-typography-action)' },
-  tertiary:  { default: 'var(--pt-semantic-typography-action)', hover: 'var(--pt-semantic-typography-action_hover)', negative: 'var(--pt-semantic-typography-error)', disabled: 'var(--pt-semantic-typography-body_caption)', ai: 'var(--pt-semantic-typography-action)' },
+  primary:   { default: 'var(--pt-semantic-typography-on_action)', hover: 'var(--pt-semantic-typography-on_action)', negative: 'var(--pt-semantic-typography-on_action)', negative_hover: 'var(--pt-semantic-typography-on_action)', disabled: 'var(--pt-semantic-typography-on_disabled)', ai: 'var(--pt-semantic-typography-on_action)', ai_hover: 'var(--pt-semantic-typography-on_action)' },
+  secondary: { default: 'var(--pt-semantic-typography-action)', hover: 'var(--pt-semantic-typography-action_hover)', negative: 'var(--pt-semantic-typography-error)', negative_hover: 'var(--pt-semantic-typography-error)', disabled: 'var(--pt-semantic-typography-body_caption)', ai: 'var(--pt-semantic-typography-action)', ai_hover: 'var(--pt-semantic-typography-action_hover)' },
+  tertiary:  { default: 'var(--pt-semantic-typography-action)', hover: 'var(--pt-semantic-typography-action_hover)', negative: 'var(--pt-semantic-typography-error)', negative_hover: 'var(--pt-semantic-typography-error)', disabled: 'var(--pt-semantic-typography-body_caption)', ai: 'var(--pt-semantic-typography-action)', ai_hover: 'var(--pt-semantic-typography-action_hover)' },
 };
 const BTN_BORDER = {
-  primary:   { default: 'var(--pt-semantic-border-action)', hover: 'var(--pt-semantic-border-action_hover)', negative: 'var(--pt-semantic-border-negative)', disabled: 'var(--pt-semantic-border-disabled)', ai: 'var(--pt-color-green-400)' },
-  secondary: { default: 'var(--pt-semantic-border-action)', hover: 'var(--pt-semantic-border-action_hover)', negative: 'var(--pt-semantic-border-negative)', disabled: 'var(--pt-semantic-border-disabled)', ai: 'var(--pt-semantic-border-action)' },
-  tertiary:  { default: 'transparent', hover: 'transparent', negative: 'transparent', disabled: 'transparent', ai: 'transparent' },
+  primary:   { default: 'var(--pt-semantic-border-action)', hover: 'var(--pt-semantic-border-action_hover)', negative: 'var(--pt-semantic-border-negative)', negative_hover: 'var(--pt-semantic-border-negative_hover)', disabled: 'var(--pt-semantic-border-disabled)', ai: 'var(--pt-color-green-400)', ai_hover: 'var(--pt-color-green-500)' },
+  secondary: { default: 'var(--pt-semantic-border-action)', hover: 'var(--pt-semantic-border-action_hover)', negative: 'var(--pt-semantic-border-negative)', negative_hover: 'var(--pt-semantic-border-negative_hover)', disabled: 'var(--pt-semantic-border-disabled)', ai: 'var(--pt-semantic-border-action)', ai_hover: 'var(--pt-semantic-border-action_hover)' },
+  tertiary:  { default: 'transparent', hover: 'transparent', negative: 'transparent', negative_hover: 'transparent', disabled: 'transparent', ai: 'transparent', ai_hover: 'transparent' },
 };
 const BTN_PADDING = { sm: ['var(--pt-scale-2)', 'var(--pt-scale-4)'], md: ['var(--pt-scale-3)', 'var(--pt-scale-5)'], lg: ['var(--pt-scale-3)', 'var(--pt-scale-6)'] };
 const BTN_FONT    = { sm: 'var(--pt-typography-body-sm-font_size)', md: 'var(--pt-typography-body-default-font_size)', lg: 'var(--pt-typography-body-lg-font_size)' };
@@ -1034,41 +1176,50 @@ const BTN_RADIUS  = { sm: 'var(--pt-scale-1half)', md: 'var(--pt-scale-2)', lg: 
 
 // Swift token maps (no CSS-var syntax)
 const BTN_BG_SWIFT = {
-  primary:   { default: 'PT.Semantic.Surface.action', hover: 'PT.Semantic.Surface.actionHover', negative: 'PT.Semantic.Surface.negative', disabled: 'PT.Semantic.Surface.disabled', ai: '/* gradient — see note */' },
-  secondary: { default: 'PT.Semantic.Surface.page', hover: 'PT.Semantic.Surface.cardPrimary', negative: 'PT.Semantic.Surface.page', disabled: 'PT.Semantic.Surface.disabled', ai: 'PT.Semantic.Surface.page' },
-  tertiary:  { default: '.clear', hover: '.clear', negative: '.clear', disabled: '.clear', ai: '.clear' },
+  primary:   { default: 'PT.Semantic.Surface.action', hover: 'PT.Semantic.Surface.actionHover', negative: 'PT.Semantic.Surface.negative', negative_hover: 'PT.Semantic.Surface.negativeHover', disabled: 'PT.Semantic.Surface.disabled', ai: '/* gradient — see note */', ai_hover: '/* gradient darker — see note */' },
+  secondary: { default: 'PT.Semantic.Surface.page', hover: 'PT.Semantic.Surface.cardPrimary', negative: 'PT.Semantic.Surface.page', negative_hover: 'PT.Semantic.Surface.cardPrimary', disabled: 'PT.Semantic.Surface.disabled', ai: 'PT.Semantic.Surface.page', ai_hover: 'PT.Semantic.Surface.page' },
+  tertiary:  { default: '.clear', hover: '.clear', negative: '.clear', negative_hover: '.clear', disabled: '.clear', ai: '.clear', ai_hover: '.clear' },
 };
 const BTN_COLOR_SWIFT = {
-  primary:   { default: 'PT.Semantic.Typography.onAction', hover: 'PT.Semantic.Typography.onAction', negative: 'PT.Semantic.Typography.onAction', disabled: 'PT.Semantic.Typography.onDisabled', ai: 'PT.Semantic.Typography.onAction' },
-  secondary: { default: 'PT.Semantic.Typography.action', hover: 'PT.Semantic.Typography.actionHover', negative: 'PT.Semantic.Typography.error', disabled: 'PT.Semantic.Typography.onDisabled', ai: 'PT.Semantic.Typography.action' },
-  tertiary:  { default: 'PT.Semantic.Typography.action', hover: 'PT.Semantic.Typography.actionHover', negative: 'PT.Semantic.Typography.error', disabled: 'PT.Semantic.Typography.disabled', ai: 'PT.Semantic.Typography.action' },
+  primary:   { default: 'PT.Semantic.Typography.onAction', hover: 'PT.Semantic.Typography.onAction', negative: 'PT.Semantic.Typography.onAction', negative_hover: 'PT.Semantic.Typography.onAction', disabled: 'PT.Semantic.Typography.onDisabled', ai: 'PT.Semantic.Typography.onAction', ai_hover: 'PT.Semantic.Typography.onAction' },
+  secondary: { default: 'PT.Semantic.Typography.action', hover: 'PT.Semantic.Typography.actionHover', negative: 'PT.Semantic.Typography.error', negative_hover: 'PT.Semantic.Typography.error', disabled: 'PT.Semantic.Typography.onDisabled', ai: 'PT.Semantic.Typography.action', ai_hover: 'PT.Semantic.Typography.actionHover' },
+  tertiary:  { default: 'PT.Semantic.Typography.action', hover: 'PT.Semantic.Typography.actionHover', negative: 'PT.Semantic.Typography.error', negative_hover: 'PT.Semantic.Typography.error', disabled: 'PT.Semantic.Typography.disabled', ai: 'PT.Semantic.Typography.action', ai_hover: 'PT.Semantic.Typography.actionHover' },
 };
 const BTN_BORDER_SWIFT = {
-  primary:   { default: 'PT.Semantic.Border.action', hover: 'PT.Semantic.Border.actionHover', negative: 'PT.Semantic.Border.negative', disabled: 'PT.Semantic.Border.disabled', ai: 'PT.Color.Green.c400' },
-  secondary: { default: 'PT.Semantic.Border.action', hover: 'PT.Semantic.Border.actionHover', negative: 'PT.Semantic.Border.negative', disabled: 'PT.Semantic.Border.disabled', ai: 'PT.Semantic.Border.action' },
-  tertiary:  { default: '.clear', hover: '.clear', negative: '.clear', disabled: '.clear', ai: '.clear' },
+  primary:   { default: 'PT.Semantic.Border.action', hover: 'PT.Semantic.Border.actionHover', negative: 'PT.Semantic.Border.negative', negative_hover: 'PT.Semantic.Border.negativeHover', disabled: 'PT.Semantic.Border.disabled', ai: 'PT.Color.Green.c400', ai_hover: 'PT.Color.Green.c500' },
+  secondary: { default: 'PT.Semantic.Border.action', hover: 'PT.Semantic.Border.actionHover', negative: 'PT.Semantic.Border.negative', negative_hover: 'PT.Semantic.Border.negativeHover', disabled: 'PT.Semantic.Border.disabled', ai: 'PT.Semantic.Border.action', ai_hover: 'PT.Semantic.Border.actionHover' },
+  tertiary:  { default: '.clear', hover: '.clear', negative: '.clear', negative_hover: '.clear', disabled: '.clear', ai: '.clear', ai_hover: '.clear' },
 };
 const BTN_PADDING_SWIFT = { sm: ['PT.Scale.s2', 'PT.Scale.s4'], md: ['PT.Scale.s3', 'PT.Scale.s5'], lg: ['PT.Scale.s3', 'PT.Scale.s6'] };
 const BTN_RADIUS_SWIFT  = { sm: 'PT.Scale.s1half', md: 'PT.Scale.s2', lg: 'PT.Scale.s2' };
 
 // Android Compose token maps
 const BTN_BG_COMPOSE = {
-  primary:   { default: 'colors.surfaceAction', hover: 'colors.surfaceActionHover', negative: 'colors.surfaceNegative', disabled: 'colors.surfaceDisabled', ai: '/* gradient — see note */' },
-  secondary: { default: 'colors.surfacePage', hover: 'colors.surfaceCardPrimary', negative: 'colors.surfacePage', disabled: 'colors.surfacePage', ai: 'colors.surfacePage' },
-  tertiary:  { default: 'Color.Transparent', hover: 'Color.Transparent', negative: 'Color.Transparent', disabled: 'Color.Transparent', ai: 'Color.Transparent' },
+  primary:   { default: 'colors.surfaceAction', hover: 'colors.surfaceActionHover', negative: 'colors.surfaceNegative', negative_hover: 'colors.surfaceNegativeHover', disabled: 'colors.surfaceDisabled', ai: '/* gradient — see note */', ai_hover: '/* gradient darker — see note */' },
+  secondary: { default: 'colors.surfacePage', hover: 'colors.surfaceCardPrimary', negative: 'colors.surfacePage', negative_hover: 'colors.surfaceCardPrimary', disabled: 'colors.surfacePage', ai: 'colors.surfacePage', ai_hover: 'colors.surfacePage' },
+  tertiary:  { default: 'Color.Transparent', hover: 'Color.Transparent', negative: 'Color.Transparent', negative_hover: 'Color.Transparent', disabled: 'Color.Transparent', ai: 'Color.Transparent', ai_hover: 'Color.Transparent' },
 };
 const BTN_COLOR_COMPOSE = {
-  primary:   { default: 'colors.typographyOnAction', hover: 'colors.typographyOnAction', negative: 'colors.typographyOnAction', disabled: 'colors.typographyOnDisabled', ai: 'colors.typographyOnAction' },
-  secondary: { default: 'colors.typographyAction', hover: 'colors.typographyActionHover', negative: 'colors.typographyError', disabled: 'colors.typographyOnDisabled', ai: 'colors.typographyAction' },
-  tertiary:  { default: 'colors.typographyAction', hover: 'colors.typographyActionHover', negative: 'colors.typographyError', disabled: 'colors.typographyDisabled', ai: 'colors.typographyAction' },
+  primary:   { default: 'colors.typographyOnAction', hover: 'colors.typographyOnAction', negative: 'colors.typographyOnAction', negative_hover: 'colors.typographyOnAction', disabled: 'colors.typographyOnDisabled', ai: 'colors.typographyOnAction', ai_hover: 'colors.typographyOnAction' },
+  secondary: { default: 'colors.typographyAction', hover: 'colors.typographyActionHover', negative: 'colors.typographyError', negative_hover: 'colors.typographyError', disabled: 'colors.typographyOnDisabled', ai: 'colors.typographyAction', ai_hover: 'colors.typographyActionHover' },
+  tertiary:  { default: 'colors.typographyAction', hover: 'colors.typographyActionHover', negative: 'colors.typographyError', negative_hover: 'colors.typographyError', disabled: 'colors.typographyDisabled', ai: 'colors.typographyAction', ai_hover: 'colors.typographyActionHover' },
 };
 const BTN_BORDER_COMPOSE = {
-  primary:   { default: 'colors.borderAction', hover: 'colors.borderActionHover', negative: 'colors.borderNegative', disabled: 'colors.borderDisabled', ai: 'MaterialTheme.ptColors.colorGreen400' },
-  secondary: { default: 'colors.borderAction', hover: 'colors.borderActionHover', negative: 'colors.borderNegative', disabled: 'colors.borderDisabled', ai: 'colors.borderAction' },
-  tertiary:  { default: 'Color.Transparent', hover: 'Color.Transparent', negative: 'Color.Transparent', disabled: 'Color.Transparent', ai: 'Color.Transparent' },
+  primary:   { default: 'colors.borderAction', hover: 'colors.borderActionHover', negative: 'colors.borderNegative', negative_hover: 'colors.borderNegativeHover', disabled: 'colors.borderDisabled', ai: 'MaterialTheme.ptColors.colorGreen400', ai_hover: 'MaterialTheme.ptColors.colorGreen500' },
+  secondary: { default: 'colors.borderAction', hover: 'colors.borderActionHover', negative: 'colors.borderNegative', negative_hover: 'colors.borderNegativeHover', disabled: 'colors.borderDisabled', ai: 'colors.borderAction', ai_hover: 'colors.borderActionHover' },
+  tertiary:  { default: 'Color.Transparent', hover: 'Color.Transparent', negative: 'Color.Transparent', negative_hover: 'Color.Transparent', disabled: 'Color.Transparent', ai: 'Color.Transparent', ai_hover: 'Color.Transparent' },
 };
 const BTN_PADDING_COMPOSE = { sm: ['PTDimens.s2', 'PTDimens.s4'], md: ['PTDimens.s3', 'PTDimens.s5'], lg: ['PTDimens.s3', 'PTDimens.s6'] };
 const BTN_RADIUS_COMPOSE  = { sm: 'PTDimens.s1half', md: 'PTDimens.s2', lg: 'PTDimens.s2' };
+
+function getBtnShadowWeb(type, size, state) {
+  if (type === 'tertiary' || state === 'disabled') return null;
+  const isHover = ['hover', 'ai_hover', 'negative_hover'].includes(state);
+  if (!isHover) return null;
+  if (size === 'sm') return 'box-shadow: var(--pt-shadow-solid-xs);';
+  if (size === 'md' || size === 'lg') return 'box-shadow: var(--pt-shadow-solid-sm);';
+  return null;
+}
 
 function buildBtnWebSnippet(type, { size, state, icon }) {
   const bg     = BTN_BG[type][state];
@@ -1077,17 +1228,26 @@ function buildBtnWebSnippet(type, { size, state, icon }) {
   const [pv, ph] = BTN_PADDING[size];
   const fs     = BTN_FONT[size];
   const radius = BTN_RADIUS[size];
+  const shadow = getBtnShadowWeb(type, size, state);
   const dis    = state === 'disabled' ? '\ncursor: not-allowed;' : '';
   const iconPx   = ICON_SIZE[size] || 20;
   const iconNote = icon !== 'none' ? `\n/* tabler icon "${btnIconName}" (${iconPx}×${iconPx}px) — see Icons section */\n/* place ${icon === 'leading' ? 'before' : 'after'} label, stroke="currentColor" */` : '';
+  const isGradientBorder = type === 'primary' && (state === 'ai' || state === 'ai_hover');
+  const bgLine = isGradientBorder
+    ? `background:\n  ${bg} padding-box,\n  ${bg} border-box;`
+    : `background: ${bg};`;
+  const borderLine = isGradientBorder
+    ? `border: 1px solid transparent;`
+    : `border: 1px solid ${border};`;
   return [
     `/* ${type[0].toUpperCase() + type.slice(1)} · ${state} · ${size} */`,
-    `background: ${bg};`,
+    bgLine,
     `color: ${color};`,
-    `border: 1px solid ${border};`,
+    borderLine,
     `padding: ${pv} ${ph};`,
     `font-size: ${fs};`,
     `border-radius: ${radius};`,
+    shadow,
     `display: inline-flex; align-items: center; gap: var(--pt-scale-2);`,
     dis + iconNote,
   ].filter(Boolean).join('\n');
@@ -1103,6 +1263,22 @@ function buildBtnIOSSnippet(type, { size, state, icon }) {
   const iconNote = icon !== 'none' ? `\n// Add SF Symbol or custom SVG ${icon === 'leading' ? 'before' : 'after'} title` : '';
   const aiNote   = state === 'ai' ? '\n// AI gradient: apply CAGradientLayer with\n// colors: [PT.Color.Green.c400.cgColor, PT.Color.Teal.c500.cgColor]' : '';
   const borderLine = border === '.clear' ? '' : `\nbutton.layer.borderColor = ${border}.cgColor\nbutton.layer.borderWidth = 1`;
+  let shadowLines = '';
+  if (type !== 'tertiary' && state !== 'disabled') {
+    const isHoverState = ['hover', 'ai_hover', 'negative_hover'].includes(state);
+    const isSmHover = size === 'sm' && isHoverState;
+    const isMdLg    = (size === 'md' || size === 'lg') && isHoverState;
+    if (isSmHover || isMdLg) {
+      const offsetY = isSmHover ? 'PT.Scale.shalf' : 'PT.Scale.s1';
+      const blur    = isSmHover ? 'PT.Scale.s1'    : 'PT.Scale.s1half';
+      shadowLines = [
+        `\nbutton.layer.shadowColor   = PT.Semantic.Shadow.normal.cgColor`,
+        `button.layer.shadowOffset  = CGSize(width: 0, height: ${offsetY})`,
+        `button.layer.shadowOpacity = 1`,
+        `button.layer.shadowRadius  = ${blur}`,
+      ].join('\n');
+    }
+  }
   return [
     `// ${type[0].toUpperCase() + type.slice(1)} · ${state} · ${size}`,
     `button.backgroundColor = ${bg}`,
@@ -1113,6 +1289,7 @@ function buildBtnIOSSnippet(type, { size, state, icon }) {
     `  top: ${pv}, left: ${ph},`,
     `  bottom: ${pv}, right: ${ph}`,
     `)`,
+    shadowLines,
     dis + iconNote + aiNote,
   ].filter(Boolean).join('\n');
 }
@@ -1126,8 +1303,17 @@ function buildBtnAndroidSnippet(type, { size, state, icon }) {
   const radius = BTN_RADIUS_COMPOSE[size];
   const dis    = state === 'disabled' ? '\n  enabled = false,' : '';
   const iconNote = icon !== 'none' ? `\n// Add Icon composable ${icon === 'leading' ? 'before' : 'after'} Text` : '';
-  const aiNote   = state === 'ai' ? '\n// AI gradient: use Box with Modifier.background(Brush.horizontalGradient(\n//   listOf(PT.Color.Green.c400, PT.Color.Teal.c500)))' : '';
+  const aiNote   = state === 'ai' ? '\n// AI gradient: use Box with Modifier.background(Brush.horizontalGradient(\n//   listOf(PT.Color.Green.c400, PT.Color.Teal.c500)))' :
+                   state === 'ai_hover' ? '\n// AI gradient hover: use Box with Modifier.background(Brush.horizontalGradient(\n//   listOf(MaterialTheme.ptColors.colorGreen500, MaterialTheme.ptColors.colorTeal600)))' : '';
   const borderLine = border === 'Color.Transparent' ? '' : `\n  border = BorderStroke(1.dp, ${border}),`;
+  let shadowLine = '';
+  if (type !== 'tertiary' && state !== 'disabled') {
+    const isHoverState = ['hover', 'ai_hover', 'negative_hover'].includes(state);
+    const isSmHover = size === 'sm' && isHoverState;
+    const isMdLg    = (size === 'md' || size === 'lg') && isHoverState;
+    if (isSmHover) shadowLine = `\n  // shadow: pt-shadow-solid-xs → elevation = PTDimens.shalf (2.dp)`;
+    else if (isMdLg) shadowLine = `\n  // shadow: pt-shadow-solid-sm → elevation = PTDimens.s1 (4.dp)`;
+  }
   return [
     `// ${type[0].toUpperCase() + type.slice(1)} · ${state} · ${size}`,
     colors,
@@ -1139,6 +1325,7 @@ function buildBtnAndroidSnippet(type, { size, state, icon }) {
     borderLine,
     `  shape = RoundedCornerShape(${radius}),`,
     `  contentPadding = PaddingValues(horizontal = ${ph}, vertical = ${pv}),`,
+    shadowLine,
     dis,
     `) { Text("Button") }`,
     iconNote + aiNote,

@@ -677,3 +677,90 @@ Several rounds of corrections were made to align the component with the Figma de
 | 5 | Map Pin component stylesheet not distributed | ⚠️ Map Pin CSS/UIKit/Compose implementations exist only in docs |
 
 ---
+
+## Entry 10 · 2026-05-03 · PST
+
+### Work Completed Since Entry 9
+
+---
+
+### Shadow Component — Token Pipeline + Docs Preview ✅
+
+**Source:** Figma node 707:3485 (`PinTours-Design-System` → Shadow section)
+
+**Token pipeline:**
+- Replaced the single legacy `shadow.lg` token in `tokens/tokens.json` with a full 3-group × 5-size structure (15 tokens total)
+- Groups: `gradient` (soft blurred elevation), `solid` (crisp bottom-edge depth), `bottom_sheet` (upward shadow)
+- Sizes: `xs`, `sm`, `md`, `lg`, `xl`
+- Token type: DTCG `boxShadow` — array of shadow layers, each with `color`, `offsetX`, `offsetY`, `blur`, `spread`
+- Bottom-sheet negative offsetY values hardcoded as string literals (`"-2"`, `"-3"`, etc.) — DTCG refs cannot be negative
+- Ran `npm run build` → 15 new CSS custom properties generated in `build/web/variables.css`:
+  - Pattern: `--pt-shadow-{group}-{size}`
+  - Example: `--pt-shadow-solid-xs: 0px 2px 0px 0px #a8c0c7, 0px 0px 4px 0px #cbd9dd`
+- `CLAUDE.md` shadow token table updated to reflect new 15-token structure and Figma mapping
+
+**Docs site — Shadow section:**
+- Shadow section repositioned: HTML section order corrected to match nav (after Icons, before Button)
+- Shadow color semantic tokens (`--pt-semantic-shadow`, `--pt-semantic-shadow-normal`) moved out of the Shadow section and into the Semantic Tokens section as a "Shadow" group — consistent with Typography / Icon / Surface / Border groups
+- Shadow preview: 3 groups, 5 cards each — white box on page-colour background demonstrating each effect
+- Token name removed from cards; size label (XS–XL) and snippet button only
+- **Code snippets:** Each card shows a full-width shared panel below the grid (not inside the narrow card). Panel contains:
+  - Web: `.element { box-shadow: var(--pt-shadow-...); /* resolves to: ... */ }`
+  - iOS: `view.layer.shadowColor/shadowOffset/shadowOpacity/shadowRadius` with parsed values
+  - Android: `Modifier.shadow(elevation = N.dp)` with token reference
+- Active state UX: clicking `▸ {}` flips arrow to `▾`, turns button green (`--pt-semantic-border-action`), opens shared panel; clicking again closes it
+- `cssSnippet()` updated to return `box-shadow: var(...)` for `--pt-shadow-*` vars
+- `swiftSnippet()` shadow match fixed to camelCase the key (`gradientXs` not `gradient-xs`)
+
+**Nav:**
+- Visual divider (`1px`, `--pt-semantic-border-divider`) added between Foundations and Components nav groups
+
+---
+
+### Button Component — Hover States + Shadows ✅
+
+**New hover states built:**
+
+| State | Class | Behaviour |
+|---|---|---|
+| `Default__Gradient_Hover` | `.pt-btn-primary.pt-btn-ai.pt-btn-is-hover` | Darker gradient (`green-500` → `teal-600`), gradient border via `padding-box / border-box` background-clip |
+| `Negative_hover` | `.pt-btn-negative.pt-btn-is-hover` | `surface-negative_hover` fill, `border-negative_hover` stroke |
+
+**Shadow tokens applied to hover states:**
+- `shadow/solid/xs` → small (`.pt-btn-sm`) hover buttons, all types except tertiary
+- `shadow/solid/sm` → default (`.pt-btn-md`) and large (`.pt-btn-lg`) hover buttons, all types except tertiary
+- Shadows apply **only** on hover states (`hover`, `ai_hover`, `negative_hover`) — not on default, negative, ai, or disabled states
+
+**Border fixes — all hover states:**
+- Removed `border-bottom-width: 4px` from all hover state CSS rules (primary, negative, ai, gradient)
+- All hover states now use consistent 1px border all around
+
+**Cascade bug fixes:**
+- Secondary `Negative_hover`: `.pt-btn-secondary.pt-btn-is-hover` was overriding error text colour with green action hover → fixed by explicitly setting `color: --pt-semantic-typography-error` in the secondary negative hover rule
+- Tertiary `Negative_hover`: `.pt-btn-negative.pt-btn-is-hover` was applying dark red background to tertiary → fixed by explicitly resetting `background: transparent`, `border-color: transparent`, `color: --pt-semantic-typography-error` in the tertiary negative hover rule
+
+**AI gradient border:**
+- Changed from `border-color: --pt-color-green-400` to `border: 1px solid transparent` + `background: gradient padding-box, gradient border-box`
+- Gradient border matches fill visually; CSS snippet updated to show the background-clip technique
+
+**Snippet generator updates (`docs/main.js`):**
+- State label renamed: `Neg. Hover` → `Negative_hover`
+- `getBtnClasses()`: recognises `ai_hover` and `negative_hover` as hover-type states (adds `.pt-btn-is-hover`, `.pt-btn-negative`, `.pt-btn-ai` correctly)
+- `getBtnShadowWeb()`: updated to treat `hover`, `ai_hover`, `negative_hover` as hover states for shadow output
+- `buildBtnIOSSnippet()` and `buildBtnAndroidSnippet()`: shadow logic updated to cover all three hover-state variants
+- Android Compose token maps (`BTN_BG_COMPOSE`, `BTN_COLOR_COMPOSE`, `BTN_BORDER_COMPOSE`): extended with `negative_hover` and `ai_hover` keys for all three button types
+- `buildBtnWebSnippet()`: gradient border states (`primary ai` / `primary ai_hover`) emit `background: gradient padding-box, gradient border-box` + `border: 1px solid transparent` instead of the standard `border: 1px solid` line
+
+---
+
+### Open Items
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Success palette — `success` semantic tokens incorrectly reference `color.green.*` | ⚠️ Carry-over from Entry 5/6 |
+| 2 | Font weight discrepancies (Thin: tokens=300, Figma=400; Regular: tokens=500, Figma=600) | ⚠️ Carry-over from Entry 3 |
+| 3 | Button component stylesheet not distributed | ⚠️ Carry-over from Entry 3 |
+| 4 | Super Icon component stylesheet not distributed | ⚠️ Carry-over from Entry 6 |
+| 5 | Map Pin component stylesheet not distributed | ⚠️ Carry-over from Entry 9 |
+
+---

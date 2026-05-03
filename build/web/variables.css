@@ -189,7 +189,21 @@
 
 
   /* ── Effects ───────────────────────────── */
-  --pt-shadow-lg: 0px 12px 32px 0px #cbd9dd, 0px 8px 16px 0px #a8c0c7;
+  --pt-shadow-gradient-xs: 0px 2px 4px 0px #a8c0c7;
+  --pt-shadow-gradient-sm: 0px 3px 6px 0px #a8c0c7;
+  --pt-shadow-gradient-md: 0px 6px 12px 0px #a8c0c7, 0px 6px 12px 0px #cbd9dd;
+  --pt-shadow-gradient-lg: 0px 12px 32px 0px #cbd9dd, 0px 8px 16px 0px #a8c0c7;
+  --pt-shadow-gradient-xl: 0px 32px 48px 0px #cbd9dd, 0px 16px 24px 0px #a8c0c7;
+  --pt-shadow-solid-xs: 0px 2px 0px 0px #a8c0c7, 0px 0px 4px 0px #cbd9dd;
+  --pt-shadow-solid-sm: 0px 4px 0px 0px #a8c0c7, 0px 0px 6px 0px #cbd9dd;
+  --pt-shadow-solid-md: 0px 6px 0px 0px #a8c0c7, 0px 0px 8px 0px #cbd9dd;
+  --pt-shadow-solid-lg: 0px 8px 0px 0px #a8c0c7, 0px 0px 12px 0px #cbd9dd;
+  --pt-shadow-solid-xl: 0px 12px 0px 0px #a8c0c7, 0px 0px 16px 0px #cbd9dd;
+  --pt-shadow-bottom_sheet-xs: 0px -2px 4px 0px #a8c0c7;
+  --pt-shadow-bottom_sheet-sm: 0px -3px 6px 0px #a8c0c7;
+  --pt-shadow-bottom_sheet-md: 0px -3px 20px 0px #a8c0c7, 0px -6px 12px 0px #cbd9dd;
+  --pt-shadow-bottom_sheet-lg: 0px -8px 24px 0px #a8c0c7, 0px -12px 40px 0px #cbd9dd;
+  --pt-shadow-bottom_sheet-xl: 0px -12px 32px 0px #a8c0c7, 0px -24px 48px 0px #cbd9dd;
 
 
   /* ── Semantic: Light (default) ──────────── */
