@@ -11,13 +11,30 @@
  *  3. Circular reference detection
  *  4. Semantic category coverage
  *  5. Dark-mode coverage report
+ *  6. Semantic file — no raw hex values (primitive leak detection)
  */
 
 const fs   = require('fs');
 const path = require('path');
 
-const TOKENS_PATH = path.resolve(__dirname, '../tokens/tokens.json');
-const raw = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf-8'));
+function deepMerge(target, source) {
+  for (const [k, v] of Object.entries(source)) {
+    if (v && typeof v === 'object' && !Array.isArray(v) && target[k] && typeof target[k] === 'object') {
+      deepMerge(target[k], v);
+    } else {
+      target[k] = v;
+    }
+  }
+  return target;
+}
+
+const { $metadata, ...primTokens } = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, '../tokens/primitives.json'), 'utf-8')
+);
+const raw = deepMerge(
+  primTokens,
+  JSON.parse(fs.readFileSync(path.resolve(__dirname, '../tokens/semantic.json'), 'utf-8'))
+);
 
 const errors   = [];
 const warnings = [];
@@ -138,6 +155,19 @@ const covered  = lightTokens.length - missingDark.length;
 const coverage = lightTokens.length
   ? Math.round((covered / lightTokens.length) * 100)
   : 100;
+
+// ── 6. Semantic file — no raw hex values ─────────────────────────────────────
+// rgba() values are exempt (opacity variants that can't be expressed as refs).
+const HEX_RE  = /^#[0-9a-fA-F]{3,8}$/;
+const RGBA_RE = /^rgba?\(/i;
+
+for (const [dotPath, token] of Object.entries(flat)) {
+  if (!dotPath.startsWith('semantic.')) continue;
+  const val = typeof token.value === 'string' ? token.value.trim() : null;
+  if (val && HEX_RE.test(val) && !RGBA_RE.test(val)) {
+    errors.push(`PRIMITIVE LEAK  "${dotPath}" has raw hex "${val}" — use a {color.*} reference`);
+  }
+}
 
 // ── Report ───────────────────────────────────────────────────────────────────
 const DIVIDER = '─'.repeat(60);

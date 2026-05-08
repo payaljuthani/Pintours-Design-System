@@ -25,6 +25,12 @@ public enum PT {
 
     // MARK: - Color Primitives
     public enum Color {
+        public enum White {
+            public static let c = UIColor(hex: "#ffffff")
+        }
+        public enum Black {
+            public static let c = UIColor(hex: "#000000")
+        }
         public enum Green {
             public static let c50 = UIColor(hex: "#eff5ed")
             public static let c100 = UIColor(hex: "#dfebdb")

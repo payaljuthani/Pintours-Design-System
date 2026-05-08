@@ -4,6 +4,8 @@
 <resources>
 
     <!-- COLOR -->
+    <color name="pt_color_white">#ffffff</color>
+    <color name="pt_color_black">#000000</color>
     <color name="pt_color_green_50">#eff5ed</color>
     <color name="pt_color_green_100">#dfebdb</color>
     <color name="pt_color_green_200">#bed7b8</color>

@@ -9,6 +9,8 @@
 
 :root {
   /* ── Color ───────────────────────────────── */
+  --pt-color-white: #ffffff;
+  --pt-color-black: #000000;
   --pt-color-green-50: #eff5ed;
   --pt-color-green-100: #dfebdb;
   --pt-color-green-200: #bed7b8;
