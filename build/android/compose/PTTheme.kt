@@ -30,6 +30,12 @@ import androidx.compose.ui.unit.sp
 // ── Color Primitives ─────────────────────────────────────────────────────────
 
 object PTColorPrimitives {
+    // White
+    val white = Color(0xFFFFFFFF)
+
+    // Black
+    val black = Color(0xFF000000)
+
     // Green
     val greenN50 = Color(0xFFEFF5ED)
     val greenN100 = Color(0xFFDFEBDB)

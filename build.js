@@ -3,7 +3,7 @@
 /**
  * PinTours Design System — Style Dictionary Build
  *
- * Reads tokens/tokens.json → generates:
+ * Reads tokens/primitives.json + tokens/semantic.json → generates:
  *   build/web/variables.css
  *   build/ios/Tokens.swift
  *   build/android/values/colors.xml
@@ -15,11 +15,25 @@ const StyleDictionary = require('style-dictionary');
 const fs   = require('fs');
 const path = require('path');
 
-// ── Pre-process: strip $metadata so SD doesn't try to parse it ──────────────
-const rawTokens = JSON.parse(
-  fs.readFileSync(path.resolve(__dirname, 'tokens/tokens.json'), 'utf-8')
+// ── Pre-process: merge primitives + semantic files, strip $metadata ──────────
+function deepMerge(target, source) {
+  for (const [k, v] of Object.entries(source)) {
+    if (v && typeof v === 'object' && !Array.isArray(v) && target[k] && typeof target[k] === 'object') {
+      deepMerge(target[k], v);
+    } else {
+      target[k] = v;
+    }
+  }
+  return target;
+}
+
+const { $metadata, ...primTokens } = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, 'tokens/primitives.json'), 'utf-8')
 );
-const { $metadata, ...tokens } = rawTokens;
+const tokens = deepMerge(
+  primTokens,
+  JSON.parse(fs.readFileSync(path.resolve(__dirname, 'tokens/semantic.json'), 'utf-8'))
+);
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const PREFIX = 'pt';
