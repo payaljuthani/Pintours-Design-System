@@ -1059,6 +1059,7 @@ gradientsSection.appendChild(gradientSnippetWrap);
   { toggleId: 'foundations-toggle',   itemsId: 'foundations-items',   iconId: 'foundations-icon'   },
   { toggleId: 'components-toggle',    itemsId: 'components-items',    iconId: 'components-icon'    },
   { toggleId: 'selection-sub-toggle', itemsId: 'selection-sub-items', iconId: 'selection-sub-icon' },
+  { toggleId: 'input-sub-toggle',     itemsId: 'input-sub-items',     iconId: 'input-sub-icon'     },
 ].forEach(({ toggleId, itemsId, iconId }) => {
   const btn   = document.getElementById(toggleId);
   const items = document.getElementById(itemsId);
@@ -4707,3 +4708,828 @@ buildSelectionPlayground({
   buildElement:  buildToggleElement,
   buildSnippets: buildTglSnippets,
 });
+
+// ─── Label playground ─────────────────────────────────────────────────────────
+
+const LABEL_COMBOS = [
+  { key: 'default-default',   sizeKey: 'default',  stateKey: 'default',  label: 'Default / Default'  },
+  { key: 'default-error',     sizeKey: 'default',  stateKey: 'error',    label: 'Default / Error'    },
+  { key: 'default-disabled',  sizeKey: 'default',  stateKey: 'disabled', label: 'Default / Disabled' },
+  { key: 'eyebrow-default',   sizeKey: 'eyebrow',  stateKey: 'default',  label: 'Eyebrow / Default'  },
+  { key: 'eyebrow-error',     sizeKey: 'eyebrow',  stateKey: 'error',    label: 'Eyebrow / Error'    },
+  { key: 'eyebrow-disabled',  sizeKey: 'eyebrow',  stateKey: 'disabled', label: 'Eyebrow / Disabled' },
+];
+
+function buildLabelElement(sizeKey, stateKey) {
+  const el = document.createElement('div');
+  el.className = `pt-label pt-label-size-${sizeKey} pt-label-state-${stateKey}`;
+  el.innerHTML = `<div class="pt-label-content"><span>*Label</span>${buildIconSvg('info-circle', sizeKey === 'eyebrow' ? 12 : 16)}</div>`;
+  return el;
+}
+
+const LABEL_TEXT_COLOR = {
+  'default-default':  'var(--pt-semantic-typography-body)',
+  'default-error':    'var(--pt-semantic-typography-error)',
+  'default-disabled': 'var(--pt-semantic-typography-disabled)',
+  'eyebrow-default':  'var(--pt-semantic-typography-body_secondary)',
+  'eyebrow-error':    'var(--pt-semantic-typography-body_secondary)',
+  'eyebrow-disabled': 'var(--pt-semantic-typography-disabled)',
+};
+const LABEL_FONT_SIZE = { default: 'var(--pt-typography-body-default-font_size)', eyebrow: 'var(--pt-typography-body-sm-font_size)' };
+
+function buildLabelWebSnippet(sizeKey, stateKey) {
+  const key = `${sizeKey}-${stateKey}`;
+  return [
+    `/* Label · ${sizeKey} / ${stateKey} */`,
+    `.label {`,
+    `  display: inline-flex;`,
+    `  align-items: center;`,
+    `  gap: 4px;`,
+    `  font-family: var(--pt-typography-font_family-primary), sans-serif;`,
+    `  font-weight: 500;`,
+    `  font-size: ${LABEL_FONT_SIZE[sizeKey]};`,
+    `  line-height: ${sizeKey === 'eyebrow' ? 'var(--pt-scale-5)' : 'var(--pt-scale-6)'};`,
+    `  color: ${LABEL_TEXT_COLOR[key]};`,
+    `}`,
+  ].join('\n');
+}
+
+function buildLabelIOSSnippet(sizeKey, stateKey) {
+  const key = `${sizeKey}-${stateKey}`;
+  const size = sizeKey === 'eyebrow' ? '14' : '16';
+  const colorMap = {
+    'default-default':  'PT.Semantic.Typography.body',
+    'default-error':    'PT.Semantic.Typography.error',
+    'default-disabled': 'PT.Semantic.Typography.disabled',
+    'eyebrow-default':  'PT.Semantic.Typography.bodySecondary',
+    'eyebrow-error':    'PT.Semantic.Typography.bodySecondary',
+    'eyebrow-disabled': 'PT.Semantic.Typography.disabled',
+  };
+  return [
+    `// Label · ${sizeKey} / ${stateKey}`,
+    `let label = UILabel()`,
+    `label.font = UIFont(name: "Poppins-Medium", size: ${size}) ?? .systemFont(ofSize: ${size}, weight: .medium)`,
+    `label.textColor = ${colorMap[key]}`,
+    `label.text = "*Label"`,
+  ].join('\n');
+}
+
+function buildLabelAndroidSnippet(sizeKey, stateKey) {
+  const colorMap = {
+    'default-default':  'pt_semantic_typography_body',
+    'default-error':    'pt_semantic_typography_error',
+    'default-disabled': 'pt_semantic_typography_disabled',
+    'eyebrow-default':  'pt_semantic_typography_body_secondary',
+    'eyebrow-error':    'pt_semantic_typography_body_secondary',
+    'eyebrow-disabled': 'pt_semantic_typography_disabled',
+  };
+  const styleMap = {
+    default: 'PT.TextStyle.Small.BodyDefault.Regular',
+    eyebrow: 'PT.TextStyle.Small.BodySm.Regular',
+  };
+  return [
+    `<!-- Label · ${sizeKey} / ${stateKey} -->`,
+    `<TextView`,
+    `    android:layout_width="wrap_content"`,
+    `    android:layout_height="wrap_content"`,
+    `    android:text="*Label"`,
+    `    android:textColor="@color/${colorMap[`${sizeKey}-${stateKey}`]}"`,
+    `    android:textAppearance="@style/${styleMap[sizeKey]}" />`,
+  ].join('\n');
+}
+
+function buildLabelPlayground() {
+  const container = document.getElementById('labelPlayground');
+  if (!container) return;
+
+  const grid = document.createElement('div');
+  grid.className = 'form-field-grid';
+
+  const sharedPanel = document.createElement('div');
+  sharedPanel.className = 'form-field-shared-panel';
+  sharedPanel.innerHTML = `
+    <div class="snippet-tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn" data-tab="ios">iOS</button>
+      <button class="tab-btn" data-tab="android">Android</button>
+    </div>
+    <div class="snippet-code-wrap">
+      <code class="snippet-text"></code>
+      <button class="copy-btn">Copy</button>
+    </div>`;
+
+  const panelTabs = sharedPanel.querySelectorAll('.tab-btn');
+  const panelCode = sharedPanel.querySelector('.snippet-text');
+  const panelCopy = sharedPanel.querySelector('.copy-btn');
+  let activeTab   = 'web';
+  let activeKey   = null;
+  let activeCard  = null;
+  const allSnippets = {};
+
+  panelTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      panelTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      if (activeKey) panelCode.textContent = allSnippets[activeKey][activeTab];
+    });
+  });
+
+  panelCopy.addEventListener('click', () => {
+    if (!activeKey) return;
+    navigator.clipboard.writeText(allSnippets[activeKey][activeTab]);
+    panelCopy.textContent = 'Copied!';
+    setTimeout(() => { panelCopy.textContent = 'Copy'; }, 1500);
+  });
+
+  LABEL_COMBOS.forEach(({ key, sizeKey, stateKey, label }) => {
+    allSnippets[key] = {
+      web:     buildLabelWebSnippet(sizeKey, stateKey),
+      ios:     buildLabelIOSSnippet(sizeKey, stateKey),
+      android: buildLabelAndroidSnippet(sizeKey, stateKey),
+    };
+
+    const card = document.createElement('div');
+    card.className = 'form-field-card';
+
+    const preview = document.createElement('div');
+    preview.className = 'form-field-card-preview';
+    preview.style.minHeight = '40px';
+    preview.appendChild(buildLabelElement(sizeKey, stateKey));
+
+    const cardLabel = document.createElement('div');
+    cardLabel.className = 'form-field-card-label';
+    cardLabel.textContent = label;
+
+    card.appendChild(preview);
+    card.appendChild(cardLabel);
+
+    card.addEventListener('click', () => {
+      const wasActive = activeKey === key && sharedPanel.classList.contains('open');
+      if (activeCard) activeCard.classList.remove('active');
+      if (wasActive) {
+        sharedPanel.classList.remove('open');
+        activeKey  = null;
+        activeCard = null;
+      } else {
+        card.classList.add('active');
+        activeKey  = key;
+        activeCard = card;
+        panelCode.textContent = allSnippets[key][activeTab];
+        sharedPanel.classList.add('open');
+      }
+    });
+
+    grid.appendChild(card);
+  });
+
+  grid.appendChild(sharedPanel);
+  container.appendChild(grid);
+}
+
+buildLabelPlayground();
+
+// ─── Footnote playground ───────────────────────────────────────────────────────
+
+const FOOTNOTE_STATES = [
+  { key: 'default', label: 'Default' },
+  { key: 'error',   label: 'Error'   },
+];
+
+function buildFootnoteElement(stateKey) {
+  const el = document.createElement('div');
+  el.className = `pt-footnote pt-footnote-${stateKey}`;
+  el.innerHTML =
+    buildIconSvg('square', 16) +
+    `<span>Footnote sentence for the form field.</span>` +
+    buildIconSvg('info-circle', 16);
+  return el;
+}
+
+function buildFootnoteWebSnippet(stateKey) {
+  const isError = stateKey === 'error';
+  return [
+    `/* Footnote · ${stateKey} */`,
+    `.footnote {`,
+    `  display: inline-flex;`,
+    `  align-items: center;`,
+    `  gap: var(--pt-scale-1);`,
+    `  font-family: var(--pt-typography-font_family-primary), sans-serif;`,
+    `  font-size: var(--pt-typography-body-sm-font_size);`,
+    `  font-weight: 300;`,
+    `  line-height: var(--pt-scale-6);`,
+    `  color: ${isError ? 'var(--pt-semantic-typography-error)' : 'var(--pt-semantic-typography-body_caption)'};`,
+    `}`,
+  ].join('\n');
+}
+
+function buildFootnoteIOSSnippet(stateKey) {
+  const isError = stateKey === 'error';
+  return [
+    `// Footnote · ${stateKey}`,
+    `let footnote = UILabel()`,
+    `footnote.font = UIFont(name: "Poppins-Light", size: 14) ?? .systemFont(ofSize: 14, weight: .light)`,
+    `footnote.textColor = ${isError ? 'PT.Semantic.Typography.error' : 'PT.Semantic.Typography.bodyCaption'}`,
+    `footnote.text = "Footnote sentence for the form field."`,
+  ].join('\n');
+}
+
+function buildFootnoteAndroidSnippet(stateKey) {
+  const isError = stateKey === 'error';
+  return [
+    `<!-- Footnote · ${stateKey} -->`,
+    `<TextView`,
+    `    android:layout_width="wrap_content"`,
+    `    android:layout_height="wrap_content"`,
+    `    android:text="Footnote sentence for the form field."`,
+    `    android:textColor="@color/${isError ? 'pt_semantic_typography_error' : 'pt_semantic_typography_body_caption'}"`,
+    `    android:textAppearance="@style/PT.TextStyle.Small.BodySm.Thin" />`,
+  ].join('\n');
+}
+
+function buildFootnotePlayground() {
+  const container = document.getElementById('footnotePlayground');
+  if (!container) return;
+
+  const grid = document.createElement('div');
+  grid.className = 'form-field-grid';
+
+  const sharedPanel = document.createElement('div');
+  sharedPanel.className = 'form-field-shared-panel';
+  sharedPanel.innerHTML = `
+    <div class="snippet-tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn" data-tab="ios">iOS</button>
+      <button class="tab-btn" data-tab="android">Android</button>
+    </div>
+    <div class="snippet-code-wrap">
+      <code class="snippet-text"></code>
+      <button class="copy-btn">Copy</button>
+    </div>`;
+
+  const panelTabs = sharedPanel.querySelectorAll('.tab-btn');
+  const panelCode = sharedPanel.querySelector('.snippet-text');
+  const panelCopy = sharedPanel.querySelector('.copy-btn');
+  let activeTab   = 'web';
+  let activeState = null;
+  let activeCard  = null;
+  const allSnippets = {};
+
+  panelTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      panelTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      if (activeState) panelCode.textContent = allSnippets[activeState][activeTab];
+    });
+  });
+
+  panelCopy.addEventListener('click', () => {
+    if (!activeState) return;
+    navigator.clipboard.writeText(allSnippets[activeState][activeTab]);
+    panelCopy.textContent = 'Copied!';
+    setTimeout(() => { panelCopy.textContent = 'Copy'; }, 1500);
+  });
+
+  FOOTNOTE_STATES.forEach(({ key, label }) => {
+    allSnippets[key] = {
+      web:     buildFootnoteWebSnippet(key),
+      ios:     buildFootnoteIOSSnippet(key),
+      android: buildFootnoteAndroidSnippet(key),
+    };
+
+    const card = document.createElement('div');
+    card.className = 'form-field-card';
+
+    const preview = document.createElement('div');
+    preview.className = 'form-field-card-preview';
+    preview.style.minHeight = '32px';
+    preview.appendChild(buildFootnoteElement(key));
+
+    const cardLabel = document.createElement('div');
+    cardLabel.className = 'form-field-card-label';
+    cardLabel.textContent = label;
+
+    card.appendChild(preview);
+    card.appendChild(cardLabel);
+
+    card.addEventListener('click', () => {
+      const wasActive = activeState === key && sharedPanel.classList.contains('open');
+      if (activeCard) activeCard.classList.remove('active');
+      if (wasActive) {
+        sharedPanel.classList.remove('open');
+        activeState = null;
+        activeCard  = null;
+      } else {
+        card.classList.add('active');
+        activeState = key;
+        activeCard  = card;
+        panelCode.textContent = allSnippets[key][activeTab];
+        sharedPanel.classList.add('open');
+      }
+    });
+
+    grid.appendChild(card);
+  });
+
+  grid.appendChild(sharedPanel);
+  container.appendChild(grid);
+}
+
+buildFootnotePlayground();
+
+// ─── Form Field playground ─────────────────────────────────────────────────────
+
+const FF_STATES = [
+  { key: 'default',  label: 'Default'  },
+  { key: 'active',   label: 'Active'   },
+  { key: 'error',    label: 'Error'    },
+  { key: 'disabled', label: 'Disabled' },
+  { key: 'hover',    label: 'Hover'    },
+  { key: 'filled',   label: 'Filled'   },
+];
+
+const FF_BG = {
+  default:  'var(--pt-semantic-surface-card_primary)',
+  active:   'var(--pt-semantic-surface-card_primary)',
+  error:    'var(--pt-semantic-surface-error)',
+  disabled: 'var(--pt-semantic-surface-page)',
+  hover:    'var(--pt-semantic-surface-success)',
+  filled:   'var(--pt-semantic-surface-card_primary)',
+};
+const FF_BORDER = {
+  default:  'var(--pt-semantic-border-card_primary)',
+  active:   'var(--pt-semantic-border-action)',
+  error:    'var(--pt-semantic-border-error)',
+  disabled: 'var(--pt-semantic-border-card_primary)',
+  hover:    'var(--pt-semantic-border-action)',
+  filled:   'var(--pt-semantic-border-card_primary)',
+};
+const FF_BG_SWIFT = {
+  default:  'PT.Semantic.Surface.cardPrimary',
+  active:   'PT.Semantic.Surface.cardPrimary',
+  error:    'PT.Semantic.Surface.error',
+  disabled: 'PT.Semantic.Surface.page',
+  hover:    'PT.Semantic.Surface.success',
+  filled:   'PT.Semantic.Surface.cardPrimary',
+};
+const FF_BORDER_SWIFT = {
+  default:  'PT.Semantic.Border.cardPrimary',
+  active:   'PT.Semantic.Border.action',
+  error:    'PT.Semantic.Border.error',
+  disabled: 'PT.Semantic.Border.cardPrimary',
+  hover:    'PT.Semantic.Border.action',
+  filled:   'PT.Semantic.Border.cardPrimary',
+};
+const FF_BG_ANDROID = {
+  default:  'pt_semantic_surface_card_primary',
+  active:   'pt_semantic_surface_card_primary',
+  error:    'pt_semantic_surface_error',
+  disabled: 'pt_semantic_surface_page',
+  hover:    'pt_semantic_surface_success',
+  filled:   'pt_semantic_surface_card_primary',
+};
+const FF_BORDER_ANDROID = {
+  default:  'pt_semantic_border_card_primary',
+  active:   'pt_semantic_border_action',
+  error:    'pt_semantic_border_error',
+  disabled: 'pt_semantic_border_card_primary',
+  hover:    'pt_semantic_border_action',
+  filled:   'pt_semantic_border_card_primary',
+};
+
+function buildFormFieldElement(stateKey) {
+  const wrap = document.createElement('div');
+  wrap.className = `pt-form-field pt-form-field-${stateKey}`;
+
+  const text = document.createElement('span');
+  text.className = 'pt-form-field-text';
+  text.textContent = 'Form input';
+
+  const chevron = document.createElement('span');
+  chevron.className = 'pt-form-field-chevron';
+  chevron.innerHTML = buildIconSvg('chevron-down', 20);
+
+  const label = document.createElement('div');
+  label.className = 'pt-form-field-label';
+  label.innerHTML = `<div class="pt-form-field-label-content"><span>*Label</span>${buildIconSvg('info-circle', 16)}</div>`;
+
+  wrap.appendChild(text);
+  wrap.appendChild(chevron);
+  wrap.appendChild(label);
+  return wrap;
+}
+
+function buildFFWebSnippet(stateKey) {
+  const isFloating = ['active', 'filled', 'error'].includes(stateKey);
+  const isDisabled = stateKey === 'disabled';
+  const isHover    = stateKey === 'hover';
+  const isError    = stateKey === 'error';
+  const hasInput   = ['active', 'filled', 'error'].includes(stateKey);
+
+  const labelBg    = isError
+    ? 'var(--pt-semantic-surface-error)'
+    : 'var(--pt-semantic-surface-card_primary)';
+  const labelColor = isDisabled
+    ? 'var(--pt-semantic-typography-disabled)'
+    : isFloating
+      ? 'var(--pt-semantic-typography-body_secondary)'
+      : 'var(--pt-semantic-typography-body)';
+  const inputColor = isError
+    ? 'var(--pt-semantic-typography-error)'
+    : 'var(--pt-semantic-typography-body)';
+
+  return [
+    `/* Form Field · ${stateKey} */`,
+    `.form-field {`,
+    `  position: relative;`,
+    `  display: flex;`,
+    `  align-items: center;`,
+    `  gap: var(--pt-scale-2);`,
+    `  padding: var(--pt-scale-5) var(--pt-scale-4);`,
+    `  border: 1px solid ${FF_BORDER[stateKey]};`,
+    `  border-radius: var(--pt-scale-1);`,
+    `  background: ${FF_BG[stateKey]};`,
+    `  min-height: 64px;`,
+    isHover    ? `  box-shadow: var(--pt-shadow-solid-xs);` : null,
+    isDisabled ? `  cursor: not-allowed;` : null,
+    `}`,
+    `.form-field-label {`,
+    `  position: absolute;`,
+    `  left: 7px;`,
+    isFloating ? `  top: -1px; height: 10px; align-items: flex-end;` : `  top: 23px;`,
+    `  padding: 0 var(--pt-scale-2);`,
+    `  font-size: ${isFloating ? 'var(--pt-typography-body-sm-font_size)' : 'var(--pt-typography-body-default-font_size)'};`,
+    `  line-height: ${isFloating ? 'var(--pt-scale-5)' : 'var(--pt-scale-6)'};`,
+    `  color: ${labelColor};`,
+    isFloating ? `  background: ${labelBg};` : null,
+    `}`,
+    hasInput ? [
+      `.form-field-input {`,
+      `  color: ${inputColor};`,
+      `}`,
+    ] : null,
+  ].flat().filter(Boolean).join('\n');
+}
+
+function buildFFIOSSnippet(stateKey) {
+  const isFloating = ['active', 'filled', 'error'].includes(stateKey);
+  const isHover    = stateKey === 'hover';
+  const isDisabled = stateKey === 'disabled';
+  const isError    = stateKey === 'error';
+
+  return [
+    `// Form Field · ${stateKey}`,
+    `let field = UIView()`,
+    `field.backgroundColor = ${FF_BG_SWIFT[stateKey]}`,
+    `field.layer.borderColor = ${FF_BORDER_SWIFT[stateKey]}.cgColor`,
+    `field.layer.borderWidth = 1`,
+    `field.layer.cornerRadius = PT.Scale.s1`,
+    isHover ? `field.layer.shadowColor = PT.Semantic.Shadow.shadow.cgColor` : null,
+    isHover ? `field.layer.shadowOffset = CGSize(width: 0, height: PT.Scale.shalf)` : null,
+    isHover ? `field.layer.shadowOpacity = 0.2` : null,
+    ``,
+    `// Floating label`,
+    `let label = UILabel()`,
+    isFloating
+      ? `label.font = UIFont(name: "Poppins-Medium", size: 14) ?? .systemFont(ofSize: 14, weight: .medium)`
+      : `label.font = UIFont(name: "Poppins-Medium", size: 16) ?? .systemFont(ofSize: 16, weight: .medium)`,
+    isDisabled
+      ? `label.textColor = PT.Semantic.Typography.disabled`
+      : isFloating
+        ? `label.textColor = PT.Semantic.Typography.bodySecondary`
+        : `label.textColor = PT.Semantic.Typography.body`,
+    isError    ? `label.textColor = PT.Semantic.Typography.bodySecondary` : null,
+    isDisabled ? `field.isUserInteractionEnabled = false` : null,
+    isError    ? `` : null,
+    isError    ? `// Input text` : null,
+    isError    ? `inputLabel.textColor = PT.Semantic.Typography.error` : null,
+  ].filter(v => v !== null).join('\n');
+}
+
+function buildFFAndroidSnippet(stateKey) {
+  const isDisabled = stateKey === 'disabled';
+  const isError    = stateKey === 'error';
+
+  return [
+    `<!-- Form Field · ${stateKey} -->`,
+    `<com.google.android.material.textfield.TextInputLayout`,
+    `    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"`,
+    `    android:layout_width="match_parent"`,
+    `    android:layout_height="wrap_content"`,
+    `    app:boxBackgroundColor="@color/${FF_BG_ANDROID[stateKey]}"`,
+    `    app:boxStrokeColor="@color/${FF_BORDER_ANDROID[stateKey]}"`,
+    `    app:boxStrokeWidth="1dp"`,
+    `    app:boxCornerRadiusTopStart="@dimen/pt_scale_1"`,
+    `    app:boxCornerRadiusTopEnd="@dimen/pt_scale_1"`,
+    `    app:boxCornerRadiusBottomStart="@dimen/pt_scale_1"`,
+    `    app:boxCornerRadiusBottomEnd="@dimen/pt_scale_1"`,
+    `    app:hintTextColor="@color/pt_semantic_typography_body_secondary"`,
+    `    android:hint="*Label"`,
+    isDisabled ? `    android:enabled="false"` : null,
+    isError    ? `    app:errorEnabled="true"` : null,
+    `    app:endIconMode="dropdown_menu">`,
+    `  <com.google.android.material.textfield.TextInputEditText`,
+    `      android:layout_width="match_parent"`,
+    `      android:layout_height="wrap_content"`,
+    `      android:padding="@dimen/pt_scale_5"`,
+    `      android:textColor="@color/${isError ? 'pt_semantic_typography_error' : 'pt_semantic_typography_body'}"`,
+    `      android:fontFamily="@font/poppins_medium" />`,
+    `</com.google.android.material.textfield.TextInputLayout>`,
+  ].filter(Boolean).join('\n');
+}
+
+function buildFFSnippets(stateKey) {
+  return {
+    web:     buildFFWebSnippet(stateKey),
+    ios:     buildFFIOSSnippet(stateKey),
+    android: buildFFAndroidSnippet(stateKey),
+  };
+}
+
+function buildFormFieldPlayground() {
+  const container = document.getElementById('formFieldPlayground');
+  if (!container) return;
+
+  const grid = document.createElement('div');
+  grid.className = 'form-field-grid';
+
+  const sharedPanel = document.createElement('div');
+  sharedPanel.className = 'form-field-shared-panel';
+  sharedPanel.innerHTML = `
+    <div class="snippet-tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn" data-tab="ios">iOS</button>
+      <button class="tab-btn" data-tab="android">Android</button>
+    </div>
+    <div class="snippet-code-wrap">
+      <code class="snippet-text"></code>
+      <button class="copy-btn">Copy</button>
+    </div>`;
+
+  const panelTabs = sharedPanel.querySelectorAll('.tab-btn');
+  const panelCode = sharedPanel.querySelector('.snippet-text');
+  const panelCopy = sharedPanel.querySelector('.copy-btn');
+  let activeTab   = 'web';
+  let activeState = null;
+  let activeCard  = null;
+  const allSnippets = {};
+
+  panelTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      panelTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      if (activeState) panelCode.textContent = allSnippets[activeState][activeTab];
+    });
+  });
+
+  panelCopy.addEventListener('click', () => {
+    if (!activeState) return;
+    navigator.clipboard.writeText(allSnippets[activeState][activeTab]);
+    panelCopy.textContent = 'Copied!';
+    setTimeout(() => { panelCopy.textContent = 'Copy'; }, 1500);
+  });
+
+  FF_STATES.forEach(({ key, label }) => {
+    allSnippets[key] = buildFFSnippets(key);
+
+    const card = document.createElement('div');
+    card.className = 'form-field-card';
+
+    const preview = document.createElement('div');
+    preview.className = 'form-field-card-preview';
+    preview.appendChild(buildFormFieldElement(key));
+
+    const cardLabel = document.createElement('div');
+    cardLabel.className = 'form-field-card-label';
+    cardLabel.textContent = label;
+
+    card.appendChild(preview);
+    card.appendChild(cardLabel);
+
+    card.addEventListener('click', () => {
+      const wasActive = activeState === key && sharedPanel.classList.contains('open');
+      if (activeCard) activeCard.classList.remove('active');
+      if (wasActive) {
+        sharedPanel.classList.remove('open');
+        activeState = null;
+        activeCard  = null;
+      } else {
+        card.classList.add('active');
+        activeState = key;
+        activeCard  = card;
+        panelCode.textContent = allSnippets[key][activeTab];
+        sharedPanel.classList.add('open');
+      }
+    });
+
+    grid.appendChild(card);
+  });
+
+  grid.appendChild(sharedPanel);
+  container.appendChild(grid);
+}
+
+buildFormFieldPlayground();
+
+// ─── Search playground ─────────────────────────────────────────────────────────
+
+const SEARCH_STATES = [
+  { key: 'default', label: 'Default' },
+  { key: 'active',  label: 'Active'  },
+];
+
+function buildSearchElement(stateKey) {
+  const wrap = document.createElement('div');
+  wrap.className = `pt-search pt-search-${stateKey}`;
+
+  const input = document.createElement('div');
+  input.className = 'pt-search-input';
+  input.textContent = 'Enter search query';
+
+  const btn = document.createElement('div');
+  btn.className = 'pt-search-button';
+  btn.innerHTML = buildIconSvg('search', 20);
+
+  wrap.appendChild(input);
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+function buildSearchWebSnippet(stateKey) {
+  const isActive    = stateKey === 'active';
+  const borderToken = isActive ? 'var(--pt-semantic-border-action)' : 'var(--pt-semantic-border-card_primary)';
+  const bgToken     = isActive ? 'var(--pt-semantic-surface-success)' : 'var(--pt-semantic-surface-card_primary)';
+
+  return [
+    `/* Search · ${stateKey} */`,
+    `.search {`,
+    `  display: flex;`,
+    isActive ? `  box-shadow: var(--pt-shadow-solid-xs);` : null,
+    `}`,
+    `.search-input {`,
+    `  flex: 1;`,
+    `  padding: var(--pt-scale-3) var(--pt-scale-5);`,
+    `  border: 1px solid ${borderToken};`,
+    `  border-right: none;`,
+    `  border-radius: var(--pt-scale-1) 0 0 var(--pt-scale-1);`,
+    `  background: ${bgToken};`,
+    `  color: ${isActive ? 'var(--pt-semantic-typography-body)' : 'var(--pt-semantic-typography-body_secondary)'};`,
+    `  font-family: var(--pt-typography-font_family-primary), sans-serif;`,
+    `  font-size: var(--pt-typography-body-default-font_size);`,
+    `}`,
+    `.search-button {`,
+    `  width: 48px; height: 48px;`,
+    `  display: flex; align-items: center; justify-content: center;`,
+    `  border: 1px solid ${borderToken};`,
+    `  border-radius: 0 var(--pt-scale-1) var(--pt-scale-1) 0;`,
+    `  background: ${bgToken};`,
+    `  color: ${isActive ? 'var(--pt-semantic-icon-action)' : 'var(--pt-semantic-icon-body_secondary)'};`,
+    `  cursor: pointer;`,
+    `}`,
+  ].filter(Boolean).join('\n');
+}
+
+function buildSearchIOSSnippet(stateKey) {
+  const isActive = stateKey === 'active';
+  return [
+    `// Search · ${stateKey}`,
+    `let searchBar = UISearchBar()`,
+    `searchBar.searchBarStyle = .minimal`,
+    `searchBar.backgroundImage = UIImage()`,
+    `searchBar.layer.borderWidth = 1`,
+    `searchBar.layer.cornerRadius = PT.Scale.s1`,
+    `searchBar.layer.borderColor = ${isActive ? 'PT.Semantic.Border.action' : 'PT.Semantic.Border.cardPrimary'}.cgColor`,
+    `searchBar.backgroundColor = ${isActive ? 'PT.Semantic.Surface.success' : 'PT.Semantic.Surface.cardPrimary'}`,
+    `searchBar.placeholder = "Enter search query"`,
+    `searchBar.tintColor = PT.Semantic.Icon.action`,
+  ].join('\n');
+}
+
+function buildSearchAndroidSnippet(stateKey) {
+  const isActive    = stateKey === 'active';
+  const borderColor = isActive ? 'pt_semantic_border_action' : 'pt_semantic_border_card_primary';
+  const bgColor     = isActive ? 'pt_semantic_surface_success' : 'pt_semantic_surface_card_primary';
+
+  return [
+    `<!-- Search · ${stateKey} -->`,
+    `<LinearLayout`,
+    `    android:layout_width="match_parent"`,
+    `    android:layout_height="48dp"`,
+    `    android:orientation="horizontal">`,
+    `  <com.google.android.material.textfield.TextInputLayout`,
+    `      style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"`,
+    `      android:layout_width="0dp"`,
+    `      android:layout_height="match_parent"`,
+    `      android:layout_weight="1"`,
+    `      app:boxBackgroundColor="@color/${bgColor}"`,
+    `      app:boxStrokeColor="@color/${borderColor}"`,
+    `      android:hint="Enter search query">`,
+    `    <com.google.android.material.textfield.TextInputEditText`,
+    `        android:layout_width="match_parent"`,
+    `        android:layout_height="match_parent" />`,
+    `  </com.google.android.material.textfield.TextInputLayout>`,
+    `  <ImageButton`,
+    `      android:layout_width="48dp"`,
+    `      android:layout_height="48dp"`,
+    `      android:src="@drawable/ic_search"`,
+    `      android:background="@color/${bgColor}"`,
+    `      android:tint="@color/${isActive ? 'pt_semantic_icon_action' : 'pt_semantic_icon_body_secondary'}" />`,
+    `</LinearLayout>`,
+  ].join('\n');
+}
+
+function buildSearchSnippets(stateKey) {
+  return {
+    web:     buildSearchWebSnippet(stateKey),
+    ios:     buildSearchIOSSnippet(stateKey),
+    android: buildSearchAndroidSnippet(stateKey),
+  };
+}
+
+function buildSearchPlayground() {
+  const container = document.getElementById('searchPlayground');
+  if (!container) return;
+
+  const grid = document.createElement('div');
+  grid.className = 'form-field-grid';
+
+  const sharedPanel = document.createElement('div');
+  sharedPanel.className = 'form-field-shared-panel';
+  sharedPanel.innerHTML = `
+    <div class="snippet-tabs">
+      <button class="tab-btn active" data-tab="web">Web</button>
+      <button class="tab-btn" data-tab="ios">iOS</button>
+      <button class="tab-btn" data-tab="android">Android</button>
+    </div>
+    <div class="snippet-code-wrap">
+      <code class="snippet-text"></code>
+      <button class="copy-btn">Copy</button>
+    </div>`;
+
+  const panelTabs = sharedPanel.querySelectorAll('.tab-btn');
+  const panelCode = sharedPanel.querySelector('.snippet-text');
+  const panelCopy = sharedPanel.querySelector('.copy-btn');
+  let activeTab   = 'web';
+  let activeState = null;
+  let activeCard  = null;
+  const allSnippets = {};
+
+  panelTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      panelTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      if (activeState) panelCode.textContent = allSnippets[activeState][activeTab];
+    });
+  });
+
+  panelCopy.addEventListener('click', () => {
+    if (!activeState) return;
+    navigator.clipboard.writeText(allSnippets[activeState][activeTab]);
+    panelCopy.textContent = 'Copied!';
+    setTimeout(() => { panelCopy.textContent = 'Copy'; }, 1500);
+  });
+
+  SEARCH_STATES.forEach(({ key, label }) => {
+    allSnippets[key] = buildSearchSnippets(key);
+
+    const card = document.createElement('div');
+    card.className = 'form-field-card';
+
+    const preview = document.createElement('div');
+    preview.className = 'form-field-card-preview';
+    preview.appendChild(buildSearchElement(key));
+
+    const cardLabel = document.createElement('div');
+    cardLabel.className = 'form-field-card-label';
+    cardLabel.textContent = label;
+
+    card.appendChild(preview);
+    card.appendChild(cardLabel);
+
+    card.addEventListener('click', () => {
+      const wasActive = activeState === key && sharedPanel.classList.contains('open');
+      if (activeCard) activeCard.classList.remove('active');
+      if (wasActive) {
+        sharedPanel.classList.remove('open');
+        activeState = null;
+        activeCard  = null;
+      } else {
+        card.classList.add('active');
+        activeState = key;
+        activeCard  = card;
+        panelCode.textContent = allSnippets[key][activeTab];
+        sharedPanel.classList.add('open');
+      }
+    });
+
+    grid.appendChild(card);
+  });
+
+  grid.appendChild(sharedPanel);
+  container.appendChild(grid);
+}
+
+buildSearchPlayground();

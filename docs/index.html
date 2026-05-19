@@ -1726,6 +1726,281 @@
     .pt-toggle-false .pt-toggle-knob,
     .pt-toggle-disabled .pt-toggle-knob { left: 2px; }
     .pt-toggle-true .pt-toggle-knob    { left: calc(100% - 2px); transform: translateY(-50%) translateX(-100%); }
+
+    /* ─── PT Form Field ──────────────────────────────────────────────── */
+    .pt-form-field {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: var(--pt-scale-2);
+      padding: var(--pt-scale-5) var(--pt-scale-4);
+      border: 1px solid;
+      border-radius: var(--pt-scale-1);
+      min-height: 64px;
+      width: 100%;
+      box-sizing: border-box;
+      font-family: var(--pt-typography-font_family-primary, 'Poppins'), sans-serif;
+    }
+    .pt-form-field-default {
+      background: var(--pt-semantic-surface-card_primary);
+      border-color: var(--pt-semantic-border-card_primary);
+    }
+    .pt-form-field-active {
+      background: var(--pt-semantic-surface-card_primary);
+      border-color: var(--pt-semantic-border-action);
+    }
+    .pt-form-field-error {
+      background: var(--pt-semantic-surface-error);
+      border-color: var(--pt-semantic-border-error);
+    }
+    .pt-form-field-disabled {
+      background: var(--pt-semantic-surface-page);
+      border-color: var(--pt-semantic-border-card_primary);
+      cursor: not-allowed;
+    }
+    .pt-form-field-hover {
+      background: var(--pt-semantic-surface-success);
+      border-color: var(--pt-semantic-border-action);
+      box-shadow: var(--pt-shadow-solid-xs);
+    }
+    .pt-form-field-filled {
+      background: var(--pt-semantic-surface-card_primary);
+      border-color: var(--pt-semantic-border-card_primary);
+    }
+
+    .pt-form-field-text {
+      flex: 1;
+      min-width: 0;
+      font-size: var(--pt-typography-body-default-font_size, 16px);
+      line-height: var(--pt-scale-6, 24px);
+      font-weight: 500;
+    }
+    .pt-form-field-default .pt-form-field-text,
+    .pt-form-field-hover .pt-form-field-text,
+    .pt-form-field-disabled .pt-form-field-text { opacity: 0; }
+    .pt-form-field-active .pt-form-field-text,
+    .pt-form-field-filled .pt-form-field-text  { color: var(--pt-semantic-typography-body); }
+    .pt-form-field-error .pt-form-field-text   { color: var(--pt-semantic-typography-error); }
+
+    .pt-form-field-chevron {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+    }
+    .pt-form-field-default .pt-form-field-chevron,
+    .pt-form-field-active .pt-form-field-chevron,
+    .pt-form-field-hover .pt-form-field-chevron,
+    .pt-form-field-filled .pt-form-field-chevron { color: var(--pt-semantic-icon-body); }
+    .pt-form-field-error .pt-form-field-chevron    { color: var(--pt-semantic-icon-error); }
+    .pt-form-field-disabled .pt-form-field-chevron { color: var(--pt-semantic-icon-disabled); }
+
+    /* Floating label — outer positioner */
+    .pt-form-field-label {
+      position: absolute;
+      left: 7px;
+      padding: 0 var(--pt-scale-2);
+      display: inline-flex;
+      align-items: center;
+      pointer-events: none;
+    }
+    /* Inner content — aligns text + icon as a pair */
+    .pt-form-field-label-content {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .pt-form-field-label-content svg {
+      display: block;
+      flex-shrink: 0;
+    }
+
+    /* Center position: Default, Hover */
+    .pt-form-field-default .pt-form-field-label,
+    .pt-form-field-hover .pt-form-field-label {
+      top: 23px;
+    }
+    .pt-form-field-default .pt-form-field-label-content,
+    .pt-form-field-hover .pt-form-field-label-content {
+      font-size: var(--pt-typography-body-default-font_size, 16px);
+      line-height: var(--pt-scale-6, 24px);
+      color: var(--pt-semantic-typography-body);
+    }
+    /* Center position: Disabled */
+    .pt-form-field-disabled .pt-form-field-label { top: 23px; }
+    .pt-form-field-disabled .pt-form-field-label-content {
+      font-size: var(--pt-typography-body-default-font_size, 16px);
+      line-height: var(--pt-scale-6, 24px);
+      color: var(--pt-semantic-typography-body_caption);
+    }
+    /* Eyebrow position: Active, Filled — label sits on the top border */
+    .pt-form-field-active .pt-form-field-label,
+    .pt-form-field-filled .pt-form-field-label {
+      top: -1px;
+      height: 10px;
+      align-items: flex-end;
+      background: var(--pt-semantic-surface-card_primary);
+    }
+    .pt-form-field-active .pt-form-field-label-content,
+    .pt-form-field-filled .pt-form-field-label-content {
+      font-size: var(--pt-typography-body-sm-font_size, 14px);
+      line-height: var(--pt-scale-5, 20px);
+      color: var(--pt-semantic-typography-body_secondary);
+    }
+    /* Eyebrow position: Error */
+    .pt-form-field-error .pt-form-field-label {
+      top: -1px;
+      height: 10px;
+      align-items: flex-end;
+      background: var(--pt-semantic-surface-error);
+    }
+    .pt-form-field-error .pt-form-field-label-content {
+      font-size: var(--pt-typography-body-sm-font_size, 14px);
+      line-height: var(--pt-scale-5, 20px);
+      color: var(--pt-semantic-typography-body_secondary);
+    }
+
+    /* ─── PT Label (standalone) ──────────────────────────────────── */
+    .pt-label {
+      display: inline-flex;
+      align-items: flex-end;
+      padding: 0 var(--pt-scale-2);
+    }
+    .pt-label-content {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--pt-typography-font_family-primary, 'Poppins'), sans-serif;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .pt-label-content svg { display: block; flex-shrink: 0; }
+
+    /* Size variants */
+    .pt-label-size-default .pt-label-content {
+      font-size: var(--pt-typography-body-default-font_size, 16px);
+      line-height: var(--pt-scale-6, 24px);
+    }
+    .pt-label-size-eyebrow .pt-label-content {
+      font-size: var(--pt-typography-body-sm-font_size, 14px);
+      line-height: var(--pt-scale-5, 20px);
+    }
+    /* State colors — Default size */
+    .pt-label-size-default.pt-label-state-default  .pt-label-content { color: var(--pt-semantic-typography-body); }
+    .pt-label-size-default.pt-label-state-error     .pt-label-content { color: var(--pt-semantic-typography-error); }
+    .pt-label-size-default.pt-label-state-disabled  .pt-label-content { color: var(--pt-semantic-typography-body_caption); }
+    /* Eyebrow always uses secondary / disabled */
+    .pt-label-size-eyebrow.pt-label-state-default   .pt-label-content,
+    .pt-label-size-eyebrow.pt-label-state-error      .pt-label-content { color: var(--pt-semantic-typography-body_secondary); }
+    .pt-label-size-eyebrow.pt-label-state-disabled   .pt-label-content { color: var(--pt-semantic-typography-body_caption); }
+
+    /* ─── PT Footnote ─────────────────────────────────────────────── */
+    .pt-footnote {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--pt-scale-2);
+      font-family: var(--pt-typography-font_family-primary, 'Poppins'), sans-serif;
+      font-size: var(--pt-typography-body-sm-font_size, 14px);
+      font-weight: 300;
+      line-height: var(--pt-scale-6, 24px);
+    }
+    .pt-footnote svg { display: block; flex-shrink: 0; }
+    .pt-footnote-default { color: var(--pt-semantic-typography-body_caption); }
+    .pt-footnote-error   { color: var(--pt-semantic-typography-error); }
+
+    /* ─── PT Search ──────────────────────────────────────────────── */
+    .pt-search {
+      display: flex;
+      align-items: stretch;
+      font-family: var(--pt-typography-font_family-primary, 'Poppins'), sans-serif;
+    }
+    .pt-search-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      padding: var(--pt-scale-5);
+      border: 1px solid;
+      border-right-width: 0;
+      border-top-left-radius: var(--pt-scale-1);
+      border-bottom-left-radius: var(--pt-scale-1);
+      font-size: var(--pt-typography-body-default-font_size, 16px);
+      line-height: var(--pt-scale-6, 24px);
+      font-weight: 500;
+    }
+    .pt-search-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      padding: 10px;
+      border: 1px solid;
+      border-left-width: 0;
+      border-top-right-radius: var(--pt-scale-1);
+      border-bottom-right-radius: var(--pt-scale-1);
+      flex-shrink: 0;
+    }
+    .pt-search-button svg { display: block; flex-shrink: 0; }
+    .pt-search-default .pt-search-input,
+    .pt-search-default .pt-search-button {
+      background: var(--pt-semantic-surface-card_primary);
+      border-color: var(--pt-semantic-border-card_primary);
+    }
+    .pt-search-default .pt-search-input  { color: var(--pt-semantic-typography-body_secondary); }
+    .pt-search-default .pt-search-button { color: var(--pt-semantic-icon-body_secondary); }
+    .pt-search-active .pt-search-input,
+    .pt-search-active .pt-search-button {
+      background: var(--pt-semantic-surface-success);
+      border-color: var(--pt-semantic-border-action);
+    }
+    .pt-search-active .pt-search-input  { color: var(--pt-semantic-typography-body); }
+    .pt-search-active .pt-search-button { color: var(--pt-semantic-icon-action); }
+    .pt-search-active { box-shadow: var(--pt-shadow-solid-xs); }
+
+    /* ─── Form Field / Search playground layout ──────────────────── */
+    .form-field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 620px) {
+      .form-field-grid { grid-template-columns: 1fr; }
+    }
+    .form-field-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--pt-semantic-surface-page, #f6f9f9);
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 10px;
+      padding: 20px 16px 14px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .form-field-card:hover { border-color: var(--pt-semantic-border-default, #222628); }
+    .form-field-card.active { border-color: var(--pt-semantic-surface-action, #5d9c4d); }
+    .form-field-card-preview {
+      display: flex;
+      align-items: center;
+      min-height: 64px;
+    }
+    .form-field-card-label {
+      font-size: 10px;
+      text-align: center;
+      opacity: 0.55;
+    }
+    .form-field-shared-panel {
+      display: none;
+      grid-column: 1 / -1;
+      background: var(--pt-semantic-surface-card_primary, #fff);
+      border: 1px solid var(--pt-semantic-border-divider, #a8c0c7);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .form-field-shared-panel.open { display: block; }
   </style>
 </head>
 <body>
@@ -1779,6 +2054,19 @@
               <a href="#components-selection-checkbox" class="nav-link nav-sub-link" data-section="components-selection-checkbox">Checkbox</a>
               <a href="#components-selection-radio"    class="nav-link nav-sub-link" data-section="components-selection-radio">Radio Button</a>
               <a href="#components-selection-toggle"   class="nav-link nav-sub-link" data-section="components-selection-toggle">Toggle</a>
+            </div>
+          </div>
+
+          <div class="nav-sub-section">
+            <button class="nav-sub-header" id="input-sub-toggle">
+              Input &amp; Form
+              <span class="nav-sub-icon" id="input-sub-icon">−</span>
+            </button>
+            <div class="nav-sub-items" id="input-sub-items">
+              <a href="#components-label"      class="nav-link nav-sub-link" data-section="components-label">Label</a>
+              <a href="#components-footnote"   class="nav-link nav-sub-link" data-section="components-footnote">Footnote</a>
+              <a href="#components-form-field" class="nav-link nav-sub-link" data-section="components-form-field">Form Field</a>
+              <a href="#components-search"     class="nav-link nav-sub-link" data-section="components-search">Search</a>
             </div>
           </div>
         </div>
@@ -1908,6 +2196,34 @@
       <h2>Toggle</h2>
       <p class="comp-description">Binary on/off control for immediate setting changes. Three states (False, True, Disabled) across three sizes — Small, Medium, and Large.</p>
       <div id="togglePlayground"></div>
+    </section>
+
+    <!-- ── Input & Form: Label ── -->
+    <section id="components-label">
+      <h2>Label</h2>
+      <p class="comp-description">Floating label that identifies a form field. Two sizes — Default (16 px, sits inside the field as placeholder) and Eyebrow (14 px, floats on the top border when the field is active or filled). Three states: Default, Error, and Disabled.</p>
+      <div id="labelPlayground"></div>
+    </section>
+
+    <!-- ── Input & Form: Footnote ── -->
+    <section id="components-footnote">
+      <h2>Footnote</h2>
+      <p class="comp-description">Helper text that sits below a form field. Provides context or validation feedback. Two states: Default and Error.</p>
+      <div id="footnotePlayground"></div>
+    </section>
+
+    <!-- ── Input & Form: Form Field ── -->
+    <section id="components-form-field">
+      <h2>Form Field</h2>
+      <p class="comp-description">Text input with a floating label that animates from placeholder position to eyebrow position when the field is active or filled. Six states: Default, Active, Filled, Error, Hover, and Disabled.</p>
+      <div id="formFieldPlayground"></div>
+    </section>
+
+    <!-- ── Input & Form: Search ── -->
+    <section id="components-search">
+      <h2>Search</h2>
+      <p class="comp-description">Full-width search bar pairing a text input with a trailing search button. Two states: Default (empty/unfocused) and Active (focused).</p>
+      <div id="searchPlayground"></div>
     </section>
   </main>
 
