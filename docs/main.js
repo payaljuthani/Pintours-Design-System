@@ -907,16 +907,19 @@ for (const { key, label, desc } of SHADOW_GROUPS) {
 const gradientsSection = document.getElementById('gradients');
 
 const PAGE_WASH_TOKENS = [
-  { token: '--pt-color-teal-100',                hex: '#ccebf4' },
-  { token: '--pt-color-yellow-100',              hex: '#fdf1d9' },
+  { token: '--pt-color-yellow-200',              hex: '#fbe2b3' },
+  { token: '--pt-color-green-200',               hex: '#bed7b8' },
+  { token: '--pt-semantic-surface-page',         hex: '#f6f9f9' },
   { token: '--pt-color-green-100',               hex: '#dfebdb' },
-  { token: '--pt-semantic-surface-card_primary', hex: '#ffffff' },
+  { token: '--pt-color-teal-100',                hex: '#ccebf4' },
 ];
 
 const gradientCard = document.createElement('div');
 gradientCard.className = 'gradient-pattern-card';
 gradientCard.innerHTML = `
-  <div class="gradient-pattern-preview"></div>
+  <div class="gradient-pattern-preview gradient-pattern-preview--direct">
+    <div style="position:absolute;inset:-120px;background:var(--pt-gradient-page_wash);filter:blur(120px);"></div>
+  </div>
   <div class="gradient-pattern-meta">
     <div class="gradient-pattern-name">Page Wash</div>
     <div class="gradient-token-chips">
@@ -941,6 +944,7 @@ gradientToggleBtn.style.cssText = 'font-size:12px; padding:5px 12px; margin-bott
 gradientToggleBtn.textContent = '▸ {} Show code snippet';
 
 const pageWashWebSnippet = `/* Requires: build/web/variables.css */
+/* --pt-gradient-page_wash: conic-gradient(from 0deg at 50% 50%, var(--pt-color-yellow-200) 0%, var(--pt-color-green-200) 5%, var(--pt-semantic-surface-page) 30%, var(--pt-semantic-surface-page) 53%, var(--pt-color-green-100) 88%, var(--pt-color-teal-100) 100%) */
 .page-wash {
   position: relative;
   overflow: hidden;
@@ -949,33 +953,24 @@ const pageWashWebSnippet = `/* Requires: build/web/variables.css */
   content: '';
   position: absolute;
   inset: -120px;
-  background: conic-gradient(
-    from 200deg at 55% -10%,
-    var(--pt-color-teal-100),
-    var(--pt-color-yellow-100),
-    var(--pt-color-green-100),
-    var(--pt-semantic-surface-card_primary) 55%
-  );
+  background: var(--pt-gradient-page_wash);
   filter: blur(120px);
   pointer-events: none;
 }`;
 
 const pageWashIosSnippet = `// Requires: build/ios/Tokens.swift
+// PT.Gradient.pageWash — conic, center 50% 50%, blur 120pt
 private func addPageWash(to view: UIView) {
     let gradient = CAGradientLayer()
     gradient.type = .conic
-    gradient.colors = [
-        PT.Color.Teal.c100.cgColor,
-        PT.Color.Yellow.c100.cgColor,
-        PT.Color.Green.c100.cgColor,
-        UIColor.white.cgColor,
-    ]
-    gradient.startPoint = CGPoint(x: 0.55, y: 0)
-    gradient.endPoint   = CGPoint(x: 0.55, y: 1)
+    gradient.colors = PT.Gradient.pageWash.colors
+    gradient.locations = PT.Gradient.pageWash.locations
+    gradient.startPoint = PT.Gradient.pageWash.startPoint
+    gradient.endPoint   = PT.Gradient.pageWash.endPoint
     gradient.frame = view.bounds.insetBy(dx: -120, dy: -120)
 
-    let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
-    blurView.frame = view.bounds
+    let blurFilter = CIFilter(name: "CIGaussianBlur")!
+    blurFilter.setValue(30, forKey: kCIInputRadiusKey)
 
     let container = UIView(frame: view.bounds)
     container.clipsToBounds = true
@@ -984,23 +979,14 @@ private func addPageWash(to view: UIView) {
 }`;
 
 const pageWashAndroidSnippet = `// Requires: build/android/compose/PTTheme.kt
+// PTGradients.pageWash — conic, center 50% 50%, blur 120dp
 @Composable
 fun PageWashBackground(modifier: Modifier = Modifier) {
-    val colors = MaterialTheme.ptColors
     Box(
         modifier = modifier
             .fillMaxSize()
             .drawBehind {
-                drawRect(
-                    brush = Brush.sweepGradient(
-                        listOf(
-                            Color(0xFFCCEBF4), // pt-color-teal-100
-                            Color(0xFFFDF1D9), // pt-color-yellow-100
-                            Color(0xFFDFEBDB), // pt-color-green-100
-                            Color.White,
-                        )
-                    )
-                )
+                drawRect(brush = PTGradients.pageWash)
             }
             .blur(120.dp)
     )
@@ -1012,16 +998,15 @@ fun PageWashBackground(modifier: Modifier = Modifier) {
 const gradientPanelEl = document.createElement('div');
 gradientPanelEl.className = 'snippet-panel';
 gradientPanelEl.style.cssText = 'position:static;width:100%;box-shadow:none;display:none;';
+const pageWashSnippets = { web: pageWashWebSnippet, ios: pageWashIosSnippet, android: pageWashAndroidSnippet };
 gradientPanelEl.innerHTML = `
-  <div class="panel-tabs">
-    <button class="panel-tab active" data-tab="web">Web</button>
-    <button class="panel-tab" data-tab="ios">iOS</button>
-    <button class="panel-tab" data-tab="android">Android</button>
+  <div class="snippet-tabs">
+    <button class="tab-btn active" data-tab="web">Web</button>
+    <button class="tab-btn" data-tab="ios">iOS</button>
+    <button class="tab-btn" data-tab="android">Android</button>
   </div>
-  <div class="panel-body">
-    <pre class="panel-code" data-pane="web">${pageWashWebSnippet}</pre>
-    <pre class="panel-code" data-pane="ios" style="display:none">${pageWashIosSnippet}</pre>
-    <pre class="panel-code" data-pane="android" style="display:none">${pageWashAndroidSnippet}</pre>
+  <div class="snippet-code-wrap">
+    <code class="snippet-text">${pageWashWebSnippet}</code>
     <button class="copy-btn">Copy</button>
   </div>
 `;
@@ -1033,25 +1018,389 @@ gradientToggleBtn.addEventListener('click', () => {
   gradientToggleBtn.classList.toggle('active', !open);
 });
 
-gradientPanelEl.querySelectorAll('.panel-tab').forEach(tab => {
+const pageWashTabs   = gradientPanelEl.querySelectorAll('.tab-btn');
+const pageWashCodeEl = gradientPanelEl.querySelector('.snippet-text');
+const pageWashCopyBtn = gradientPanelEl.querySelector('.copy-btn');
+pageWashTabs.forEach(tab => {
   tab.addEventListener('click', () => {
-    const pane = tab.dataset.tab;
-    gradientPanelEl.querySelectorAll('.panel-tab').forEach(t => t.classList.toggle('active', t === tab));
-    gradientPanelEl.querySelectorAll('.panel-code').forEach(c => {
-      c.style.display = c.dataset.pane === pane ? 'block' : 'none';
-    });
+    pageWashTabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    pageWashCodeEl.textContent = pageWashSnippets[tab.dataset.tab];
   });
 });
-
-gradientPanelEl.querySelector('.copy-btn').addEventListener('click', function () {
-  const activeCode = gradientPanelEl.querySelector('.panel-code:not([style*="display:none"])');
-  navigator.clipboard.writeText(activeCode ? activeCode.textContent : '');
+pageWashCopyBtn.addEventListener('click', function () {
+  const activeTab = gradientPanelEl.querySelector('.tab-btn.active').dataset.tab;
+  navigator.clipboard.writeText(pageWashSnippets[activeTab]);
   this.textContent = 'Copied!';
   setTimeout(() => { this.textContent = 'Copy'; }, 1500);
 });
 
 gradientSnippetWrap.append(gradientToggleBtn, gradientPanelEl);
 gradientsSection.appendChild(gradientSnippetWrap);
+
+// ── Default gradient card ─────────────────────────────────────────────────────
+
+const DEFAULT_GRADIENT_TOKENS = [
+  { token: '--pt-gradient-default', hex: 'linear-gradient(to right, #7db071, #009bc8)' },
+  { token: '--pt-color-green-400',  hex: '#7db071' },
+  { token: '--pt-color-teal-500',   hex: '#009bc8' },
+];
+
+const defaultGradientCard = document.createElement('div');
+defaultGradientCard.className = 'gradient-pattern-card';
+defaultGradientCard.innerHTML = `
+  <div class="gradient-pattern-preview gradient-pattern-preview--direct" style="background: var(--pt-gradient-default, linear-gradient(to right, #7db071, #009bc8));"></div>
+  <div class="gradient-pattern-meta">
+    <div class="gradient-pattern-name">Default</div>
+    <div class="gradient-token-chips">
+      ${DEFAULT_GRADIENT_TOKENS.map(({ token, hex }) => `
+        <span class="gradient-token-chip">
+          <span class="gradient-token-chip-swatch" style="background:${hex};border:1px solid rgba(0,0,0,0.08)"></span>
+          ${token}
+        </span>
+      `).join('')}
+    </div>
+  </div>
+`;
+gradientsSection.appendChild(defaultGradientCard);
+
+const defaultGradientSnippetWrap = document.createElement('div');
+defaultGradientSnippetWrap.className = 'gradient-snippet-wrap';
+
+const defaultGradientToggleBtn = document.createElement('button');
+defaultGradientToggleBtn.className = 'snippet-toggle';
+defaultGradientToggleBtn.style.cssText = 'font-size:12px; padding:5px 12px; margin-bottom:10px;';
+defaultGradientToggleBtn.textContent = '▸ {} Show code snippet';
+
+const defaultGradientWebSnippet = `/* Requires: build/web/variables.css */
+/* --pt-gradient-default: linear-gradient(to right, var(--pt-color-green-400) 0%, var(--pt-color-teal-500) 100%) */
+.my-element {
+  background: var(--pt-gradient-default);
+}`;
+
+const defaultGradientIosSnippet = `// Requires: build/ios/Tokens.swift
+// Resolves to: [PT.Color.Green.c400, PT.Color.Teal.c500]
+let layer = CAGradientLayer()
+let g = PT.Gradient.\`default\`
+layer.colors     = g.colors.map(\\.cgColor)
+layer.startPoint = g.startPoint
+layer.endPoint   = g.endPoint
+layer.frame      = view.bounds
+view.layer.insertSublayer(layer, at: 0)`;
+
+const defaultGradientAndroidSnippet = `// Requires: build/android/compose/PTTheme.kt
+// Resolves to: Brush.horizontalGradient(listOf(PTColorPrimitives.green400, PTColorPrimitives.teal500))
+Box(
+    modifier = Modifier
+        .fillMaxWidth()
+        .background(PTGradients.default)
+) {
+    // content
+}`;
+
+const defaultGradientPanelEl = document.createElement('div');
+defaultGradientPanelEl.className = 'snippet-panel';
+defaultGradientPanelEl.style.cssText = 'position:static;width:100%;box-shadow:none;display:none;';
+const defaultSnippets = { web: defaultGradientWebSnippet, ios: defaultGradientIosSnippet, android: defaultGradientAndroidSnippet };
+defaultGradientPanelEl.innerHTML = `
+  <div class="snippet-tabs">
+    <button class="tab-btn active" data-tab="web">Web</button>
+    <button class="tab-btn" data-tab="ios">iOS</button>
+    <button class="tab-btn" data-tab="android">Android</button>
+  </div>
+  <div class="snippet-code-wrap">
+    <code class="snippet-text">${defaultGradientWebSnippet}</code>
+    <button class="copy-btn">Copy</button>
+  </div>
+`;
+
+defaultGradientToggleBtn.addEventListener('click', () => {
+  const open = defaultGradientPanelEl.style.display !== 'none';
+  defaultGradientPanelEl.style.display = open ? 'none' : 'block';
+  defaultGradientToggleBtn.textContent  = open ? '▸ {} Show code snippet' : '▾ {} Hide code snippet';
+  defaultGradientToggleBtn.classList.toggle('active', !open);
+});
+
+const defaultTabs   = defaultGradientPanelEl.querySelectorAll('.tab-btn');
+const defaultCodeEl = defaultGradientPanelEl.querySelector('.snippet-text');
+const defaultCopyBtn = defaultGradientPanelEl.querySelector('.copy-btn');
+defaultTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    defaultTabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    defaultCodeEl.textContent = defaultSnippets[tab.dataset.tab];
+  });
+});
+defaultCopyBtn.addEventListener('click', function () {
+  const activeTab = defaultGradientPanelEl.querySelector('.tab-btn.active').dataset.tab;
+  navigator.clipboard.writeText(defaultSnippets[activeTab]);
+  this.textContent = 'Copied!';
+  setTimeout(() => { this.textContent = 'Copy'; }, 1500);
+});
+
+defaultGradientSnippetWrap.append(defaultGradientToggleBtn, defaultGradientPanelEl);
+gradientsSection.appendChild(defaultGradientSnippetWrap);
+
+// ── Hover gradient card ───────────────────────────────────────────────────────
+
+const HOVER_GRADIENT_TOKENS = [
+  { token: '--pt-gradient-hover', hex: 'linear-gradient(to right, #5d9c4d, #007ca0)' },
+  { token: '--pt-color-green-500', hex: '#5d9c4d' },
+  { token: '--pt-color-teal-600',  hex: '#007ca0' },
+];
+
+const hoverGradientCard = document.createElement('div');
+hoverGradientCard.className = 'gradient-pattern-card';
+hoverGradientCard.innerHTML = `
+  <div class="gradient-pattern-preview gradient-pattern-preview--direct" style="background: var(--pt-gradient-hover, linear-gradient(to right, #5d9c4d, #007ca0));"></div>
+  <div class="gradient-pattern-meta">
+    <div class="gradient-pattern-name">Hover</div>
+    <div class="gradient-token-chips">
+      ${HOVER_GRADIENT_TOKENS.map(({ token, hex }) => `
+        <span class="gradient-token-chip">
+          <span class="gradient-token-chip-swatch" style="background:${hex};border:1px solid rgba(0,0,0,0.08)"></span>
+          ${token}
+        </span>
+      `).join('')}
+    </div>
+  </div>
+`;
+gradientsSection.appendChild(hoverGradientCard);
+
+const hoverGradientSnippetWrap = document.createElement('div');
+hoverGradientSnippetWrap.className = 'gradient-snippet-wrap';
+
+const hoverGradientToggleBtn = document.createElement('button');
+hoverGradientToggleBtn.className = 'snippet-toggle';
+hoverGradientToggleBtn.style.cssText = 'font-size:12px; padding:5px 12px; margin-bottom:10px;';
+hoverGradientToggleBtn.textContent = '▸ {} Show code snippet';
+
+const hoverGradientWebSnippet = `/* Requires: build/web/variables.css */
+/* --pt-gradient-hover: linear-gradient(to right, var(--pt-color-green-500) 0%, var(--pt-color-teal-600) 100%) */
+.my-element:hover {
+  background: var(--pt-gradient-hover);
+}`;
+
+const hoverGradientIosSnippet = `// Requires: build/ios/Tokens.swift
+// Resolves to: [PT.Color.Green.c500, PT.Color.Teal.c600]
+let layer = CAGradientLayer()
+let g = PT.Gradient.hover
+layer.colors     = g.colors.map(\\.cgColor)
+layer.startPoint = g.startPoint
+layer.endPoint   = g.endPoint
+layer.frame      = view.bounds
+view.layer.insertSublayer(layer, at: 0)`;
+
+const hoverGradientAndroidSnippet = `// Requires: build/android/compose/PTTheme.kt
+// Resolves to: Brush.horizontalGradient(listOf(PTColorPrimitives.green500, PTColorPrimitives.teal600))
+Box(
+    modifier = Modifier
+        .fillMaxWidth()
+        .background(PTGradients.hover)
+) {
+    // content
+}`;
+
+const hoverGradientPanelEl = document.createElement('div');
+hoverGradientPanelEl.className = 'snippet-panel';
+hoverGradientPanelEl.style.cssText = 'position:static;width:100%;box-shadow:none;display:none;';
+const hoverSnippets = { web: hoverGradientWebSnippet, ios: hoverGradientIosSnippet, android: hoverGradientAndroidSnippet };
+hoverGradientPanelEl.innerHTML = `
+  <div class="snippet-tabs">
+    <button class="tab-btn active" data-tab="web">Web</button>
+    <button class="tab-btn" data-tab="ios">iOS</button>
+    <button class="tab-btn" data-tab="android">Android</button>
+  </div>
+  <div class="snippet-code-wrap">
+    <code class="snippet-text">${hoverGradientWebSnippet}</code>
+    <button class="copy-btn">Copy</button>
+  </div>
+`;
+
+hoverGradientToggleBtn.addEventListener('click', () => {
+  const open = hoverGradientPanelEl.style.display !== 'none';
+  hoverGradientPanelEl.style.display = open ? 'none' : 'block';
+  hoverGradientToggleBtn.textContent  = open ? '▸ {} Show code snippet' : '▾ {} Hide code snippet';
+  hoverGradientToggleBtn.classList.toggle('active', !open);
+});
+
+const hoverTabs    = hoverGradientPanelEl.querySelectorAll('.tab-btn');
+const hoverCodeEl  = hoverGradientPanelEl.querySelector('.snippet-text');
+const hoverCopyBtn = hoverGradientPanelEl.querySelector('.copy-btn');
+hoverTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    hoverTabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    hoverCodeEl.textContent = hoverSnippets[tab.dataset.tab];
+  });
+});
+hoverCopyBtn.addEventListener('click', function () {
+  const activeTab = hoverGradientPanelEl.querySelector('.tab-btn.active').dataset.tab;
+  navigator.clipboard.writeText(hoverSnippets[activeTab]);
+  this.textContent = 'Copied!';
+  setTimeout(() => { this.textContent = 'Copy'; }, 1500);
+});
+
+hoverGradientSnippetWrap.append(hoverGradientToggleBtn, hoverGradientPanelEl);
+gradientsSection.appendChild(hoverGradientSnippetWrap);
+
+// ── Panel Wash gradient card ──────────────────────────────────────────────────
+
+const PANEL_WASH_GRADIENT_TOKENS = [
+  { token: '--pt-gradient-panel_wash',    hex: 'conic-gradient(from 90deg, #dfebdb 0%, #eff5ed 50%, #ccebf4 100%)' },
+  { token: '--pt-color-green-100',  hex: '#dfebdb' },
+  { token: '--pt-color-green-50',   hex: '#eff5ed' },
+  { token: '--pt-color-teal-100',   hex: '#ccebf4' },
+];
+
+const panelWashGradientCard = document.createElement('div');
+panelWashGradientCard.className = 'gradient-pattern-card';
+panelWashGradientCard.innerHTML = `
+  <div class="gradient-pattern-preview gradient-pattern-preview--direct">
+    <div style="position:absolute;inset:-40px;background:var(--pt-gradient-panel_wash);filter:blur(40px);"></div>
+  </div>
+  <div class="gradient-pattern-meta">
+    <div class="gradient-pattern-name">Panel Wash</div>
+    <div class="gradient-token-chips">
+      ${PANEL_WASH_GRADIENT_TOKENS.map(({ token, hex }) => `
+        <span class="gradient-token-chip">
+          <span class="gradient-token-chip-swatch" style="background:${hex};border:1px solid rgba(0,0,0,0.08)"></span>
+          ${token}
+        </span>
+      `).join('')}
+    </div>
+  </div>
+`;
+gradientsSection.appendChild(panelWashGradientCard);
+
+const panelWashGradientSnippetWrap = document.createElement('div');
+panelWashGradientSnippetWrap.className = 'gradient-snippet-wrap';
+
+const panelWashGradientToggleBtn = document.createElement('button');
+panelWashGradientToggleBtn.className = 'snippet-toggle';
+panelWashGradientToggleBtn.style.cssText = 'font-size:12px; padding:5px 12px; margin-bottom:10px;';
+panelWashGradientToggleBtn.textContent = '▸ {} Show code snippet';
+
+const panelWashGradientWebSnippet = `/* Requires: build/web/variables.css */
+/* --pt-gradient-panel_wash: conic-gradient(from 90deg, var(--pt-color-green-100) 0%, var(--pt-color-green-50) 50%, var(--pt-color-teal-100) 100%) */
+.my-element {
+  position: relative;
+  overflow: hidden;
+}
+.my-element::before {
+  content: '';
+  position: absolute;
+  inset: -40px;
+  background: var(--pt-gradient-panel_wash);
+  filter: blur(40px);
+  pointer-events: none;
+}`;
+
+const panelWashGradientIosSnippet = `// Requires: build/ios/Tokens.swift
+private func addWashGradient(to view: UIView) {
+    let gradient = CAGradientLayer()
+    gradient.type   = .conic
+    gradient.colors = [
+        PT.Color.Green.c100.cgColor,
+        PT.Color.Green.c50.cgColor,
+        PT.Color.Teal.c100.cgColor,
+    ]
+    gradient.startPoint = CGPoint(x: 0.5, y: 0.5)
+    gradient.endPoint   = CGPoint(x: 1, y: 0.5)
+    gradient.opacity    = 0.65
+    gradient.frame      = view.bounds.insetBy(dx: -20, dy: -20)
+
+    let container = UIView(frame: view.bounds)
+    container.clipsToBounds = true
+    container.layer.insertSublayer(gradient, at: 0)
+    view.insertSubview(container, at: 0)
+}`;
+
+const panelWashGradientAndroidSnippet = `// Requires: build/android/compose/PTTheme.kt
+@Composable
+fun WashBackground(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .graphicsLayer { alpha = 0.65f }
+            .drawBehind {
+                drawRect(
+                    brush = Brush.sweepGradient(
+                        listOf(
+                            PTColorPrimitives.green100,
+                            PTColorPrimitives.green50,
+                            PTColorPrimitives.teal100,
+                        )
+                    )
+                )
+            }
+            .blur(20.dp)
+    )
+}
+
+/* Note: Android's blur() modifier requires API 31+.
+   For API 26–30, use RenderScript-based blur as a fallback. */`;
+
+const panelWashGradientPanelEl = document.createElement('div');
+panelWashGradientPanelEl.className = 'snippet-panel';
+panelWashGradientPanelEl.style.cssText = 'position:static;width:100%;box-shadow:none;display:none;';
+const panelWashSnippets = { web: panelWashGradientWebSnippet, ios: panelWashGradientIosSnippet, android: panelWashGradientAndroidSnippet };
+panelWashGradientPanelEl.innerHTML = `
+  <div class="snippet-tabs">
+    <button class="tab-btn active" data-tab="web">Web</button>
+    <button class="tab-btn" data-tab="ios">iOS</button>
+    <button class="tab-btn" data-tab="android">Android</button>
+  </div>
+  <div class="snippet-code-wrap">
+    <code class="snippet-text">${panelWashGradientWebSnippet}</code>
+    <button class="copy-btn">Copy</button>
+  </div>
+`;
+
+panelWashGradientToggleBtn.addEventListener('click', () => {
+  const open = panelWashGradientPanelEl.style.display !== 'none';
+  panelWashGradientPanelEl.style.display = open ? 'none' : 'block';
+  panelWashGradientToggleBtn.textContent  = open ? '▸ {} Show code snippet' : '▾ {} Hide code snippet';
+  panelWashGradientToggleBtn.classList.toggle('active', !open);
+});
+
+const panelWashTabs    = panelWashGradientPanelEl.querySelectorAll('.tab-btn');
+const panelWashCodeEl  = panelWashGradientPanelEl.querySelector('.snippet-text');
+const panelWashCopyBtn = panelWashGradientPanelEl.querySelector('.copy-btn');
+panelWashTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    panelWashTabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    panelWashCodeEl.textContent = panelWashSnippets[tab.dataset.tab];
+  });
+});
+panelWashCopyBtn.addEventListener('click', function () {
+  const activeTab = panelWashGradientPanelEl.querySelector('.tab-btn.active').dataset.tab;
+  navigator.clipboard.writeText(panelWashSnippets[activeTab]);
+  this.textContent = 'Copied!';
+  setTimeout(() => { this.textContent = 'Copy'; }, 1500);
+});
+
+panelWashGradientSnippetWrap.append(panelWashGradientToggleBtn, panelWashGradientPanelEl);
+gradientsSection.appendChild(panelWashGradientSnippetWrap);
+
+// Arrange into 2×2 grid: Default, Hover (top) | Page Wash, Panel Wash (bottom)
+const gradientGrid = document.createElement('div');
+gradientGrid.className = 'gradient-grid';
+
+[
+  [defaultGradientCard, defaultGradientSnippetWrap],
+  [hoverGradientCard,   hoverGradientSnippetWrap],
+  [gradientCard,        gradientSnippetWrap],
+  [panelWashGradientCard, panelWashGradientSnippetWrap],
+].forEach(([card, snippet]) => {
+  const item = document.createElement('div');
+  item.className = 'gradient-grid-item';
+  item.append(card, snippet);
+  gradientGrid.appendChild(item);
+});
+
+gradientsSection.appendChild(gradientGrid);
 
 // ─── Sidebar — section toggle ─────────────────────────────────────────────────
 

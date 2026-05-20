@@ -173,6 +173,54 @@
       }
     }
   },
+  "gradient": {
+    "default": {
+      "value": [
+        { "color": "{color.green.400}", "position": "0%"   },
+        { "color": "{color.teal.500}",  "position": "100%" }
+      ],
+      "type": "gradient",
+      "$description": "Brand gradient — left to right, green-400 to teal-500 (Gradient/Default in Figma)"
+    },
+    "hover": {
+      "value": [
+        { "color": "{color.green.500}", "position": "0%"   },
+        { "color": "{color.teal.600}",  "position": "100%" }
+      ],
+      "type": "gradient",
+      "$description": "Brand gradient hover state — left to right, green-500 to teal-600"
+    },
+    "panel_wash": {
+      "value": {
+        "gradientType": "conic",
+        "angle": "90deg",
+        "stops": [
+          { "color": "{color.green.100}", "position": "0%"   },
+          { "color": "{color.green.50}",  "position": "50%"  },
+          { "color": "{color.teal.100}",  "position": "100%" }
+        ]
+      },
+      "type": "gradient",
+      "$description": "Soft conic panel wash — green-100 to green-50 to teal-100. Apply with blur(40px)."
+    },
+    "page_wash": {
+      "value": {
+        "gradientType": "conic",
+        "angle": "0deg",
+        "center": "50% 50%",
+        "stops": [
+          { "color": "{color.yellow.200}",    "position": "0%"  },
+          { "color": "{color.green.200}",     "position": "5%"  },
+          { "color": "{color.grey.50}", "position": "30%" },
+          { "color": "{color.grey.50}", "position": "53%" },
+          { "color": "{color.green.100}",     "position": "88%" },
+          { "color": "{color.teal.100}",      "position": "100%"}
+        ]
+      },
+      "type": "gradient",
+      "$description": "Full-page background wash. Apply via ::before with inset:-120px and filter:blur(120px)."
+    }
+  },
   "shadow": {
     "gradient": {
       "xs": {

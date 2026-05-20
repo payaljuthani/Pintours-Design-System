@@ -512,4 +512,23 @@ public enum PT {
             }
         }
     }
+
+    // MARK: - Gradients
+    public enum Gradient {
+        public struct Definition {
+            public let colors: [UIColor]
+            public let startPoint: CGPoint
+            public let endPoint: CGPoint
+        }
+        public static let `default` = Definition(
+            colors: [UIColor(hex: "#7db071"), UIColor(hex: "#009bc8")],
+            startPoint: CGPoint(x: 0, y: 0.5),
+            endPoint:   CGPoint(x: 1, y: 0.5)
+        )
+        public static let hover = Definition(
+            colors: [UIColor(hex: "#5d9c4d"), UIColor(hex: "#007ca0")],
+            startPoint: CGPoint(x: 0, y: 0.5),
+            endPoint:   CGPoint(x: 1, y: 0.5)
+        )
+    }
 }

@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -330,6 +331,13 @@ object PTDimens {
     val shalf: Dp = 2.dp
     val s3quat: Dp = 3.dp
     val s1half: Dp = 6.dp
+}
+
+// ── Gradients ───────────────────────────────────────────────────────────────
+
+object PTGradients {
+    val default: Brush = Brush.horizontalGradient(listOf(Color(0xFF7DB071), Color(0xFF009BC8)))
+    val hover: Brush = Brush.horizontalGradient(listOf(Color(0xFF5D9C4D), Color(0xFF007CA0)))
 }
 
 // ── Typography ───────────────────────────────────────────────────────────────

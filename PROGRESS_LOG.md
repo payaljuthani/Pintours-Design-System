@@ -916,6 +916,92 @@ Replaced the previous per-component boilerplate (separate `buildSnippetPanel`, `
 
 ---
 
+## Entry 14 · 2026-05-19 · PST
+
+### Work Completed Since Entry 13
+
+---
+
+### Gradients — Page Wash & Panel Wash Overhaul ✅
+
+**Source:** Figma nodes 1338-2541 (Page Wash), 795-917 (Panel Wash)
+
+---
+
+#### Page Wash — Corrected Token Stops ✅
+
+**Problem identified:** Original Page Wash gradient used only `-100` shade primitives (teal-100, yellow-100, green-100) which are near-white pastels — producing an invisible preview. Figma uses **Warning/200 (yellow-200)** and **Primary/200 (green-200)** as the saturated anchor stops to create the visible green/yellow bloom.
+
+**Corrected gradient stops (from Figma angular gradient panel):**
+
+| Stop | Token | Value |
+|---|---|---|
+| 0% | `--pt-color-yellow-200` | `#fbe2b3` |
+| 5% | `--pt-color-green-200` | `#bed7b8` |
+| 30% | `--pt-semantic-surface-page` | `#f6f9f9` |
+| 53% | `--pt-semantic-surface-page` | `#f6f9f9` |
+| 88% | `--pt-color-green-100` | `#dfebdb` |
+| 100% | `--pt-color-teal-100` | `#ccebf4` |
+
+**Gradient parameters confirmed from Figma:** Angular type, center at 50% 50% (dead center of frame), sweep from 0deg (top, clockwise), Layer Blur radius = 120.
+
+---
+
+#### Page Wash — Added as Design Token ✅
+
+**Decision:** Moved from inline conic-gradient in code snippet to a named token `--pt-gradient-page_wash`, making it consistent with `--pt-gradient-panel_wash`.
+
+**Changes:**
+- Added `gradient.page_wash` to `tokens/semantic.json` with all 6 stops referencing primitive tokens
+- Updated `build.js` to support optional `center` parameter in conic-gradient output: `conic-gradient(from Xdeg at X% Y%, ...)`
+- Ran `npm run build` — token resolves to `--pt-gradient-page_wash: conic-gradient(from 0deg at 50% 50%, #fbe2b3 0%, #bed7b8 5%, #f6f9f9 30%, #f6f9f9 53%, #dfebdb 88%, #ccebf4 100%)`
+
+**All three code snippets updated to token-reference pattern:**
+- **Web:** `background: var(--pt-gradient-page_wash); filter: blur(120px);` with resolved value as comment
+- **iOS:** `PT.Gradient.pageWash` token reference
+- **Android:** `PTGradients.pageWash` token reference
+
+---
+
+#### Panel Wash — Blur Updated ✅
+
+- Blur updated from 20px → 40px to match Figma Layer Blur value
+- `opacity: 0.65` removed from preview (not specified in Figma effects panel)
+- Code snippet updated: `inset: -40px; filter: blur(40px);`
+
+---
+
+#### Gradient Preview — Rendering Fix ✅
+
+**Problem:** Applying `filter: blur(Xpx)` directly on the preview div caused edge fade within the container bounds (blur clips at overflow boundary), making gradients appear invisible at high blur radii.
+
+**Fix:** Replaced direct `filter` on preview div with an inner absolutely-positioned child div using `position: absolute; inset: -Xpx; filter: blur(Xpx)`. The oversized inner div extends beyond the container; `overflow: hidden` on the parent clips it cleanly. Gradient fills the full container without edge fade.
+
+---
+
+### Token Count
+
+| Version | Token count |
+|---|---|
+| Entry 13 | 312 |
+| After page_wash addition | 313 |
+
+---
+
+### Open Items
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Success palette — `success` semantic tokens incorrectly reference `color.green.*` | ⚠️ Carry-over from Entry 5/6 |
+| 2 | Font weight discrepancies (Thin: tokens=300, Figma=400; Regular: tokens=500, Figma=600) | ⚠️ Carry-over from Entry 3 |
+| 3 | Button component stylesheet not distributed | ⚠️ Carry-over from Entry 3 |
+| 4 | Super Icon component stylesheet not distributed | ⚠️ Carry-over from Entry 6 |
+| 5 | Map Pin component stylesheet not distributed | ⚠️ Carry-over from Entry 9 |
+| 6 | Button Icon Only component stylesheet not distributed | ⚠️ Carry-over from Entry 12 |
+| 7 | Selection components stylesheet not distributed | ⚠️ Carry-over from Entry 13 |
+
+---
+
 ## Entry 12 · 2026-05-03 · PST
 
 ### Bug Fix — Button Icon Only Secondary border missing in Default and AI Default states ✅

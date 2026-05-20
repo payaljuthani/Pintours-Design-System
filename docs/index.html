@@ -531,11 +531,18 @@
     }
 
     /* ─── Gradient section ──────────────────────────────────────── */
+    .gradient-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .gradient-grid-item {
+      min-width: 0;
+    }
     .gradient-pattern-card {
       border-radius: 20px;
       overflow: hidden;
-      margin-bottom: 24px;
-      max-width: 480px;
+      margin-bottom: 12px;
     }
     .gradient-pattern-preview {
       height: 220px;
@@ -554,6 +561,12 @@
         var(--pt-semantic-surface-card_primary, #ffffff) 55%
       );
       filter: blur(120px);
+    }
+    .gradient-pattern-preview--direct {
+      overflow: hidden;
+    }
+    .gradient-pattern-preview--direct::before {
+      content: none;
     }
     .gradient-pattern-meta {
       background: var(--pt-semantic-surface-card_primary, #fff);

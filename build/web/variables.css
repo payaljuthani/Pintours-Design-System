@@ -208,6 +208,13 @@
   --pt-shadow-bottom_sheet-xl: 0px -12px 32px 0px #a8c0c7, 0px -24px 48px 0px #cbd9dd;
 
 
+  /* ── Gradients ─────────────────────────── */
+  --pt-gradient-default: linear-gradient(to right, #7db071 0%, #009bc8 100%);
+  --pt-gradient-hover: linear-gradient(to right, #5d9c4d 0%, #007ca0 100%);
+  --pt-gradient-panel_wash: conic-gradient(from 90deg, #dfebdb 0%, #eff5ed 50%, #ccebf4 100%);
+  --pt-gradient-page_wash: conic-gradient(from 0deg at 50% 50%, #fbe2b3 0%, #bed7b8 5%, #f6f9f9 30%, #f6f9f9 53%, #dfebdb 88%, #ccebf4 100%);
+
+
   /* ── Semantic: Light (default) ──────────── */
   --pt-semantic-typography-headings: #222628;
   --pt-semantic-typography-body: #222628;

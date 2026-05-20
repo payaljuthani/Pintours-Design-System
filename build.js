@@ -41,12 +41,13 @@ const PREFIX = 'pt';
 // ── Token predicate helpers ──────────────────────────────────────────────────
 const isColor     = t => t.type === 'color';
 const isEffect    = t => t.type === 'boxShadow';
+const isGradient  = t => t.type === 'gradient';
 // Scope light/dark detection to semantic tokens only — prevents collisions with
 // primitive token keys that happen to be named "light" (e.g. font_weight.light).
 const isSemantic  = t => t.path[0] === 'semantic';
 const isLight     = t => isSemantic(t) && t.path.includes('light');
 const isDark      = t => isSemantic(t) && t.path.includes('dark');
-const isPrimitive = t => !isLight(t) && !isDark(t) && !isEffect(t);
+const isPrimitive = t => !isLight(t) && !isDark(t) && !isEffect(t) && !isGradient(t);
 
 // ── Naming helpers ───────────────────────────────────────────────────────────
 function stripMode(pathArr) {
@@ -193,10 +194,25 @@ StyleDictionary.registerFormat({
 
     const primitives = allTokens.filter(isPrimitive);
     const effects    = allTokens.filter(isEffect);
+    const gradients  = allTokens.filter(isGradient);
     const lights     = allTokens.filter(isLight);
     const darks      = allTokens.filter(isDark);
 
     function renderLine(t, indent) {
+      if (t.type === 'gradient') {
+        const v = t.value;
+        if (Array.isArray(v)) {
+          const stops = v.map(s => `${s.color}${s.position ? ' ' + s.position : ''}`).join(', ');
+          return `${indent}${toCSSVar(t.path)}: linear-gradient(to right, ${stops});`;
+        }
+        if (v && v.stops) {
+          const stops = v.stops.map(s => `${s.color}${s.position ? ' ' + s.position : ''}`).join(', ');
+          const css = v.gradientType === 'conic'
+            ? `conic-gradient(from ${v.angle}${v.center ? ' at ' + v.center : ''}, ${stops})`
+            : `linear-gradient(${v.angle || 'to right'}, ${stops})`;
+          return `${indent}${toCSSVar(t.path)}: ${css};`;
+        }
+      }
       if (Array.isArray(t.value)) {
         // box-shadow composite token
         const shadows = t.value
@@ -227,6 +243,10 @@ StyleDictionary.registerFormat({
 
     const effectBlock = effects.length
       ? `\n\n  /* ── Effects ───────────────────────────── */\n${renderGroup(effects)}`
+      : '';
+
+    const gradientBlock = gradients.length
+      ? `\n\n  /* ── Gradients ─────────────────────────── */\n${renderGroup(gradients)}`
       : '';
 
     const lightBlock = lights.length
@@ -268,6 +288,7 @@ StyleDictionary.registerFormat({
       ':root {',
       primitiveBlock,
       effectBlock,
+      gradientBlock,
       lightBlock,
       '}',
       darkOverride,
@@ -408,6 +429,35 @@ StyleDictionary.registerFormat({
           }
         }
         lines.push('        }');
+      }
+      lines.push('    }');
+    }
+
+    // ── Gradients ──
+    const gradientTokens = allTokens.filter(isGradient);
+    if (gradientTokens.length) {
+      lines.push(
+        '',
+        '    // MARK: - Gradients',
+        '    public enum Gradient {',
+        '        public struct Definition {',
+        '            public let colors: [UIColor]',
+        '            public let startPoint: CGPoint',
+        '            public let endPoint: CGPoint',
+        '        }',
+      );
+      for (const t of gradientTokens) {
+        if (!Array.isArray(t.value)) continue;
+        const rawName  = t.path[t.path.length - 1];
+        const swiftName = rawName === 'default' ? '`default`' : toSwiftIdent([rawName]);
+        const colorList = t.value.map(s => `UIColor(hex: "${s.color}")`).join(', ');
+        lines.push(
+          `        public static let ${swiftName} = Definition(`,
+          `            colors: [${colorList}],`,
+          `            startPoint: CGPoint(x: 0, y: 0.5),`,
+          `            endPoint:   CGPoint(x: 1, y: 0.5)`,
+          `        )`,
+        );
       }
       lines.push('    }');
     }
@@ -896,6 +946,7 @@ StyleDictionary.registerFormat({
       'import androidx.compose.runtime.CompositionLocalProvider',
       'import androidx.compose.runtime.ReadOnlyComposable',
       'import androidx.compose.runtime.staticCompositionLocalOf',
+      'import androidx.compose.ui.graphics.Brush',
       'import androidx.compose.ui.graphics.Color',
       'import androidx.compose.ui.text.TextStyle',
       'import androidx.compose.ui.text.font.Font',
@@ -967,6 +1018,23 @@ StyleDictionary.registerFormat({
         '}',
         '',
       );
+    }
+
+    // ── Gradients ──
+    const composeGradientTokens = allTokens.filter(isGradient);
+    if (composeGradientTokens.length) {
+      lines.push(
+        '// ── Gradients ───────────────────────────────────────────────────────────────',
+        '',
+        'object PTGradients {',
+      );
+      for (const t of composeGradientTokens) {
+        if (!Array.isArray(t.value)) continue;
+        const name      = toKotlin([t.path[t.path.length - 1]]);
+        const colorList = t.value.map(s => toComposeColor(s.color)).join(', ');
+        lines.push(`    val ${name}: Brush = Brush.horizontalGradient(listOf(${colorList}))`);
+      }
+      lines.push('}', '');
     }
 
     // ── Typography ──
